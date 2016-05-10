@@ -1,4 +1,5 @@
-<debug> or <cme> or <binary> or <testing> or <out_types> or <model>: include
-<Codegenerator//*.ml> : package(xml-light)
+<Codegenerator> or <Model> or <Utils> or <out_types> : include
+<Codegenerator/*.ml> : package(xml-light)
+<Model/*.ml> or <Model/*.native>: package(yojson)
 <**/*.ml> or <binary/*.mli> :package(bitstring), package(bitstring.syntax)
 <**/*.native> :package(bitstring), package(bitstring.syntax), package(xml-light)
