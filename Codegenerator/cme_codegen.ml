@@ -68,8 +68,7 @@ let process filename outdir =
     )
     in 
     preparedir outdir;
-    write_code outdir code;
-    print_string ( msgs |> List.map (fun x -> try Model_io.generate_ref_of x with _ -> "" ) |> String.concat "\n" )
+    write_code outdir code
 ;;
 
 let command =

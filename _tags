@@ -1,7 +1,4 @@
 <debug> or <cme> or <binary> or <testing> or <out_types> or <model>: include
-<cme/*.ml> : package(xml-light)
+<Codegenerator//*.ml> : package(xml-light)
 <**/*.ml> or <binary/*.mli> :package(bitstring), package(bitstring.syntax)
 <**/*.native> :package(bitstring), package(bitstring.syntax), package(xml-light)
-
-<t.ml> : package(compiler-libs.toplevel)
-<t.byte> : package(compiler-libs.toplevel)

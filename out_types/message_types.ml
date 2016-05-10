@@ -213,7 +213,7 @@ type g_ChannelReset4_NoMDEntries = {
 type msg_ChannelReset4 = { 
     f_ChannelReset4_TransactTime: t_uInt64;
     f_ChannelReset4_MatchEventIndicator: t_MatchEventIndicator;
-    f_NoMDEntries: g_ChannelReset4_NoMDEntries list
+    f_ChannelReset4_NoMDEntries: g_ChannelReset4_NoMDEntries list
 }
 type msg_AdminHeartbeat12 = unit 
 
@@ -288,10 +288,10 @@ type msg_MDInstrumentDefinitionFuture27 = {
     f_MDInstrumentDefinitionFuture27_MinPriceIncrementAmount: t_PRICENULL;
     f_MDInstrumentDefinitionFuture27_UserDefinedInstrument: t_UserDefinedInstrument;
     f_MDInstrumentDefinitionFuture27_TradingReferenceDate: t_LocalMktDate;
-    f_NoEvents: g_MDInstrumentDefinitionFuture27_NoEvents list;
-    f_NoMDFeedTypes: g_MDInstrumentDefinitionFuture27_NoMDFeedTypes list;
-    f_NoInstAttrib: g_MDInstrumentDefinitionFuture27_NoInstAttrib list;
-    f_NoLotTypeRules: g_MDInstrumentDefinitionFuture27_NoLotTypeRules list
+    f_MDInstrumentDefinitionFuture27_NoEvents: g_MDInstrumentDefinitionFuture27_NoEvents list;
+    f_MDInstrumentDefinitionFuture27_NoMDFeedTypes: g_MDInstrumentDefinitionFuture27_NoMDFeedTypes list;
+    f_MDInstrumentDefinitionFuture27_NoInstAttrib: g_MDInstrumentDefinitionFuture27_NoInstAttrib list;
+    f_MDInstrumentDefinitionFuture27_NoLotTypeRules: g_MDInstrumentDefinitionFuture27_NoLotTypeRules list
 }
 type g_MDInstrumentDefinitionSpread29_NoEvents = {
     f_MDInstrumentDefinitionSpread29_NoEvents_EventType: t_EventType;
@@ -358,11 +358,11 @@ type msg_MDInstrumentDefinitionSpread29 = {
     f_MDInstrumentDefinitionSpread29_MainFraction: t_uInt8NULL;
     f_MDInstrumentDefinitionSpread29_SubFraction: t_uInt8NULL;
     f_MDInstrumentDefinitionSpread29_TradingReferenceDate: t_LocalMktDate;
-    f_NoEvents: g_MDInstrumentDefinitionSpread29_NoEvents list;
-    f_NoMDFeedTypes: g_MDInstrumentDefinitionSpread29_NoMDFeedTypes list;
-    f_NoInstAttrib: g_MDInstrumentDefinitionSpread29_NoInstAttrib list;
-    f_NoLotTypeRules: g_MDInstrumentDefinitionSpread29_NoLotTypeRules list;
-    f_NoLegs: g_MDInstrumentDefinitionSpread29_NoLegs list
+    f_MDInstrumentDefinitionSpread29_NoEvents: g_MDInstrumentDefinitionSpread29_NoEvents list;
+    f_MDInstrumentDefinitionSpread29_NoMDFeedTypes: g_MDInstrumentDefinitionSpread29_NoMDFeedTypes list;
+    f_MDInstrumentDefinitionSpread29_NoInstAttrib: g_MDInstrumentDefinitionSpread29_NoInstAttrib list;
+    f_MDInstrumentDefinitionSpread29_NoLotTypeRules: g_MDInstrumentDefinitionSpread29_NoLotTypeRules list;
+    f_MDInstrumentDefinitionSpread29_NoLegs: g_MDInstrumentDefinitionSpread29_NoLegs list
 }
 
 type msg_SecurityStatus30 = { 
@@ -390,7 +390,7 @@ type g_MDIncrementalRefreshBook32_NoMDEntries = {
 type msg_MDIncrementalRefreshBook32 = { 
     f_MDIncrementalRefreshBook32_TransactTime: t_uInt64;
     f_MDIncrementalRefreshBook32_MatchEventIndicator: t_MatchEventIndicator;
-    f_NoMDEntries: g_MDIncrementalRefreshBook32_NoMDEntries list
+    f_MDIncrementalRefreshBook32_NoMDEntries: g_MDIncrementalRefreshBook32_NoMDEntries list
 }
 type g_MDIncrementalRefreshDailyStatistics33_NoMDEntries = {
     f_MDIncrementalRefreshDailyStatistics33_NoMDEntries_MDEntryPx: t_PRICENULL;
@@ -406,7 +406,7 @@ type g_MDIncrementalRefreshDailyStatistics33_NoMDEntries = {
 type msg_MDIncrementalRefreshDailyStatistics33 = { 
     f_MDIncrementalRefreshDailyStatistics33_TransactTime: t_uInt64;
     f_MDIncrementalRefreshDailyStatistics33_MatchEventIndicator: t_MatchEventIndicator;
-    f_NoMDEntries: g_MDIncrementalRefreshDailyStatistics33_NoMDEntries list
+    f_MDIncrementalRefreshDailyStatistics33_NoMDEntries: g_MDIncrementalRefreshDailyStatistics33_NoMDEntries list
 }
 type g_MDIncrementalRefreshLimitsBanding34_NoMDEntries = {
     f_MDIncrementalRefreshLimitsBanding34_NoMDEntries_HighLimitPrice: t_PRICENULL;
@@ -421,7 +421,7 @@ type g_MDIncrementalRefreshLimitsBanding34_NoMDEntries = {
 type msg_MDIncrementalRefreshLimitsBanding34 = { 
     f_MDIncrementalRefreshLimitsBanding34_TransactTime: t_uInt64;
     f_MDIncrementalRefreshLimitsBanding34_MatchEventIndicator: t_MatchEventIndicator;
-    f_NoMDEntries: g_MDIncrementalRefreshLimitsBanding34_NoMDEntries list
+    f_MDIncrementalRefreshLimitsBanding34_NoMDEntries: g_MDIncrementalRefreshLimitsBanding34_NoMDEntries list
 }
 type g_MDIncrementalRefreshSessionStatistics35_NoMDEntries = {
     f_MDIncrementalRefreshSessionStatistics35_NoMDEntries_MDEntryPx: t_PRICE;
@@ -435,7 +435,7 @@ type g_MDIncrementalRefreshSessionStatistics35_NoMDEntries = {
 type msg_MDIncrementalRefreshSessionStatistics35 = { 
     f_MDIncrementalRefreshSessionStatistics35_TransactTime: t_uInt64;
     f_MDIncrementalRefreshSessionStatistics35_MatchEventIndicator: t_MatchEventIndicator;
-    f_NoMDEntries: g_MDIncrementalRefreshSessionStatistics35_NoMDEntries list
+    f_MDIncrementalRefreshSessionStatistics35_NoMDEntries: g_MDIncrementalRefreshSessionStatistics35_NoMDEntries list
 }
 type g_MDIncrementalRefreshTrade36_NoMDEntries = {
     f_MDIncrementalRefreshTrade36_NoMDEntries_MDEntryPx: t_PRICE;
@@ -452,7 +452,7 @@ type g_MDIncrementalRefreshTrade36_NoMDEntries = {
 type msg_MDIncrementalRefreshTrade36 = { 
     f_MDIncrementalRefreshTrade36_TransactTime: t_uInt64;
     f_MDIncrementalRefreshTrade36_MatchEventIndicator: t_MatchEventIndicator;
-    f_NoMDEntries: g_MDIncrementalRefreshTrade36_NoMDEntries list
+    f_MDIncrementalRefreshTrade36_NoMDEntries: g_MDIncrementalRefreshTrade36_NoMDEntries list
 }
 type g_MDIncrementalRefreshVolume37_NoMDEntries = {
     f_MDIncrementalRefreshVolume37_NoMDEntries_MDEntrySize: t_Int32;
@@ -465,7 +465,7 @@ type g_MDIncrementalRefreshVolume37_NoMDEntries = {
 type msg_MDIncrementalRefreshVolume37 = { 
     f_MDIncrementalRefreshVolume37_TransactTime: t_uInt64;
     f_MDIncrementalRefreshVolume37_MatchEventIndicator: t_MatchEventIndicator;
-    f_NoMDEntries: g_MDIncrementalRefreshVolume37_NoMDEntries list
+    f_MDIncrementalRefreshVolume37_NoMDEntries: g_MDIncrementalRefreshVolume37_NoMDEntries list
 }
 type g_SnapshotFullRefresh38_NoMDEntries = {
     f_SnapshotFullRefresh38_NoMDEntries_MDEntryPx: t_PRICENULL;
@@ -490,7 +490,7 @@ type msg_SnapshotFullRefresh38 = {
     f_SnapshotFullRefresh38_HighLimitPrice: t_PRICENULL;
     f_SnapshotFullRefresh38_LowLimitPrice: t_PRICENULL;
     f_SnapshotFullRefresh38_MaxPriceVariation: t_PRICENULL;
-    f_NoMDEntries: g_SnapshotFullRefresh38_NoMDEntries list
+    f_SnapshotFullRefresh38_NoMDEntries: g_SnapshotFullRefresh38_NoMDEntries list
 }
 type g_QuoteRequest39_NoRelatedSym = {
     f_QuoteRequest39_NoRelatedSym_Symbol: t_Symbol;
@@ -504,7 +504,7 @@ type msg_QuoteRequest39 = {
     f_QuoteRequest39_TransactTime: t_uInt64;
     f_QuoteRequest39_QuoteReqID: t_QuoteReqId;
     f_QuoteRequest39_MatchEventIndicator: t_MatchEventIndicator;
-    f_NoRelatedSym: g_QuoteRequest39_NoRelatedSym list
+    f_QuoteRequest39_NoRelatedSym: g_QuoteRequest39_NoRelatedSym list
 }
 type g_MDInstrumentDefinitionOption41_NoEvents = {
     f_MDInstrumentDefinitionOption41_NoEvents_EventType: t_EventType;
@@ -572,11 +572,11 @@ type msg_MDInstrumentDefinitionOption41 = {
     f_MDInstrumentDefinitionOption41_HighLimitPrice: t_PRICENULL;
     f_MDInstrumentDefinitionOption41_UserDefinedInstrument: t_UserDefinedInstrument;
     f_MDInstrumentDefinitionOption41_TradingReferenceDate: t_LocalMktDate;
-    f_NoEvents: g_MDInstrumentDefinitionOption41_NoEvents list;
-    f_NoMDFeedTypes: g_MDInstrumentDefinitionOption41_NoMDFeedTypes list;
-    f_NoInstAttrib: g_MDInstrumentDefinitionOption41_NoInstAttrib list;
-    f_NoLotTypeRules: g_MDInstrumentDefinitionOption41_NoLotTypeRules list;
-    f_NoUnderlyings: g_MDInstrumentDefinitionOption41_NoUnderlyings list
+    f_MDInstrumentDefinitionOption41_NoEvents: g_MDInstrumentDefinitionOption41_NoEvents list;
+    f_MDInstrumentDefinitionOption41_NoMDFeedTypes: g_MDInstrumentDefinitionOption41_NoMDFeedTypes list;
+    f_MDInstrumentDefinitionOption41_NoInstAttrib: g_MDInstrumentDefinitionOption41_NoInstAttrib list;
+    f_MDInstrumentDefinitionOption41_NoLotTypeRules: g_MDInstrumentDefinitionOption41_NoLotTypeRules list;
+    f_MDInstrumentDefinitionOption41_NoUnderlyings: g_MDInstrumentDefinitionOption41_NoUnderlyings list
 }
 type g_MDIncrementalRefreshTradeSummary42_NoMDEntries = {
     f_MDIncrementalRefreshTradeSummary42_NoMDEntries_MDEntryPx: t_PRICE;
@@ -596,8 +596,8 @@ type g_MDIncrementalRefreshTradeSummary42_NoOrderIDEntries = {
 type msg_MDIncrementalRefreshTradeSummary42 = { 
     f_MDIncrementalRefreshTradeSummary42_TransactTime: t_uInt64;
     f_MDIncrementalRefreshTradeSummary42_MatchEventIndicator: t_MatchEventIndicator;
-    f_NoMDEntries: g_MDIncrementalRefreshTradeSummary42_NoMDEntries list;
-    f_NoOrderIDEntries: g_MDIncrementalRefreshTradeSummary42_NoOrderIDEntries list
+    f_MDIncrementalRefreshTradeSummary42_NoMDEntries: g_MDIncrementalRefreshTradeSummary42_NoMDEntries list;
+    f_MDIncrementalRefreshTradeSummary42_NoOrderIDEntries: g_MDIncrementalRefreshTradeSummary42_NoOrderIDEntries list
 }
 type message = 
     | M_ChannelReset4 of msg_ChannelReset4

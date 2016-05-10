@@ -311,10 +311,10 @@ let read_g_ChannelReset4_NoMDEntries bits =
 let read_msg_ChannelReset4 (bits, gbits) = 
     let f_ChannelReset4_TransactTime, bits = read_uInt64 bits in
     let f_ChannelReset4_MatchEventIndicator, bits = read_MatchEventIndicator bits in
-    let f_NoMDEntries, gbits = 
+    let f_ChannelReset4_NoMDEntries, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_ChannelReset4_NoMDEntries gbits in
-    { f_ChannelReset4_TransactTime; f_ChannelReset4_MatchEventIndicator; f_NoMDEntries } 
+    { f_ChannelReset4_TransactTime; f_ChannelReset4_MatchEventIndicator; f_ChannelReset4_NoMDEntries } 
 let read_msg_AdminHeartbeat12 (bits, gbits) = () 
 
 
@@ -388,19 +388,19 @@ let read_msg_MDInstrumentDefinitionFuture27 (bits, gbits) =
     let f_MDInstrumentDefinitionFuture27_MinPriceIncrementAmount, bits = read_PRICENULL bits in
     let f_MDInstrumentDefinitionFuture27_UserDefinedInstrument, bits = read_UserDefinedInstrument bits in
     let f_MDInstrumentDefinitionFuture27_TradingReferenceDate, bits = read_LocalMktDate bits in
-    let f_NoEvents, gbits = 
+    let f_MDInstrumentDefinitionFuture27_NoEvents, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDInstrumentDefinitionFuture27_NoEvents gbits in
-    let f_NoMDFeedTypes, gbits = 
+    let f_MDInstrumentDefinitionFuture27_NoMDFeedTypes, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDInstrumentDefinitionFuture27_NoMDFeedTypes gbits in
-    let f_NoInstAttrib, gbits = 
+    let f_MDInstrumentDefinitionFuture27_NoInstAttrib, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDInstrumentDefinitionFuture27_NoInstAttrib gbits in
-    let f_NoLotTypeRules, gbits = 
+    let f_MDInstrumentDefinitionFuture27_NoLotTypeRules, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDInstrumentDefinitionFuture27_NoLotTypeRules gbits in
-    { f_MDInstrumentDefinitionFuture27_MatchEventIndicator; f_MDInstrumentDefinitionFuture27_TotNumReports; f_MDInstrumentDefinitionFuture27_SecurityUpdateAction; f_MDInstrumentDefinitionFuture27_LastUpdateTime; f_MDInstrumentDefinitionFuture27_MDSecurityTradingStatus; f_MDInstrumentDefinitionFuture27_ApplID; f_MDInstrumentDefinitionFuture27_MarketSegmentID; f_MDInstrumentDefinitionFuture27_UnderlyingProduct; f_MDInstrumentDefinitionFuture27_SecurityExchange; f_MDInstrumentDefinitionFuture27_SecurityGroup; f_MDInstrumentDefinitionFuture27_Asset; f_MDInstrumentDefinitionFuture27_Symbol; f_MDInstrumentDefinitionFuture27_SecurityID; f_MDInstrumentDefinitionFuture27_SecurityIDSource; f_MDInstrumentDefinitionFuture27_SecurityType; f_MDInstrumentDefinitionFuture27_CFICode; f_MDInstrumentDefinitionFuture27_MaturityMonthYear; f_MDInstrumentDefinitionFuture27_Currency; f_MDInstrumentDefinitionFuture27_SettlCurrency; f_MDInstrumentDefinitionFuture27_MatchAlgorithm; f_MDInstrumentDefinitionFuture27_MinTradeVol; f_MDInstrumentDefinitionFuture27_MaxTradeVol; f_MDInstrumentDefinitionFuture27_MinPriceIncrement; f_MDInstrumentDefinitionFuture27_DisplayFactor; f_MDInstrumentDefinitionFuture27_MainFraction; f_MDInstrumentDefinitionFuture27_SubFraction; f_MDInstrumentDefinitionFuture27_PriceDisplayFormat; f_MDInstrumentDefinitionFuture27_UnitOfMeasure; f_MDInstrumentDefinitionFuture27_UnitOfMeasureQty; f_MDInstrumentDefinitionFuture27_TradingReferencePrice; f_MDInstrumentDefinitionFuture27_SettlPriceType; f_MDInstrumentDefinitionFuture27_OpenInterestQty; f_MDInstrumentDefinitionFuture27_ClearedVolume; f_MDInstrumentDefinitionFuture27_HighLimitPrice; f_MDInstrumentDefinitionFuture27_LowLimitPrice; f_MDInstrumentDefinitionFuture27_MaxPriceVariation; f_MDInstrumentDefinitionFuture27_DecayQuantity; f_MDInstrumentDefinitionFuture27_DecayStartDate; f_MDInstrumentDefinitionFuture27_OriginalContractSize; f_MDInstrumentDefinitionFuture27_ContractMultiplier; f_MDInstrumentDefinitionFuture27_ContractMultiplierUnit; f_MDInstrumentDefinitionFuture27_FlowScheduleType; f_MDInstrumentDefinitionFuture27_MinPriceIncrementAmount; f_MDInstrumentDefinitionFuture27_UserDefinedInstrument; f_MDInstrumentDefinitionFuture27_TradingReferenceDate; f_NoEvents; f_NoMDFeedTypes; f_NoInstAttrib; f_NoLotTypeRules } 
+    { f_MDInstrumentDefinitionFuture27_MatchEventIndicator; f_MDInstrumentDefinitionFuture27_TotNumReports; f_MDInstrumentDefinitionFuture27_SecurityUpdateAction; f_MDInstrumentDefinitionFuture27_LastUpdateTime; f_MDInstrumentDefinitionFuture27_MDSecurityTradingStatus; f_MDInstrumentDefinitionFuture27_ApplID; f_MDInstrumentDefinitionFuture27_MarketSegmentID; f_MDInstrumentDefinitionFuture27_UnderlyingProduct; f_MDInstrumentDefinitionFuture27_SecurityExchange; f_MDInstrumentDefinitionFuture27_SecurityGroup; f_MDInstrumentDefinitionFuture27_Asset; f_MDInstrumentDefinitionFuture27_Symbol; f_MDInstrumentDefinitionFuture27_SecurityID; f_MDInstrumentDefinitionFuture27_SecurityIDSource; f_MDInstrumentDefinitionFuture27_SecurityType; f_MDInstrumentDefinitionFuture27_CFICode; f_MDInstrumentDefinitionFuture27_MaturityMonthYear; f_MDInstrumentDefinitionFuture27_Currency; f_MDInstrumentDefinitionFuture27_SettlCurrency; f_MDInstrumentDefinitionFuture27_MatchAlgorithm; f_MDInstrumentDefinitionFuture27_MinTradeVol; f_MDInstrumentDefinitionFuture27_MaxTradeVol; f_MDInstrumentDefinitionFuture27_MinPriceIncrement; f_MDInstrumentDefinitionFuture27_DisplayFactor; f_MDInstrumentDefinitionFuture27_MainFraction; f_MDInstrumentDefinitionFuture27_SubFraction; f_MDInstrumentDefinitionFuture27_PriceDisplayFormat; f_MDInstrumentDefinitionFuture27_UnitOfMeasure; f_MDInstrumentDefinitionFuture27_UnitOfMeasureQty; f_MDInstrumentDefinitionFuture27_TradingReferencePrice; f_MDInstrumentDefinitionFuture27_SettlPriceType; f_MDInstrumentDefinitionFuture27_OpenInterestQty; f_MDInstrumentDefinitionFuture27_ClearedVolume; f_MDInstrumentDefinitionFuture27_HighLimitPrice; f_MDInstrumentDefinitionFuture27_LowLimitPrice; f_MDInstrumentDefinitionFuture27_MaxPriceVariation; f_MDInstrumentDefinitionFuture27_DecayQuantity; f_MDInstrumentDefinitionFuture27_DecayStartDate; f_MDInstrumentDefinitionFuture27_OriginalContractSize; f_MDInstrumentDefinitionFuture27_ContractMultiplier; f_MDInstrumentDefinitionFuture27_ContractMultiplierUnit; f_MDInstrumentDefinitionFuture27_FlowScheduleType; f_MDInstrumentDefinitionFuture27_MinPriceIncrementAmount; f_MDInstrumentDefinitionFuture27_UserDefinedInstrument; f_MDInstrumentDefinitionFuture27_TradingReferenceDate; f_MDInstrumentDefinitionFuture27_NoEvents; f_MDInstrumentDefinitionFuture27_NoMDFeedTypes; f_MDInstrumentDefinitionFuture27_NoInstAttrib; f_MDInstrumentDefinitionFuture27_NoLotTypeRules } 
 let read_g_MDInstrumentDefinitionSpread29_NoEvents bits = 
     let f_MDInstrumentDefinitionSpread29_NoEvents_EventType, bits = read_EventType bits in
     let f_MDInstrumentDefinitionSpread29_NoEvents_EventTime, bits = read_uInt64 bits in
@@ -466,22 +466,22 @@ let read_msg_MDInstrumentDefinitionSpread29 (bits, gbits) =
     let f_MDInstrumentDefinitionSpread29_MainFraction, bits = read_uInt8NULL bits in
     let f_MDInstrumentDefinitionSpread29_SubFraction, bits = read_uInt8NULL bits in
     let f_MDInstrumentDefinitionSpread29_TradingReferenceDate, bits = read_LocalMktDate bits in
-    let f_NoEvents, gbits = 
+    let f_MDInstrumentDefinitionSpread29_NoEvents, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDInstrumentDefinitionSpread29_NoEvents gbits in
-    let f_NoMDFeedTypes, gbits = 
+    let f_MDInstrumentDefinitionSpread29_NoMDFeedTypes, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDInstrumentDefinitionSpread29_NoMDFeedTypes gbits in
-    let f_NoInstAttrib, gbits = 
+    let f_MDInstrumentDefinitionSpread29_NoInstAttrib, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDInstrumentDefinitionSpread29_NoInstAttrib gbits in
-    let f_NoLotTypeRules, gbits = 
+    let f_MDInstrumentDefinitionSpread29_NoLotTypeRules, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDInstrumentDefinitionSpread29_NoLotTypeRules gbits in
-    let f_NoLegs, gbits = 
+    let f_MDInstrumentDefinitionSpread29_NoLegs, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDInstrumentDefinitionSpread29_NoLegs gbits in
-    { f_MDInstrumentDefinitionSpread29_MatchEventIndicator; f_MDInstrumentDefinitionSpread29_TotNumReports; f_MDInstrumentDefinitionSpread29_SecurityUpdateAction; f_MDInstrumentDefinitionSpread29_LastUpdateTime; f_MDInstrumentDefinitionSpread29_MDSecurityTradingStatus; f_MDInstrumentDefinitionSpread29_ApplID; f_MDInstrumentDefinitionSpread29_MarketSegmentID; f_MDInstrumentDefinitionSpread29_UnderlyingProduct; f_MDInstrumentDefinitionSpread29_SecurityExchange; f_MDInstrumentDefinitionSpread29_SecurityGroup; f_MDInstrumentDefinitionSpread29_Asset; f_MDInstrumentDefinitionSpread29_Symbol; f_MDInstrumentDefinitionSpread29_SecurityID; f_MDInstrumentDefinitionSpread29_SecurityIDSource; f_MDInstrumentDefinitionSpread29_SecurityType; f_MDInstrumentDefinitionSpread29_CFICode; f_MDInstrumentDefinitionSpread29_MaturityMonthYear; f_MDInstrumentDefinitionSpread29_Currency; f_MDInstrumentDefinitionSpread29_SecuritySubType; f_MDInstrumentDefinitionSpread29_UserDefinedInstrument; f_MDInstrumentDefinitionSpread29_MatchAlgorithm; f_MDInstrumentDefinitionSpread29_MinTradeVol; f_MDInstrumentDefinitionSpread29_MaxTradeVol; f_MDInstrumentDefinitionSpread29_MinPriceIncrement; f_MDInstrumentDefinitionSpread29_DisplayFactor; f_MDInstrumentDefinitionSpread29_PriceDisplayFormat; f_MDInstrumentDefinitionSpread29_PriceRatio; f_MDInstrumentDefinitionSpread29_TickRule; f_MDInstrumentDefinitionSpread29_UnitOfMeasure; f_MDInstrumentDefinitionSpread29_TradingReferencePrice; f_MDInstrumentDefinitionSpread29_SettlPriceType; f_MDInstrumentDefinitionSpread29_OpenInterestQty; f_MDInstrumentDefinitionSpread29_ClearedVolume; f_MDInstrumentDefinitionSpread29_HighLimitPrice; f_MDInstrumentDefinitionSpread29_LowLimitPrice; f_MDInstrumentDefinitionSpread29_MaxPriceVariation; f_MDInstrumentDefinitionSpread29_MainFraction; f_MDInstrumentDefinitionSpread29_SubFraction; f_MDInstrumentDefinitionSpread29_TradingReferenceDate; f_NoEvents; f_NoMDFeedTypes; f_NoInstAttrib; f_NoLotTypeRules; f_NoLegs } 
+    { f_MDInstrumentDefinitionSpread29_MatchEventIndicator; f_MDInstrumentDefinitionSpread29_TotNumReports; f_MDInstrumentDefinitionSpread29_SecurityUpdateAction; f_MDInstrumentDefinitionSpread29_LastUpdateTime; f_MDInstrumentDefinitionSpread29_MDSecurityTradingStatus; f_MDInstrumentDefinitionSpread29_ApplID; f_MDInstrumentDefinitionSpread29_MarketSegmentID; f_MDInstrumentDefinitionSpread29_UnderlyingProduct; f_MDInstrumentDefinitionSpread29_SecurityExchange; f_MDInstrumentDefinitionSpread29_SecurityGroup; f_MDInstrumentDefinitionSpread29_Asset; f_MDInstrumentDefinitionSpread29_Symbol; f_MDInstrumentDefinitionSpread29_SecurityID; f_MDInstrumentDefinitionSpread29_SecurityIDSource; f_MDInstrumentDefinitionSpread29_SecurityType; f_MDInstrumentDefinitionSpread29_CFICode; f_MDInstrumentDefinitionSpread29_MaturityMonthYear; f_MDInstrumentDefinitionSpread29_Currency; f_MDInstrumentDefinitionSpread29_SecuritySubType; f_MDInstrumentDefinitionSpread29_UserDefinedInstrument; f_MDInstrumentDefinitionSpread29_MatchAlgorithm; f_MDInstrumentDefinitionSpread29_MinTradeVol; f_MDInstrumentDefinitionSpread29_MaxTradeVol; f_MDInstrumentDefinitionSpread29_MinPriceIncrement; f_MDInstrumentDefinitionSpread29_DisplayFactor; f_MDInstrumentDefinitionSpread29_PriceDisplayFormat; f_MDInstrumentDefinitionSpread29_PriceRatio; f_MDInstrumentDefinitionSpread29_TickRule; f_MDInstrumentDefinitionSpread29_UnitOfMeasure; f_MDInstrumentDefinitionSpread29_TradingReferencePrice; f_MDInstrumentDefinitionSpread29_SettlPriceType; f_MDInstrumentDefinitionSpread29_OpenInterestQty; f_MDInstrumentDefinitionSpread29_ClearedVolume; f_MDInstrumentDefinitionSpread29_HighLimitPrice; f_MDInstrumentDefinitionSpread29_LowLimitPrice; f_MDInstrumentDefinitionSpread29_MaxPriceVariation; f_MDInstrumentDefinitionSpread29_MainFraction; f_MDInstrumentDefinitionSpread29_SubFraction; f_MDInstrumentDefinitionSpread29_TradingReferenceDate; f_MDInstrumentDefinitionSpread29_NoEvents; f_MDInstrumentDefinitionSpread29_NoMDFeedTypes; f_MDInstrumentDefinitionSpread29_NoInstAttrib; f_MDInstrumentDefinitionSpread29_NoLotTypeRules; f_MDInstrumentDefinitionSpread29_NoLegs } 
 
 let read_msg_SecurityStatus30 (bits, gbits) = 
     let f_SecurityStatus30_TransactTime, bits = read_uInt64 bits in
@@ -508,10 +508,10 @@ let read_g_MDIncrementalRefreshBook32_NoMDEntries bits =
 let read_msg_MDIncrementalRefreshBook32 (bits, gbits) = 
     let f_MDIncrementalRefreshBook32_TransactTime, bits = read_uInt64 bits in
     let f_MDIncrementalRefreshBook32_MatchEventIndicator, bits = read_MatchEventIndicator bits in
-    let f_NoMDEntries, gbits = 
+    let f_MDIncrementalRefreshBook32_NoMDEntries, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDIncrementalRefreshBook32_NoMDEntries gbits in
-    { f_MDIncrementalRefreshBook32_TransactTime; f_MDIncrementalRefreshBook32_MatchEventIndicator; f_NoMDEntries } 
+    { f_MDIncrementalRefreshBook32_TransactTime; f_MDIncrementalRefreshBook32_MatchEventIndicator; f_MDIncrementalRefreshBook32_NoMDEntries } 
 let read_g_MDIncrementalRefreshDailyStatistics33_NoMDEntries bits = 
     let f_MDIncrementalRefreshDailyStatistics33_NoMDEntries_MDEntryPx, bits = read_PRICENULL bits in
     let f_MDIncrementalRefreshDailyStatistics33_NoMDEntries_MDEntrySize, bits = read_Int32NULL bits in
@@ -526,10 +526,10 @@ let read_g_MDIncrementalRefreshDailyStatistics33_NoMDEntries bits =
 let read_msg_MDIncrementalRefreshDailyStatistics33 (bits, gbits) = 
     let f_MDIncrementalRefreshDailyStatistics33_TransactTime, bits = read_uInt64 bits in
     let f_MDIncrementalRefreshDailyStatistics33_MatchEventIndicator, bits = read_MatchEventIndicator bits in
-    let f_NoMDEntries, gbits = 
+    let f_MDIncrementalRefreshDailyStatistics33_NoMDEntries, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDIncrementalRefreshDailyStatistics33_NoMDEntries gbits in
-    { f_MDIncrementalRefreshDailyStatistics33_TransactTime; f_MDIncrementalRefreshDailyStatistics33_MatchEventIndicator; f_NoMDEntries } 
+    { f_MDIncrementalRefreshDailyStatistics33_TransactTime; f_MDIncrementalRefreshDailyStatistics33_MatchEventIndicator; f_MDIncrementalRefreshDailyStatistics33_NoMDEntries } 
 let read_g_MDIncrementalRefreshLimitsBanding34_NoMDEntries bits = 
     let f_MDIncrementalRefreshLimitsBanding34_NoMDEntries_HighLimitPrice, bits = read_PRICENULL bits in
     let f_MDIncrementalRefreshLimitsBanding34_NoMDEntries_LowLimitPrice, bits = read_PRICENULL bits in
@@ -543,10 +543,10 @@ let read_g_MDIncrementalRefreshLimitsBanding34_NoMDEntries bits =
 let read_msg_MDIncrementalRefreshLimitsBanding34 (bits, gbits) = 
     let f_MDIncrementalRefreshLimitsBanding34_TransactTime, bits = read_uInt64 bits in
     let f_MDIncrementalRefreshLimitsBanding34_MatchEventIndicator, bits = read_MatchEventIndicator bits in
-    let f_NoMDEntries, gbits = 
+    let f_MDIncrementalRefreshLimitsBanding34_NoMDEntries, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDIncrementalRefreshLimitsBanding34_NoMDEntries gbits in
-    { f_MDIncrementalRefreshLimitsBanding34_TransactTime; f_MDIncrementalRefreshLimitsBanding34_MatchEventIndicator; f_NoMDEntries } 
+    { f_MDIncrementalRefreshLimitsBanding34_TransactTime; f_MDIncrementalRefreshLimitsBanding34_MatchEventIndicator; f_MDIncrementalRefreshLimitsBanding34_NoMDEntries } 
 let read_g_MDIncrementalRefreshSessionStatistics35_NoMDEntries bits = 
     let f_MDIncrementalRefreshSessionStatistics35_NoMDEntries_MDEntryPx, bits = read_PRICE bits in
     let f_MDIncrementalRefreshSessionStatistics35_NoMDEntries_SecurityID, bits = read_Int32 bits in
@@ -559,10 +559,10 @@ let read_g_MDIncrementalRefreshSessionStatistics35_NoMDEntries bits =
 let read_msg_MDIncrementalRefreshSessionStatistics35 (bits, gbits) = 
     let f_MDIncrementalRefreshSessionStatistics35_TransactTime, bits = read_uInt64 bits in
     let f_MDIncrementalRefreshSessionStatistics35_MatchEventIndicator, bits = read_MatchEventIndicator bits in
-    let f_NoMDEntries, gbits = 
+    let f_MDIncrementalRefreshSessionStatistics35_NoMDEntries, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDIncrementalRefreshSessionStatistics35_NoMDEntries gbits in
-    { f_MDIncrementalRefreshSessionStatistics35_TransactTime; f_MDIncrementalRefreshSessionStatistics35_MatchEventIndicator; f_NoMDEntries } 
+    { f_MDIncrementalRefreshSessionStatistics35_TransactTime; f_MDIncrementalRefreshSessionStatistics35_MatchEventIndicator; f_MDIncrementalRefreshSessionStatistics35_NoMDEntries } 
 let read_g_MDIncrementalRefreshTrade36_NoMDEntries bits = 
     let f_MDIncrementalRefreshTrade36_NoMDEntries_MDEntryPx, bits = read_PRICE bits in
     let f_MDIncrementalRefreshTrade36_NoMDEntries_MDEntrySize, bits = read_Int32 bits in
@@ -578,10 +578,10 @@ let read_g_MDIncrementalRefreshTrade36_NoMDEntries bits =
 let read_msg_MDIncrementalRefreshTrade36 (bits, gbits) = 
     let f_MDIncrementalRefreshTrade36_TransactTime, bits = read_uInt64 bits in
     let f_MDIncrementalRefreshTrade36_MatchEventIndicator, bits = read_MatchEventIndicator bits in
-    let f_NoMDEntries, gbits = 
+    let f_MDIncrementalRefreshTrade36_NoMDEntries, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDIncrementalRefreshTrade36_NoMDEntries gbits in
-    { f_MDIncrementalRefreshTrade36_TransactTime; f_MDIncrementalRefreshTrade36_MatchEventIndicator; f_NoMDEntries } 
+    { f_MDIncrementalRefreshTrade36_TransactTime; f_MDIncrementalRefreshTrade36_MatchEventIndicator; f_MDIncrementalRefreshTrade36_NoMDEntries } 
 let read_g_MDIncrementalRefreshVolume37_NoMDEntries bits = 
     let f_MDIncrementalRefreshVolume37_NoMDEntries_MDEntrySize, bits = read_Int32 bits in
     let f_MDIncrementalRefreshVolume37_NoMDEntries_SecurityID, bits = read_Int32 bits in
@@ -593,10 +593,10 @@ let read_g_MDIncrementalRefreshVolume37_NoMDEntries bits =
 let read_msg_MDIncrementalRefreshVolume37 (bits, gbits) = 
     let f_MDIncrementalRefreshVolume37_TransactTime, bits = read_uInt64 bits in
     let f_MDIncrementalRefreshVolume37_MatchEventIndicator, bits = read_MatchEventIndicator bits in
-    let f_NoMDEntries, gbits = 
+    let f_MDIncrementalRefreshVolume37_NoMDEntries, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDIncrementalRefreshVolume37_NoMDEntries gbits in
-    { f_MDIncrementalRefreshVolume37_TransactTime; f_MDIncrementalRefreshVolume37_MatchEventIndicator; f_NoMDEntries } 
+    { f_MDIncrementalRefreshVolume37_TransactTime; f_MDIncrementalRefreshVolume37_MatchEventIndicator; f_MDIncrementalRefreshVolume37_NoMDEntries } 
 let read_g_SnapshotFullRefresh38_NoMDEntries bits = 
     let f_SnapshotFullRefresh38_NoMDEntries_MDEntryPx, bits = read_PRICENULL bits in
     let f_SnapshotFullRefresh38_NoMDEntries_MDEntrySize, bits = read_Int32NULL bits in
@@ -620,10 +620,10 @@ let read_msg_SnapshotFullRefresh38 (bits, gbits) =
     let f_SnapshotFullRefresh38_HighLimitPrice, bits = read_PRICENULL bits in
     let f_SnapshotFullRefresh38_LowLimitPrice, bits = read_PRICENULL bits in
     let f_SnapshotFullRefresh38_MaxPriceVariation, bits = read_PRICENULL bits in
-    let f_NoMDEntries, gbits = 
+    let f_SnapshotFullRefresh38_NoMDEntries, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_SnapshotFullRefresh38_NoMDEntries gbits in
-    { f_SnapshotFullRefresh38_LastMsgSeqNumProcessed; f_SnapshotFullRefresh38_TotNumReports; f_SnapshotFullRefresh38_SecurityID; f_SnapshotFullRefresh38_RptSeq; f_SnapshotFullRefresh38_TransactTime; f_SnapshotFullRefresh38_LastUpdateTime; f_SnapshotFullRefresh38_TradeDate; f_SnapshotFullRefresh38_MDSecurityTradingStatus; f_SnapshotFullRefresh38_HighLimitPrice; f_SnapshotFullRefresh38_LowLimitPrice; f_SnapshotFullRefresh38_MaxPriceVariation; f_NoMDEntries } 
+    { f_SnapshotFullRefresh38_LastMsgSeqNumProcessed; f_SnapshotFullRefresh38_TotNumReports; f_SnapshotFullRefresh38_SecurityID; f_SnapshotFullRefresh38_RptSeq; f_SnapshotFullRefresh38_TransactTime; f_SnapshotFullRefresh38_LastUpdateTime; f_SnapshotFullRefresh38_TradeDate; f_SnapshotFullRefresh38_MDSecurityTradingStatus; f_SnapshotFullRefresh38_HighLimitPrice; f_SnapshotFullRefresh38_LowLimitPrice; f_SnapshotFullRefresh38_MaxPriceVariation; f_SnapshotFullRefresh38_NoMDEntries } 
 let read_g_QuoteRequest39_NoRelatedSym bits = 
     let f_QuoteRequest39_NoRelatedSym_Symbol, bits = read_Symbol bits in
     let f_QuoteRequest39_NoRelatedSym_SecurityID, bits = read_Int32 bits in
@@ -636,10 +636,10 @@ let read_msg_QuoteRequest39 (bits, gbits) =
     let f_QuoteRequest39_TransactTime, bits = read_uInt64 bits in
     let f_QuoteRequest39_QuoteReqID, bits = read_QuoteReqId bits in
     let f_QuoteRequest39_MatchEventIndicator, bits = read_MatchEventIndicator bits in
-    let f_NoRelatedSym, gbits = 
+    let f_QuoteRequest39_NoRelatedSym, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_QuoteRequest39_NoRelatedSym gbits in
-    { f_QuoteRequest39_TransactTime; f_QuoteRequest39_QuoteReqID; f_QuoteRequest39_MatchEventIndicator; f_NoRelatedSym } 
+    { f_QuoteRequest39_TransactTime; f_QuoteRequest39_QuoteReqID; f_QuoteRequest39_MatchEventIndicator; f_QuoteRequest39_NoRelatedSym } 
 let read_g_MDInstrumentDefinitionOption41_NoEvents bits = 
     let f_MDInstrumentDefinitionOption41_NoEvents_EventType, bits = read_EventType bits in
     let f_MDInstrumentDefinitionOption41_NoEvents_EventTime, bits = read_uInt64 bits in
@@ -706,22 +706,22 @@ let read_msg_MDInstrumentDefinitionOption41 (bits, gbits) =
     let f_MDInstrumentDefinitionOption41_HighLimitPrice, bits = read_PRICENULL bits in
     let f_MDInstrumentDefinitionOption41_UserDefinedInstrument, bits = read_UserDefinedInstrument bits in
     let f_MDInstrumentDefinitionOption41_TradingReferenceDate, bits = read_LocalMktDate bits in
-    let f_NoEvents, gbits = 
+    let f_MDInstrumentDefinitionOption41_NoEvents, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDInstrumentDefinitionOption41_NoEvents gbits in
-    let f_NoMDFeedTypes, gbits = 
+    let f_MDInstrumentDefinitionOption41_NoMDFeedTypes, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDInstrumentDefinitionOption41_NoMDFeedTypes gbits in
-    let f_NoInstAttrib, gbits = 
+    let f_MDInstrumentDefinitionOption41_NoInstAttrib, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDInstrumentDefinitionOption41_NoInstAttrib gbits in
-    let f_NoLotTypeRules, gbits = 
+    let f_MDInstrumentDefinitionOption41_NoLotTypeRules, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDInstrumentDefinitionOption41_NoLotTypeRules gbits in
-    let f_NoUnderlyings, gbits = 
+    let f_MDInstrumentDefinitionOption41_NoUnderlyings, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDInstrumentDefinitionOption41_NoUnderlyings gbits in
-    { f_MDInstrumentDefinitionOption41_MatchEventIndicator; f_MDInstrumentDefinitionOption41_TotNumReports; f_MDInstrumentDefinitionOption41_SecurityUpdateAction; f_MDInstrumentDefinitionOption41_LastUpdateTime; f_MDInstrumentDefinitionOption41_MDSecurityTradingStatus; f_MDInstrumentDefinitionOption41_ApplID; f_MDInstrumentDefinitionOption41_MarketSegmentID; f_MDInstrumentDefinitionOption41_UnderlyingProduct; f_MDInstrumentDefinitionOption41_SecurityExchange; f_MDInstrumentDefinitionOption41_SecurityGroup; f_MDInstrumentDefinitionOption41_Asset; f_MDInstrumentDefinitionOption41_Symbol; f_MDInstrumentDefinitionOption41_SecurityID; f_MDInstrumentDefinitionOption41_SecurityIDSource; f_MDInstrumentDefinitionOption41_SecurityType; f_MDInstrumentDefinitionOption41_CFICode; f_MDInstrumentDefinitionOption41_PutOrCall; f_MDInstrumentDefinitionOption41_MaturityMonthYear; f_MDInstrumentDefinitionOption41_Currency; f_MDInstrumentDefinitionOption41_StrikePrice; f_MDInstrumentDefinitionOption41_StrikeCurrency; f_MDInstrumentDefinitionOption41_SettlCurrency; f_MDInstrumentDefinitionOption41_MinCabPrice; f_MDInstrumentDefinitionOption41_MatchAlgorithm; f_MDInstrumentDefinitionOption41_MinTradeVol; f_MDInstrumentDefinitionOption41_MaxTradeVol; f_MDInstrumentDefinitionOption41_MinPriceIncrement; f_MDInstrumentDefinitionOption41_MinPriceIncrementAmount; f_MDInstrumentDefinitionOption41_DisplayFactor; f_MDInstrumentDefinitionOption41_TickRule; f_MDInstrumentDefinitionOption41_MainFraction; f_MDInstrumentDefinitionOption41_SubFraction; f_MDInstrumentDefinitionOption41_PriceDisplayFormat; f_MDInstrumentDefinitionOption41_UnitOfMeasure; f_MDInstrumentDefinitionOption41_UnitOfMeasureQty; f_MDInstrumentDefinitionOption41_TradingReferencePrice; f_MDInstrumentDefinitionOption41_SettlPriceType; f_MDInstrumentDefinitionOption41_ClearedVolume; f_MDInstrumentDefinitionOption41_OpenInterestQty; f_MDInstrumentDefinitionOption41_LowLimitPrice; f_MDInstrumentDefinitionOption41_HighLimitPrice; f_MDInstrumentDefinitionOption41_UserDefinedInstrument; f_MDInstrumentDefinitionOption41_TradingReferenceDate; f_NoEvents; f_NoMDFeedTypes; f_NoInstAttrib; f_NoLotTypeRules; f_NoUnderlyings } 
+    { f_MDInstrumentDefinitionOption41_MatchEventIndicator; f_MDInstrumentDefinitionOption41_TotNumReports; f_MDInstrumentDefinitionOption41_SecurityUpdateAction; f_MDInstrumentDefinitionOption41_LastUpdateTime; f_MDInstrumentDefinitionOption41_MDSecurityTradingStatus; f_MDInstrumentDefinitionOption41_ApplID; f_MDInstrumentDefinitionOption41_MarketSegmentID; f_MDInstrumentDefinitionOption41_UnderlyingProduct; f_MDInstrumentDefinitionOption41_SecurityExchange; f_MDInstrumentDefinitionOption41_SecurityGroup; f_MDInstrumentDefinitionOption41_Asset; f_MDInstrumentDefinitionOption41_Symbol; f_MDInstrumentDefinitionOption41_SecurityID; f_MDInstrumentDefinitionOption41_SecurityIDSource; f_MDInstrumentDefinitionOption41_SecurityType; f_MDInstrumentDefinitionOption41_CFICode; f_MDInstrumentDefinitionOption41_PutOrCall; f_MDInstrumentDefinitionOption41_MaturityMonthYear; f_MDInstrumentDefinitionOption41_Currency; f_MDInstrumentDefinitionOption41_StrikePrice; f_MDInstrumentDefinitionOption41_StrikeCurrency; f_MDInstrumentDefinitionOption41_SettlCurrency; f_MDInstrumentDefinitionOption41_MinCabPrice; f_MDInstrumentDefinitionOption41_MatchAlgorithm; f_MDInstrumentDefinitionOption41_MinTradeVol; f_MDInstrumentDefinitionOption41_MaxTradeVol; f_MDInstrumentDefinitionOption41_MinPriceIncrement; f_MDInstrumentDefinitionOption41_MinPriceIncrementAmount; f_MDInstrumentDefinitionOption41_DisplayFactor; f_MDInstrumentDefinitionOption41_TickRule; f_MDInstrumentDefinitionOption41_MainFraction; f_MDInstrumentDefinitionOption41_SubFraction; f_MDInstrumentDefinitionOption41_PriceDisplayFormat; f_MDInstrumentDefinitionOption41_UnitOfMeasure; f_MDInstrumentDefinitionOption41_UnitOfMeasureQty; f_MDInstrumentDefinitionOption41_TradingReferencePrice; f_MDInstrumentDefinitionOption41_SettlPriceType; f_MDInstrumentDefinitionOption41_ClearedVolume; f_MDInstrumentDefinitionOption41_OpenInterestQty; f_MDInstrumentDefinitionOption41_LowLimitPrice; f_MDInstrumentDefinitionOption41_HighLimitPrice; f_MDInstrumentDefinitionOption41_UserDefinedInstrument; f_MDInstrumentDefinitionOption41_TradingReferenceDate; f_MDInstrumentDefinitionOption41_NoEvents; f_MDInstrumentDefinitionOption41_NoMDFeedTypes; f_MDInstrumentDefinitionOption41_NoInstAttrib; f_MDInstrumentDefinitionOption41_NoLotTypeRules; f_MDInstrumentDefinitionOption41_NoUnderlyings } 
 let read_g_MDIncrementalRefreshTradeSummary42_NoMDEntries bits = 
     let f_MDIncrementalRefreshTradeSummary42_NoMDEntries_MDEntryPx, bits = read_PRICE bits in
     let f_MDIncrementalRefreshTradeSummary42_NoMDEntries_MDEntrySize, bits = read_Int32 bits in
@@ -740,13 +740,13 @@ let read_g_MDIncrementalRefreshTradeSummary42_NoOrderIDEntries bits =
 let read_msg_MDIncrementalRefreshTradeSummary42 (bits, gbits) = 
     let f_MDIncrementalRefreshTradeSummary42_TransactTime, bits = read_uInt64 bits in
     let f_MDIncrementalRefreshTradeSummary42_MatchEventIndicator, bits = read_MatchEventIndicator bits in
-    let f_NoMDEntries, gbits = 
+    let f_MDIncrementalRefreshTradeSummary42_NoMDEntries, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDIncrementalRefreshTradeSummary42_NoMDEntries gbits in
-    let f_NoOrderIDEntries, gbits = 
+    let f_MDIncrementalRefreshTradeSummary42_NoOrderIDEntries, gbits = 
          let nent, bsz, gbits = Binparser.get_group_info gbits in
          foldi (nent, bsz) read_g_MDIncrementalRefreshTradeSummary42_NoOrderIDEntries gbits in
-    { f_MDIncrementalRefreshTradeSummary42_TransactTime; f_MDIncrementalRefreshTradeSummary42_MatchEventIndicator; f_NoMDEntries; f_NoOrderIDEntries } 
+    { f_MDIncrementalRefreshTradeSummary42_TransactTime; f_MDIncrementalRefreshTradeSummary42_MatchEventIndicator; f_MDIncrementalRefreshTradeSummary42_NoMDEntries; f_MDIncrementalRefreshTradeSummary42_NoOrderIDEntries } 
 let read_message bits md =
     let gbits = Binparser.skip bits md.Binparser.block_length in
     match md.Binparser.template_id with

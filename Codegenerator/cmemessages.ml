@@ -106,14 +106,14 @@ let to_ocaml t =
         | (Group x)::tl -> codecat (Group.to_ocaml t.name x) (predefine_groups tl)
         | [] -> { typedecl = ""; writer = ""; reader = "" } 
     in
-    let fname = function | Field x -> Field.name t.name x | Group x -> "f_" ^ x.name in
+    let fname = function | Field x -> Field.name t.name x | Group x -> "f_" ^ t.name ^ "_" ^ x.name in
     let entry_ocaml = function 
         | Field x -> "    " ^ (Field.name t.name x) ^ ": t_" ^ x.cmetype
-        | Group x -> "    f_" ^ x.name ^ ": " ^ Group.name t.name x ^ " list"
+        | Group x -> "    f_" ^ t.name ^ "_" ^ x.name ^ ": " ^ Group.name t.name x ^ " list"
     in
     let func_ocaml = function 
         | Field x -> "    let " ^ (Field.name t.name x) ^ ", bits = read_" ^ x.cmetype ^ " bits in"
-        | Group x -> "    let f_" ^ x.name ^ ", gbits = \n" ^ 
+        | Group x -> "    let f_" ^ t.name ^ "_" ^ x.name ^ ", gbits = \n" ^ 
                      "         let nent, bsz, gbits = Binparser.get_group_info gbits in\n" ^
                      "         foldi (nent, bsz) read_" ^ Group.name t.name x ^ " gbits in"
     in
@@ -121,10 +121,10 @@ let to_ocaml t =
         | Field x -> "    let bits = write_" ^ x.cmetype ^ " bits " ^ "v." ^ (Field.name t.name x) ^ " in"
         | Group x -> "    let gbits = \n" ^ 
                      "         let gbits = Binparser.write_group_info  gbits ( " ^ 
-                                    "List.length v.f_" ^ x.name  ^ " , " ^
+                                    "List.length v.f_" ^ t.name ^ "_" ^ x.name ^ " , " ^
                                     string_of_int x.block_length ^ " ) in\n" ^
                      "         List.fold_left ( write_" ^ Group.name t.name x ^ " " ^ 
-                               string_of_int x.block_length ^ " ) gbits v.f_" ^ x.name ^ " in"
+                               string_of_int x.block_length ^ " ) gbits v.f_" ^ t.name ^ "_" ^ x.name ^ " in"
     in
     let grps = predefine_groups t.entries in
     {

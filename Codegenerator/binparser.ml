@@ -72,8 +72,9 @@ let skip bits l   = Bitstring.dropbits (8*l) bits
 let hexdump       = Bitstring.hexdump_bitstring stdout 
 let hexdump_o  x  = x |> List.rev |> Bitstring.concat |> Bitstring.hexdump_bitstring stdout 
 
+
 (******************************************)
-(** Message header encoding and metadata **)
+(**  Message Metadata                    **)
 (******************************************)
 
 type msg_metadata = {
@@ -97,6 +98,168 @@ let metadata_to_string md = [
         "templateID = "  ^ ( string_of_int   md.template_id );    
         "schemaID = "    ^ ( string_of_int   md.schema_id   )
     ] |> String.concat ", "
+
+(******************************************)
+(** PCAP header reading                  **)
+(******************************************)
+
+let read_pcap_file_info ?(vrb=false) bits =
+    bitmatch bits with 
+    { magic        : 32 : unsigned, int, littleendian;  
+      major_verion : 16 : unsigned, int, littleendian;
+      minor_verion : 16 : unsigned, int, littleendian;
+      timezone     : 32 : unsigned, int, littleendian;
+      ts_accuracy  : 32 : unsigned, int, littleendian;
+      max_length   : 32 : unsigned, int, littleendian;
+      link_layer   : 32 : unsigned, int, littleendian } ->
+    begin
+        if vrb then ([
+            "Read a PCAP header:" ;
+            " - major version : " ^ string_of_int major_verion  ;
+            " - minor version : " ^ string_of_int minor_verion  ;
+            " - tz GMT offset : " ^ Int32.to_string timezone    ;
+            " - ts accuracy   : " ^ Int32.to_string ts_accuracy ;
+            " - max pck length: " ^ Int32.to_string max_length  ;
+            " - lik layer code: " ^ Int32.to_string link_layer  ;
+            ""]
+            |> String.concat "\n" |> print_string )
+        else ();
+        Bitstring.dropbits (24 * 8) bits 
+    end
+
+let write_pcap_file_info () = 
+    let pcapinfo = BITSTRING { 
+        0xa1b2c3d4l  : 32 : unsigned, int, littleendian;  (* Magic *)
+        2  : 16 : unsigned, int, littleendian;  (* Major version *)
+        4  : 16 : unsigned, int, littleendian;  (* Minor version *)
+        0l : 32 : unsigned, int, littleendian;
+        0l : 32 : unsigned, int, littleendian;
+        0x0000ffffl  : 32 : unsigned, int, littleendian;
+        0x00000001l  : 32 : unsigned, int, littleendian 
+    } in 
+    [pcapinfo];;
+   
+
+let get_pcap_message ?(vrb=false) bits =
+    bitmatch bits with 
+    { receive_ts   : 32 : unsigned, int, littleendian;  
+      receive_ns   : 32 : unsigned, int, littleendian;  
+      size         : 32 : unsigned, int, littleendian;
+      othersize    : 32 : unsigned, int, littleendian;
+      stuffA       : 64 : unsigned, int, littleendian;
+      stuffB       : 64 : unsigned, int, littleendian;
+      stuffC       : 64 : unsigned, int, littleendian;
+      stuffD       : 64 : unsigned, int, littleendian;
+      stuffE       : 64 : unsigned, int, littleendian;
+      stuffF       : 48 : unsigned, int, littleendian;
+      seqence_num  : 32 : unsigned, int, littleendian;
+      sent_ts      : 64 : unsigned, int, littleendian;
+      msg_size     : 16 : unsigned, int, littleendian;
+      block_length : 16 : unsigned, int, littleendian;
+      template_id  : 16 : unsigned, int, littleendian;
+      schema_id    : 16 : unsigned, int, littleendian } ->
+    let receive_ts = Int64.of_int32 receive_ts in
+    let size = Int32.to_int size in
+    let md = { receive_ts; size; seqence_num; sent_ts;     
+               msg_size; template_id; schema_id; block_length } in (
+    if vrb then (
+        print_string ( (bits |> Bitstring.bitstring_length |> string_of_int) ^ " bytes to go, ") ;
+        print_string ( metadata_to_string md ^ "\n") )
+    else () );
+    ( md , 
+      Bitstring.subbitstring bits (84*8)  ( (16 + size - 84) * 8),
+      Bitstring.dropbits ((16 + size) * 8) bits 
+    )
+
+type pcap_info = {
+    src_mac : string;
+    dst_mac : string;
+    src_ip  : string;
+    dst_ip  : string;
+    src_port: string;
+    dst_port: string
+}
+
+let pcap_header ts size = 
+    let size, ts = Int32.of_int size, Int32.of_int ts in 
+    BITSTRING {
+        ts   : 32 : unsigned, int, littleendian;
+        0l   : 32 : unsigned, int, littleendian;
+        size : 32 : unsigned, int, littleendian;
+        size : 32 : unsigned, int, littleendian 
+    }
+
+let eth_header smac dmac = 
+    let pack a b c d e f = BITSTRING {
+        a : 8 : unsigned, int, bigendian;
+        b : 8 : unsigned, int, bigendian;
+        c : 8 : unsigned, int, bigendian;
+        d : 8 : unsigned, int, bigendian;
+        e : 8 : unsigned, int, bigendian;
+        f : 8 : unsigned, int, bigendian
+    } in 
+    let x801     = BITSTRING {     0x8100 : 16 : unsigned, int, bigendian } in
+    let bitfield = BITSTRING { 
+        0x00b3 : 16 : unsigned, int, bigendian ;
+        0x0800 : 16 : unsigned, int, bigendian 
+    } in
+    Bitstring.concat [
+        Scanf.sscanf dmac "%x:%x:%x:%x:%x:%x" pack;
+        Scanf.sscanf smac "%x:%x:%x:%x:%x:%x" pack;
+        x801; bitfield
+    ]
+    
+let ip_header sip dip tot_length = 
+    let pack a b c d = BITSTRING {
+        a : 8 : unsigned, int, bigendian;
+        b : 8 : unsigned, int, bigendian;
+        c : 8 : unsigned, int, bigendian;
+        d : 8 : unsigned, int, bigendian
+    } in
+    let bytes = BITSTRING {
+        0x45 : 8 : unsigned, int, bigendian;
+        0x00 : 8 : unsigned, int, bigendian;
+        tot_length : 16 : unsigned, int, bigendian;
+        0x9736 : 16 : unsigned, int, bigendian;
+        0x4000 : 16 : unsigned, int, bigendian;
+        0x39   :  8 : unsigned, int, bigendian;
+        0x11   :  8 : unsigned, int, bigendian;
+        0x1234 : 16 : unsigned, int, bigendian (* Checksum -- validation disabled *)
+    } in
+    Bitstring.concat [
+        bytes;
+        Scanf.sscanf dip "%d.%d.%d.%d" pack;
+        Scanf.sscanf sip "%d.%d.%d.%d" pack
+    ]
+    
+let udp_header sport dport length = 
+    let sport = int_of_string sport in
+    let dport = int_of_string dport in
+    BITSTRING {
+        dport  : 16 : unsigned, int, bigendian;
+        sport  : 16 : unsigned, int, bigendian;
+        length : 16 : unsigned, int, bigendian;
+        0x1234 : 16 : unsigned, int, bigendian (* Checksum -- validation disabled *)
+    }
+
+let time = ref 1461262423 
+    
+let make_pcap_header info t payload =
+    time := !time + 1;
+    let size = payload |> List.map Bitstring.bitstring_length 
+                       |> List.fold_left ( + ) 0
+                       |> fun x -> x / 8
+    in 
+    [ Bitstring.concat [
+        pcap_header !time  (size + 46) ;
+        eth_header  info.src_mac   info.dst_mac;
+        ip_header   info.src_ip    info.dst_ip   (size + 28);
+        udp_header  info.src_port  info.dst_port (size +  8)
+    ] ]
+
+(******************************************)
+(** Message header encoding and metadata **)
+(******************************************)
 
 let get_message ?(vrb=false) bits =
     bitmatch bits with 
