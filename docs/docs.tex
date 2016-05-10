@@ -1,0 +1,199 @@
+\documentclass[twoside,a4paper]{refart}
+%\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{mygray}{rgb}{0.9,0.9,0.9}
+\lstset{
+    backgroundcolor=\color{mygray},
+    basicstyle=\small\ttfamily
+} 
+
+
+\begin{document}
+
+\section{SBF codegeneration}
+
+The Simple Binary Format is a format for serialization/deserialization of a
+sequence of hierachically structured messages in a stream of raw binary data.
+The word ``simple'' in the name of the format serves the same purpose as the
+word ``democratic'' in the name of a country.
+
+In the SBF framework, one first defines a \textit{XML schema} -- an XML file,
+that describes the binary layout of the messages.  Typicaly, a special
+codegenerating tool then reads this XML file, and produces a code (usually
+\texttt{Java} or \texttt{C++}) that contains the message type declaraions and
+read/write routines for them. The generated code can then be linked with the
+business logic software.  
+
+In this chapter I'll describe such a code-generation tool fori the OCaml
+programming language.
+    
+\subsection{SBF brief overview}
+
+\subsubsection{SBF simple types}
+At the root of it, SBE relies on a small number of common types:
+ASCII-characters, signed or unsigned integers of various sizes and IEE754
+floating-point numbers. 
+    
+In the XML schema any such ``primitive'' type might be augmented by one of the
+following modifiers:
+\begin{itemize}
+    \item It can have a \texttt{nullValue}, which denotes the null or none
+    value for the field of that type. 
+    \item It can have an associated \texttt{length} value, meaning that the
+    given field is a sequence of values of that type. 
+    \item It can have a \texttt{constant}  ``presence'' -- in that case the
+    corresponding field is never read or written to the binary
+    stream.  Instead, the field is always equal to a constant value,
+    provided in the XML file.
+\end{itemize}
+
+\subsubsection{SBF complex types}
+Three kinds of ``complex'' types can then be construced based on the primitive
+types described above:
+\begin{itemize}
+    \item The \texttt{composite} type is a sequence (a record) of fields
+    of various types.  
+    \item The \texttt{enum} represents a number of mutually-exclusive
+    cases. Each case encoded with a constant ``case-id'', provided in the
+    XML schema.
+    \item The \texttt{set} is a collection of boolean fields, packed into a
+    single bit field.  
+\end{itemize}
+For \texttt{enum} and \texttt{set} types, an \texttt{encodingType} name must be
+provided.
+\subsubsection{SBF messages}
+In the XML schema, the declaration of all the necessary simple and complex
+types is folowed by the declaration of various messages. Each message contains
+a block of fields that are always present in the message, followed by a number
+of variable-sized groups. Each group is stored as a sequence of repeated
+blocks, with each block containing the same fixed number of fields.
+
+\subsection{OCaml codegeneration strategy}
+\subsubsection{Encoding types}
+The following conversion between the simple types and their modifiers is
+used.\\[3mm]
+
+\begin{tabular}{|c|c|}\hline
+    SBE type      & OCaml type       \\ \hline
+   \texttt{int8}  & \texttt{int}     \\ \hline
+   \texttt{int16} & \texttt{int}     \\ \hline
+   \texttt{int32} & \texttt{Int32.t} \\ \hline
+   \texttt{int64} & \texttt{Int64.t} \\ \hline
+   \texttt{char}  & \texttt{char}    \\ \hline 
+\end{tabular}\quad
+\begin{tabular}{|c|c|}\hline
+    SBE type modifier & OCaml parametrized type \\ \hline
+   \texttt{length}    & \texttt{'a list}        \\ \hline
+   \texttt{nullValue} & \texttt{'a option}      \\ \hline
+\end{tabular} \\[3mm]
+
+Instead of describing all the details of the conversion procedure and all the
+employed naming conventions, I'll instead rely on a number of self-explanatory
+examples, shown on the next page. Each example shows an XML schema entry
+followed by a corresponding OCaml code.
+
+The \texttt{composite} types are represented as OCaml record-types (1) with
+each record entry having the correstponding primitive type. The \texttt{enum}
+types are represented as OCaml variant-types (2a) with each variant case beaing
+a constant.  If the \texttt{enum} type has a nullable \texttt{encodingType} as
+in example (2b), then one extra case is added to the variant.  Finally, the
+\texttt{set} types are treated as records (3) but with all entries being of the
+\texttt{bool} type.
+
+\newpage
+
+\begin{center} (1) Composite type \end{center}
+\begin{lstlisting}[language=XML]
+<composite name="FLOAT">
+    <type name="mantissa" primitiveType="int64"/>
+    <type name="exponent" primitiveType="int"/>
+</composite>
+\end{lstlisting}
+\begin{lstlisting}[language=ML]
+type t_FLOAT = {
+     f_FLOAT_mantissa : int64;
+     f_FLOAT_exponent : int
+}
+\end{lstlisting}
+
+\begin{center} (2a) Enum type \end{center}
+\begin{lstlisting}[language=XML]
+<enum name="LegSide" encodingType="uInt8">
+    <validValue name="BuySide" >1</validValue>
+    <validValue name="SellSide">2</validValue>
+</enum>
+\end{lstlisting}
+
+\begin{lstlisting}[language=ML]
+type t_LegSide =
+     | V_LegSide_BuySide
+     | V_LegSide_SellSide
+\end{lstlisting}
+
+
+\begin{center} (2b) Enum type with null \texttt{encodingType} \end{center}
+\begin{lstlisting}[language=XML]
+<enum name="AggressorSide" encodingType="uInt8NULL">
+    <validValue name="NoAggressor">0</validValue>
+    <validValue name="Buy">1</validValue>
+    <validValue name="Sell">2</validValue>
+</enum>
+\end{lstlisting}
+
+\begin{lstlisting}[language=ML]
+type t_AggressorSide =
+    | V_AggressorSide_NoAggressor
+    | V_AggressorSide_Buy
+    | V_AggressorSide_Sell
+    | V_AggressorSide_Null
+\end{lstlisting}
+
+\begin{center} (3) Set type \end{center}
+\begin{lstlisting}[language=XML]
+<set name="SettlPriceType" encodingType="uInt8">
+    <choice name="Final">0</choice>
+    <choice name="Actual">1</choice>
+</set>
+\end{lstlisting}
+
+\begin{lstlisting}[language=ML]
+type t_SettlPriceType = {
+    r_SettlPriceType_Final : bool;
+    r_SettlPriceType_Actual : bool;
+}
+\end{lstlisting}
+
+\newpage
+\subsection{The \texttt{cme\_codegen} tool}
+
+The OCaml codegenerator takes as an input the XML schema file (set with
+\texttt{-i} flag) and writes three files into a specified directory (set with
+\texttt{-d} flag)
+
+\begin{lstlisting}[language=ML,basicstyle=\small\ttfamily]
+$ ./cme_codegen.native -i templates.xml -d outputdir
+$ ls outputdir
+message_types.ml  readers.ml  writers.ml
+\end{lstlisting}
+
+The \texttt{message\_types.ml} file contains all the OCaml type declarations and
+only them. At the very bottom of the file, the $message$ type is declared -- it
+encompasses all the messages in a single variant type.
+
+The \texttt{readers.ml} and \texttt{writers.ml} files contain the reading and
+writing routines for various types, for individual messages and for the
+\texttt{Message\_types.message}. 
+
+\newpage
+\section{Linking the CME code with an IMANDRA model}
+This chapter is devoted to the details of connectig the code generated for the
+CME protocol with the model, that is going to be used in the \texttt{IMANDRA}.
+
+\begin{lstlisting}[language=ML,basicstyle=\small\ttfamily]
+\end{lstlisting}
+
+
+
+\end{document}
