@@ -260,6 +260,37 @@ let rec int_messages_to_str (msgs : internal_msg list) =
         curr_str ^ int_messages_to_str (xs)
 ;;
 
+
+(** print out the internal messages with a required format *)
+let rec int_messages_to_str_format (msgs : internal_msg list) =
+    let order_to_str = function 
+        | NoLevel -> "X X X" 
+        | Level x -> 
+            let num_ord = match x.num_orders with None -> 0 | Some x -> x in
+            Printf.sprintf "%d %d %d" num_ord x.price x.qty
+    in 
+    let order_list_to_str prefix olist = 
+        olist |> List.map order_to_str
+              |> String.concat " "
+              |> Printf.sprintf "%s %d %s" prefix  (List.length olist)
+        in
+    let books_to_str msgnum msg = [
+            order_list_to_str "MB" msg.im_books.multi.buys     ;
+            order_list_to_str "MA" msg.im_books.multi.sells    ;
+            order_list_to_str "IB" msg.im_books.implied.buys   ;
+            order_list_to_str "IA" msg.im_books.implied.sells  ;
+            order_list_to_str "CB" msg.im_books.combined.buys  ;
+            order_list_to_str "CA" msg.im_books.combined.sells 
+        ] |> String.concat "\n"
+          |> Printf.sprintf "N %d \n%s" msgnum
+        in
+    msgs |> List.mapi books_to_str
+         |> String.concat "\n\n" 
+;;
+
+
+
+
 (** print out the interal messages in a simplified format *)
 let rec int_messages_to_str_simple (msgs : internal_msg list) = 
     match msgs with 

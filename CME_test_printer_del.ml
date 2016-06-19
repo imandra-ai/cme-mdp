@@ -108,7 +108,7 @@ let cme_test_printer ( s : feed_state ) =
 	let str_incoming_data_a_snap = string_of_packets (create_packets_snap (s.channels.snap_a.s_unproc_packets)) in 
 	let str_incoming_data_b_snap = string_of_packets (create_packets_snap (s.channels.snap_b.s_unproc_packets)) in 
 
-	let str_state_changes = int_messages_to_str_simple (gen_int_messages (s)) in
+	let str_state_changes = int_messages_to_str_format (gen_int_messages (s)) in
 	[ 
 		{
 			tf_name_prefix = addresses.ia_ref_a ^ "_ref_a";
@@ -143,7 +143,7 @@ let cme_test_printer ( s : feed_state ) =
 ;;
 
 (** The wrapper to take into account the messages *)
-let cme_test_printer_ext (s, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8) = 
+let cme_test_printer_8 (s, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8) = 
 	let s' = {
 			s with 
       		channels = { 
@@ -153,7 +153,21 @@ let cme_test_printer_ext (s, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8) =
                         snap_b = { s.channels.snap_b with s_unproc_packets = [] };
       		}
   		} in 
-  	
 	cme_test_printer (s')
 ;;
 
+
+(** The wrapper to take into account the messages *)
+let cme_test_printer_3 (s, msg1, msg2, msg3) = 
+	let s' = {
+			s with 
+      		channels = { 
+        		s.channels with ref_a = { s.channels.ref_a with r_unproc_packets = [msg1; msg2; msg3] };
+                        ref_b = { s.channels.ref_b with r_unproc_packets = [] };
+                        snap_a = { s.channels.snap_a with s_unproc_packets = [] };
+                        snap_b = { s.channels.snap_b with s_unproc_packets = [] };
+      		}
+  		} in 
+	cme_test_printer (s')
+;;
+  	
