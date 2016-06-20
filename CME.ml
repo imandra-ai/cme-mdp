@@ -317,10 +317,14 @@ type internal_msg =
     im_time : int;
     im_books : books;
     im_cache : ref_message list;    
+    im_new_packet : bool
 };;
 
 (** Contains full definition of the state of the exchange *)
 type feed_state = {
+    (* *)
+    new_packet : bool;
+    last_packet_header : packet_header option;
 
     (* Keeping a record of the security that we're maintaining *)
     sec_type : sec_type;
@@ -541,6 +545,7 @@ let mk_int_msg (s, ct : feed_state * book_change_type) =
     im_change_type = ct; (* We're transitionaing to recovery state*)
     im_time = s.channels.last_seq_processed;
     im_books = s.books;
+    im_new_packet = s.new_packet
 };;
 
 let get_cycle_hist (ch_a, ch_b, src) =
@@ -858,6 +863,14 @@ let set_ref_channel (chs, ch, ch_t : channels * ref_channel_state * channel_type
         ref_b = if ch_t = Ch_Ref_B then ch else chs.ref_b;
 };;
 
+(** Return packet header *)
+let get_packet_header (p : packet) =
+    match p with
+    | NoPacket -> None
+    | SnapshotPacket d   ->  Some d.sp_header
+    | IncRefreshPacket d ->  Some d.rp_header
+;;
+
 (** Return sequence number of the packet *)
 let get_packet_time (p : packet) =
     match p with
@@ -942,11 +955,16 @@ let process_rec_inc (s, ref_p : feed_state * ref_packet) =
     }
 ;;
 
+
+
 let process_msg_recovery (s : feed_state) =
     let channels = s.channels in
     let next_packet = get_next_packet (s.channels) in
     let src = next_packet.source in
-
+    let s' = { s with
+        new_packet = (s.last_packet_header = get_packet_header next_packet.p);
+        last_packet_header = get_packet_header next_packet.p
+    } in
     match next_packet.p with
     | NoPacket -> s (* If there's nothing to process, then we simply return the current state *)
 
@@ -954,13 +972,13 @@ let process_msg_recovery (s : feed_state) =
         
         let this_ch = process_snap_ch ( get_snap_channel (channels, src)) in
         let channels' = set_snap_channel (channels, this_ch, src) in
-        process_rec_snapshot ({ s with channels = channels' }, sp, src)
+        process_rec_snapshot ({ s' with channels = channels' }, sp, src)
 
     | IncRefreshPacket rp ->
         let this_ch = process_ref_ch ( get_ref_channel (channels, src)) in
         let channels' = set_ref_channel (channels, this_ch, src) in
 
-        process_rec_inc ({ s with channels = channels' }, rp)
+        process_rec_inc ({ s' with channels = channels' }, rp)
 ;;
 
 (** This will indicate that we need to reset the book and change to InRecovery *)
@@ -992,12 +1010,16 @@ let process_msg_normal (s : feed_state) =
 
     let next_packet = get_next_packet (channels') in
     let src = next_packet.source in
-
+    let s' = { s with
+        new_packet = (s.last_packet_header = get_packet_header next_packet.p);
+        last_packet_header = get_packet_header next_packet.p
+    } in
+ 
     match next_packet.p with
         | NoPacket -> {s with channels = channels' }
 
         (* We shouldn't be processing these here *)
-        | SnapshotPacket d -> {s with channels = channels' } 
+        | SnapshotPacket d -> {s' with channels = channels' } 
 
         | IncRefreshPacket ref_packet ->
 
@@ -1006,28 +1028,28 @@ let process_msg_normal (s : feed_state) =
 
             (** if it's the wrong security, just skip it *)
             if msg.rm_security_id <> s.sec_id then
-                { s with channels = set_ref_channel (channels', this_ch, src); }
+                { s' with channels = set_ref_channel (channels', this_ch, src); }
 
             else if msg_behind (msg, channels') then
                 (** We have already processed this somewhere, so need to discard this message *)
-                { s with channels = set_ref_channel (channels', this_ch, src); }
+                { s' with channels = set_ref_channel (channels', this_ch, src); }
             
             else if msg_correct_seq (msg, channels') then
                 (** This is the message that we need to process next *)
                 if is_msg_reset (msg) then
-                    { s with books = reset_books (s.books); feed_status = InRecovery; }
+                    { s' with books = reset_books (s.books); feed_status = InRecovery; }
                 
                 else (
                     let books' = process_md_update_action (books, msg) in
                     let channels' =  set_ref_channel (channels', this_ch, src) in
-                    { s with
+                    { s' with
                         books = books';
                         channels = { channels' with last_seq_processed = msg.rm_rep_seq_num };}
             )
             else
                 (** We've detected a gap in message sequences *)
                 let channels'' = { channels' with cache = channels'.cache @ [ msg ]; } in
-                { s with
+                { s' with
                     feed_status = InRecovery;
                     books = { s.books with b_status = Empty };
                     channels = set_ref_channel (channels'', this_ch, src);

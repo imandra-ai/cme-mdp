@@ -5,6 +5,9 @@
 :load_ocaml CME_to_json_simple.ml
 :load_ocaml CME_test_printer_del.ml
 
+:adts
+:p (in-theory (enable IML-ADT-EXECUTABLE-COUNTERPARTS-THEORY))
+
 let large_call (s, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8) =
     let s' = { s with
            books = { book_depth = 5; multi = {buys = []; sells = []};
@@ -48,6 +51,5 @@ let large_call_3 (s, msg1, msg2, msg3) =
  let s' = one_step(s') in 
  one_step(s')
 ;;
-
 
 :testgen large_call_3 with_printer cme_test_printer_3

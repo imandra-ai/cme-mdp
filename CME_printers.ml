@@ -270,7 +270,8 @@ let rec int_messages_to_str_format (msgs : internal_msg list) =
             Printf.sprintf "%d %d %d" num_ord x.price x.qty
     in 
     let order_list_to_str prefix olist = 
-        olist |> List.map order_to_str
+        olist |> List.filter (function NoLevel -> false | Level _ -> true)
+              |> List.map order_to_str
               |> String.concat " "
               |> Printf.sprintf "%s %d %s" prefix  (List.length olist)
         in
@@ -284,12 +285,10 @@ let rec int_messages_to_str_format (msgs : internal_msg list) =
         ] |> String.concat "\n"
           |> Printf.sprintf "N %d \n%s" msgnum
         in
-    msgs |> List.mapi books_to_str
+    msgs |> List.filter ( fun x -> x.im_new_packet )
+         |> List.mapi books_to_str
          |> String.concat "\n\n" 
 ;;
-
-
-
 
 (** print out the interal messages in a simplified format *)
 let rec int_messages_to_str_simple (msgs : internal_msg list) = 
