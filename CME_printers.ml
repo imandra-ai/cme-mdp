@@ -270,8 +270,8 @@ let rec int_messages_to_str_format (msgs : internal_msg list) =
             Printf.sprintf "%d %d %d" num_ord x.price x.qty
     in 
     let order_list_to_str prefix olist = 
-        olist |> List.filter (function NoLevel -> false | Level _ -> true)
-              |> List.map order_to_str
+        let olist = olist |> List.filter (function NoLevel -> false | Level _ -> true) in
+        olist |> List.map order_to_str
               |> String.concat " "
               |> Printf.sprintf "%s %d %s" prefix  (List.length olist)
         in
@@ -285,7 +285,13 @@ let rec int_messages_to_str_format (msgs : internal_msg list) =
         ] |> String.concat "\n"
           |> Printf.sprintf "N %d \n%s" msgnum
         in
-    msgs |> List.filter ( fun x -> x.im_new_packet )
+    let rec filter_packets = function
+        | h1::h2::tl -> if h2.im_new_packet 
+            then h1::(filter_packets (h2::tl)) 
+            else filter_packets (h2::tl)
+        | h1::[] ->  h1::[]
+        in
+    msgs |> filter_packets 
          |> List.mapi books_to_str
          |> String.concat "\n\n" 
 ;;
