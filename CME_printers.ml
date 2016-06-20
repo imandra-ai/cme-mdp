@@ -155,7 +155,7 @@ let internal_type_to_string it =
     | Book_Changed_to_Normal     -> "Book_Changed_to_Normal"
     | Book_Proc_Normal_Update    -> "Book_Proc_Normal_Update"
     | Book_Proc_Cache_Add        -> "Book_Proc_Cache_Add"
-    | Book_Proc_NotRelevant      -> "Book_Proc_NotRelevant"
+(*    | Book_Proc_NotRelevant      -> "Book_Proc_NotRelevant" *)
 ;;
 
 

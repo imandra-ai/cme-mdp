@@ -1,10 +1,7 @@
 (**
-
     Aesthetic Integration Ltd.
     Copyright 2016
-
     CME.ml
-
 *)
 
 let dec_units = 1000;;
@@ -77,9 +74,6 @@ type entry_type =
   | V_MDEntryType_Offer
   | V_MDEntryType_ImpliedBid
   | V_MDEntryType_ImpliedOffer
-  | V_MDEntryType_EmptyBook
-
-  (** These are not used currently 
   | V_MDEntryType_TradeSummary
   | V_MDEntryType_OpeningPrice
   | V_MDEntryType_SettlementPrice
@@ -90,10 +84,9 @@ type entry_type =
   | V_MDEntryType_TradeVolume
   | V_MDEntryType_OpenInterest
   | V_MDEntryType_FixingPrice
+  | V_MDEntryType_EmptyBook
   | V_MDEntryType_ElectronicVolume
   | V_MDEntryType_ThresholdLimits
-    *)
-
 ;;
 (** *************************************************************** *)
 
@@ -137,7 +130,6 @@ type snap_message = {
 (** Note about connecting Snapshots and Incremental Refresh messages:
         --> Market recovery packet message contains field 369-LastMsgSeqNumProcessed
             it corresponds to Incremental Refresh Message
-
         --> Tag 83 RptSeq
 *)
 type packet_header = {
@@ -147,7 +139,6 @@ type packet_header = {
         A unique sequence number given to each packet sent.
         Each channel will have its own separate set of sequence numbers that will increment sequentially
         with each packet and reset weekly.
-
         See: http://www.cmegroup.com/confluence/display/EPICSANDBOX/MDP+3.0+-+Binary+Packet+Header
      *)
     ph_sending_time : int;
@@ -157,16 +148,19 @@ type packet_header = {
     *)
 };;
 
+
 (** Note about packet data types:
     In the actual binary (and other) format, a packet has a header and a *list* of messages. For the purposes
     of modelling the feed, we do not need to introduce this complexity. In the model, we use ref_packet and
     snap_packet types. Note the at we have no restriction on repeating packet sequence numbers, hence a natural
     way to replicate a *real* packet with multiple messages is just by having a list of *model* packets with
     the same packet header, but different message fields.
-
     Types ref_packet_lst & snap_packet_lst are to be used by the encoder/decoder to read/write from/into
     the binary format.
+    TODO: write utility functions to convert between ref_packet/ref_packet_lst types and similarly for
+    snap_packet.
 *)
+
 
 type ref_packet = {
     rp_header : packet_header;
@@ -193,16 +187,12 @@ type snap_packet_lst = {
     Refresh *)
 type packet = SnapshotPacket of snap_packet | IncRefreshPacket of ref_packet | NoPacket;;
 
-type packet_lst = SnapshotPacketLst of snap_packet_lst | IncRefreshPacketLst of ref_packet_lst;;
-
 (** These types represent the internal change book-keeping *)
 type book_change_type =
     | Book_Changed_to_InRecovery    (* Changed status from Normal to InRecovery *)
     | Book_Changed_to_Normal        (* Changed stauts from InRecovery to Normal *)
     | Book_Proc_Normal_Update       (* Processed a packet in Normal mode, stayed in Normal *)
     | Book_Proc_Cache_Add           (* Processed a packet in InRecovery mode, stayed in InRecovery *)
-    | Book_Proc_NotRelevant         (* Processed a packet that's not relevant (neither the current security nor the reference one) *)
-    | Book_Proc_Snap                (* *)
 ;;
 
 (** Generic book type (used for all three types of books) *)
@@ -351,25 +341,17 @@ type feed_state = {
     cur_time : int;
 };;
 
-let correct_level (msg, depth : ref_message * int) = 
-    0 <= msg.rm_price_level && msg.rm_price_level <= depth 
-;;
-
 (*  Check whether the cache is complete: that we have all of the packets
     in the sequence starting with the last processed *)
-let rec check_list (msgs, last_idx, book_depth : ref_message list * int * int) =
+let rec check_list (msgs, last_idx : ref_message list * int) =
     match msgs with
     | [] -> true
-    | x::xs ->
-        if (x.rm_rep_seq_num = last_idx + 1) && correct_level(x, book_depth) then 
-            check_list (xs, last_idx + 1, book_depth)
-        else 
-            false
+    | x::xs -> if x.rm_rep_seq_num = last_idx + 1 then check_list (xs, last_idx + 1) else false
 ;;
 
 (* Check to see whether the cache we're maintaining is correct since the valid sequence number *)
-let is_cache_valid_since_seq_num (cache, last_processed_seq, book_depth : ref_message list * int * int) =
-    cache <> [] && check_list (cache, last_processed_seq, book_depth)
+let is_cache_valid_since_seq_num (cache, last_processed_seq : ref_message list * int) =
+    cache <> [] && check_list (cache, last_processed_seq)
 ;;
 
 (** ************************************************************** *)
@@ -416,6 +398,16 @@ let rec trim_side ( ords, num_levels, curr_level : order_level list * int * int)
         []
 ;;
 
+(** Clean multi-depth book *)
+let clean_multi_depth_book (books : books) =
+    let book' = sort_book (books.multi) in
+    let buys' = trim_side (book'.buys, books.book_depth, 1) in
+    let sells' = trim_side (book'.sells, books.book_depth, 1) in
+    { books with multi = book';
+                 implied = sort_book (books.implied);
+                 combined = {buys = buys'; sells = sells'} }
+;;
+
 (** Remove duplicates from the list of orders (used in conslidating the book) *)
 let rec add_levels (orders : order_level list) =
     match orders with
@@ -449,6 +441,7 @@ let process_ref_ch ( ch : ref_channel_state ) =
     r_proc_packets = List.hd ch.r_unproc_packets :: ch.r_proc_packets;
     r_unproc_packets = List.tl ch.r_unproc_packets;
 };;
+
 
 (** *************************************************************** *)
 (** Functions used for book modifications                           *)
@@ -561,16 +554,6 @@ let is_security_liquid (ch : channels)=
     ch.cycle_hist_a.liq = Liquid || ch.cycle_hist_b.liq = Liquid
 ;;
 
-let recalc_combined (books : books) =
-    let buys' = add_levels (sort_side (books.multi.buys @ books.implied.buys, BUY)) in
-    let sells' = add_levels (sort_side (books.multi.sells @ books.implied.sells, SELL)) in
-    let combined = {
-        buys = trim_side (buys', books.book_depth, 1);
-        sells = trim_side (sells', books.book_depth, 1);
-    } in
-    { books with combined = combined }
-;;
-
 (** *************************************************************** *)
 (** Update cycle history for this channel                           *)
 (** *************************************************************** *)
@@ -648,7 +631,7 @@ let new_snapshot_better (new_snap, old_snap : snapshot * snapshot option) =
     match old_snap with
         | None -> true
         | Some s ->
-            new_snap.snap_seq_num >= s.snap_seq_num
+            new_snap.snap_seq_num <= s.snap_seq_num
 ;;
 
 (** Change status of the books *)
@@ -661,16 +644,6 @@ let reset_books ( b : books ) =
     b_status = Empty;
 };;
 
-(** Clean multi-depth book *)
-let clean_multi_depth_book (books : books) =
-    (* let book' = sort_book (books.multi) in *)
-    let buys' = trim_side (books.multi.buys, books.book_depth, 1) in
-    let sells' = trim_side (books.multi.sells, books.book_depth, 1) in
-    {
-        books with multi = { buys = buys'; sells = sells' }
-    } 
-;;
-
 (* *************************************************************** *)
 (*  Note that here we're assuming that the message is in sequence, *)
 (*  hence we will not check sequence numbers here                  *)
@@ -679,12 +652,15 @@ let process_md_update_action (books, msg : books * ref_message) =
     let m = books.multi in
     let i = books.implied in
 
-    match msg.rm_msg_type with
+    if msg.rm_entry_type = V_MDEntryType_EmptyBook then
+        reset_books (books)
+
+    else match msg.rm_msg_type with
     | V_MDUpdateAction_New -> (
         match msg.rm_entry_type with
-        | V_MDEntryType_Bid -> 
+        | V_MDEntryType_Bid ->
             let buys' = bk_new (m.buys, BUY, msg.rm_price_level, msg.rm_entry_size,
-                            msg.rm_entry_px, Some msg.rm_num_orders) in
+                                msg.rm_entry_px, Some msg.rm_num_orders) in
             let books' = { books with multi = { m with buys = buys'; }} in
             clean_multi_depth_book (books')
         | V_MDEntryType_Offer ->
@@ -710,19 +686,19 @@ let process_md_update_action (books, msg : books * ref_message) =
         | V_MDEntryType_Bid ->
            let buys' = bk_change (m.buys, BUY, msg.rm_price_level, msg.rm_entry_size,
                                   msg.rm_entry_px, Some msg.rm_num_orders)
-           in { books with multi = { m with buys = buys' }}
+           in { books with multi = sort_book { m with buys = buys' }}
         | V_MDEntryType_Offer ->
            let sells' = bk_change (m.sells, SELL, msg.rm_price_level, msg.rm_entry_size,
                                    msg.rm_entry_px, Some msg.rm_num_orders)
-           in { books with multi = { m with sells = sells' }}
+           in { books with multi = sort_book { m with sells = sells' }}
         | V_MDEntryType_ImpliedBid ->
            let buys' = bk_change (i.buys, BUY, msg.rm_price_level, msg.rm_entry_size,
                                   msg.rm_entry_px, None)
-           in { books with implied = { i with buys = buys' }}
+           in { books with implied = sort_book { i with buys = buys' }}
         | V_MDEntryType_ImpliedOffer ->
            let sells' = bk_change (i.sells, SELL, msg.rm_price_level, msg.rm_entry_size,
                                    msg.rm_entry_px, None)
-           in { books with implied = { i with sells = sells' }}
+           in { books with implied = sort_book { i with sells = sells' }}
         | _ -> books
     )
 
@@ -732,26 +708,26 @@ let process_md_update_action (books, msg : books * ref_message) =
         match msg.rm_entry_type with
         | V_MDEntryType_Bid ->
             let buys' = bk_delete (m.buys, msg.rm_price_level)
-            in { books with multi = { m with buys = adjust_size (buys', books.book_depth) }}
+            in { books with multi = sort_book { m with buys = adjust_size (buys', books.book_depth) }}
         | V_MDEntryType_Offer ->
             let sells' = bk_delete (m.sells, msg.rm_price_level)
-            in { books with multi = { m with sells = adjust_size( sells', books.book_depth) }}
+            in { books with multi = sort_book { m with sells = adjust_size( sells', books.book_depth) }}
         | V_MDEntryType_ImpliedBid ->
             let buys' = bk_delete (i.buys, msg.rm_price_level)
-            in { books with implied = { i with buys = adjust_size (buys', books.book_depth) }}
+            in { books with implied = sort_book { i with buys = adjust_size (buys', books.book_depth) }}
         | V_MDEntryType_ImpliedOffer ->
             let sells' = bk_delete (i.sells, msg.rm_price_level)
-            in { books with implied = { i with sells = adjust_size( sells', books.book_depth) }}
+            in { books with implied = sort_book { i with sells = adjust_size( sells', books.book_depth) }}
         | _ -> books
     )
 
     | V_MDUpdateAction_DeleteThru -> (
         match msg.rm_entry_type with
         (** We're getting rid of all of the orders on one side here *)
-        | V_MDEntryType_Bid -> { books with multi = { m with buys = []; }}
-        | V_MDEntryType_Offer -> { books with multi = { m with sells = []; }}
-        | V_MDEntryType_ImpliedBid -> { books with implied = { i with buys = []; }}
-        | V_MDEntryType_ImpliedOffer -> { books with implied = { i with sells = []; }}
+        | V_MDEntryType_Bid -> { books with multi = sort_book { m with buys = []; }}
+        | V_MDEntryType_Offer -> { books with multi = sort_book { m with sells = []; }}
+        | V_MDEntryType_ImpliedBid -> { books with implied = sort_book { i with buys = []; }}
+        | V_MDEntryType_ImpliedOffer -> { books with implied = sort_book { i with sells = []; }}
         | _ -> books
     )
 
@@ -760,16 +736,16 @@ let process_md_update_action (books, msg : books * ref_message) =
         match msg.rm_entry_type with
         | V_MDEntryType_Bid ->
             let buys' = bk_delete_from (m.buys, 1, msg.rm_price_level) in
-            { books with multi = { m with buys = adjust_size (buys', books.book_depth); }}
+            { books with multi = sort_book { m with buys = adjust_size (buys', books.book_depth); }}
         | V_MDEntryType_Offer ->
             let sells' = bk_delete_from (m.sells, 1, msg.rm_price_level) in
-            { books with multi = { m with sells = adjust_size (sells', books.book_depth); }}
+            { books with multi = sort_book { m with sells = adjust_size (sells', books.book_depth); }}
         | V_MDEntryType_ImpliedBid ->
             let buys' = bk_delete_from (i.buys, 1, msg.rm_price_level) in
-            { books with implied = { i with buys = adjust_size (buys', books.book_depth); }}
+            { books with implied = sort_book { i with buys = adjust_size (buys', books.book_depth); }}
         | V_MDEntryType_ImpliedOffer ->
             let sells' = bk_delete_from (i.sells, 1, msg.rm_price_level) in
-            { books with implied = { i with sells = adjust_size (sells', books.book_depth); }}
+            { books with implied = sort_book { i with sells = adjust_size (sells', books.book_depth); }}
         | _ -> books
     )
 
@@ -777,6 +753,7 @@ let process_md_update_action (books, msg : books * ref_message) =
 ;;
 (** *************************************************************** *)
 
+(** apply_cache *)
 let rec apply_update_packets (books, packets : books * ref_message list) =
     match packets with
     | [] -> books
@@ -788,58 +765,34 @@ let apply_cache (books, channels : books * channels) =
     apply_update_packets (books, channels.cache)
 ;;
 
-(** Add an internal state change message to the list of the feed state *)
-let add_int_message (s, ch_type : feed_state * book_change_type) =
-{ s with internal_changes = s.internal_changes @ [mk_int_msg (s, ch_type)] }
-;;
-
 (**
     Check whether the feed can now fully recover.
     There are two cases:
-
     -- The cache is now valid -> it has the full sequence of packets since the
         last processed one
-
     -- We have a snapshot and a full sequence of packets since the snapshot.
-
     Alternatively, we have an illiquid security, hence we need to use the
-    incremental refresh channels only.
-*)
+    incremental refresh channels only. *)
 let attempt_recovery (s : feed_state) =
     let books = s.books in
     let channels = s.channels in
     if channels.cycle_hist_a.liq = Illiquid && channels.cycle_hist_b.liq = Illiquid then
         let books' = apply_cache (books, channels) in
-        let s' = { s with feed_status = Normal; books = books'; } in 
-        add_int_message (s', Book_Changed_to_Normal)
+        { s with feed_status = Normal;
+            books = books'; }
     else (
-        if is_cache_valid_since_seq_num (channels.cache, channels.last_seq_processed, s.books.book_depth) then (
+        if is_cache_valid_since_seq_num (channels.cache, channels.last_seq_processed) then (
             let books' = apply_cache (books, channels) in
-            let books'' = recalc_combined (books') in 
-            let s' = { s with
-                        feed_status = Normal;
-                        books = books'';
-                        channels = { 
-                            channels with cache = [] 
-                        }
-                    } in 
-            add_int_message (s', Book_Changed_to_Normal)
+            { s with feed_status = Normal;
+                books = books'; }
         )
-
         else match channels.last_snapshot with
             | None -> s
             | Some snap ->
-                if is_cache_valid_since_seq_num (channels.cache, snap.snap_seq_num, s.books.book_depth) then
+                if is_cache_valid_since_seq_num (channels.cache, snap.snap_seq_num) then
                     let books' = apply_snapshot (books, snap) in
                     let books'' = apply_cache (books', channels) in
-                    let books''' = recalc_combined (books'') in 
-                    let s' =    { s 
-                                with books = books''';
-                                    feed_status = Normal;
-                                    channels = { 
-                                        channels with cache = [] 
-                                }} in 
-                    add_int_message (s', Book_Changed_to_Normal)
+                    { s with books = books''; feed_status = Normal; }
                 else
                     s
         )
@@ -860,6 +813,12 @@ let clean_ref_ch (ch : ref_channel_state) =
 }
 ;;
 
+
+(** check to make sure we're processing the next one *)
+let correct_seq (channels, msg : channels * ref_message) =
+    msg.rm_rep_seq_num <> (channels.last_seq_processed + 1)
+;;
+
 (** Data structure used in returning the right packets *)
 type msg_source =
 {
@@ -872,16 +831,16 @@ type msg_source =
 let get_snap_channel (channels, ct : channels * channel_type) =
     match ct with
     | Ch_Snap_A -> channels.snap_a
-    | Ch_Snap_B -> channels.snap_b
-    | _ -> channels.snap_b
+    | _         -> channels.snap_b
+
 ;;
 
 let get_ref_channel (channels, ct : channels * channel_type) =
     match ct with
     | Ch_Ref_A  -> channels.ref_a
-    | Ch_Ref_B  -> channels.ref_b
-    | _ -> channels.ref_b
+    | _         -> channels.ref_b
 ;;
+
 
 (** set_channel_snap *)
 let set_snap_channel (chs, ch, ch_t : channels * snap_channel_state * channel_type) =
@@ -968,45 +927,19 @@ let process_rec_snapshot (s, snap_p, src : feed_state * snap_packet * channel_ty
         channels = { s.channels with
             cycle_hist_a = if src = Ch_Snap_A then cycle_hist' else s.channels.cycle_hist_a;
             cycle_hist_b = if src = Ch_Snap_B then cycle_hist' else s.channels.cycle_hist_b;
-            last_seq_processed = snap_p.sp_snap.sm_last_msg_seq_num_processed;
             last_snapshot = new_snap;
         }
     }
 ;;
 
-(** Need to add to the cache in the right order *)
-let rec add_to_cache (msg, cache : ref_message * ref_message list) = 
-    match cache with 
-    | [] -> [msg]    
-    | [x] ->
-        if x.rm_rep_seq_num < msg.rm_rep_seq_num then
-            cache @ [msg]
-        else if x.rm_rep_seq_num = msg.rm_rep_seq_num then 
-            cache
-        else
-            msg::cache
-
-    | x::y::xs ->
-        if x.rm_rep_seq_num = msg.rm_rep_seq_num || y.rm_rep_seq_num = msg.rm_rep_seq_num then 
-            cache
-        else if x.rm_rep_seq_num > msg.rm_rep_seq_num then
-            msg :: cache
-        else if  x.rm_rep_seq_num < msg.rm_rep_seq_num && msg.rm_rep_seq_num < y.rm_rep_seq_num then
-            x::msg::y::xs
-        else 
-            x :: add_to_cache (msg, y::xs)
-;;
-
-(** Auxillary check used for proofs *)
-let rec is_cache_sorted (cache : ref_message list) =
-    match cache with 
-    | [] -> true
-    | [x] -> true
-    | x::y::xs ->
-        if x.rm_rep_seq_num >= y.rm_rep_seq_num then
-            false
-        else
-            is_cache_sorted(y::xs)
+(** Process incremental refresh packet when in recovery *)
+let process_rec_inc (s, ref_p : feed_state * ref_packet) = 
+    (** If we're in recovery mode, then we need to add the message
+        to the cache. We will process it if we consider cache complete. *)
+    let cache' = s.channels.cache @ [ref_p.rp_msg] in
+    { s with
+        channels = { s.channels with cache = cache'};
+    }
 ;;
 
 let process_msg_recovery (s : feed_state) =
@@ -1015,25 +948,19 @@ let process_msg_recovery (s : feed_state) =
     let src = next_packet.source in
 
     match next_packet.p with
-    | NoPacket -> s
-        (* If there's nothing to process, then we simply return the current state *)
+    | NoPacket -> s (* If there's nothing to process, then we simply return the current state *)
 
-    | SnapshotPacket sp ->        
+    | SnapshotPacket sp ->
+        
         let this_ch = process_snap_ch ( get_snap_channel (channels, src)) in
         let channels' = set_snap_channel (channels, this_ch, src) in
-        let s' = process_rec_snapshot ({ s with channels = channels' }, sp, src) in 
-        add_int_message(s', Book_Proc_Snap)
+        process_rec_snapshot ({ s with channels = channels' }, sp, src)
 
     | IncRefreshPacket rp ->
         let this_ch = process_ref_ch ( get_ref_channel (channels, src)) in
         let channels' = set_ref_channel (channels, this_ch, src) in
-        let s' = { s with channels = channels' } in 
-        if rp.rp_msg.rm_security_id <> s.sec_id then
-            add_int_message (s', Book_Proc_NotRelevant)
-        else
-            let cache' = add_to_cache (rp.rp_msg , s'.channels.cache) in
-            let s'' = { s' with channels = { s'.channels with cache = cache'} } in 
-            add_int_message (s'', Book_Proc_Cache_Add)
+
+        process_rec_inc ({ s with channels = channels' }, rp)
 ;;
 
 (** This will indicate that we need to reset the book and change to InRecovery *)
@@ -1049,60 +976,15 @@ let msg_correct_seq (msg, ch) =
     msg.rm_rep_seq_num = (ch.last_seq_processed + 1) 
 ;;
 
-(** Merging a single side of the book *)
-
-(**
-let rec merge_side (ords1, ords2 : order_level list * order_level list) = 
-    match ords1, ords2 with 
-    | x::xs, y::ys ->
-        let new_level = ( 
-            match x, y with 
-            | Level o1, Level o2 -> 
-                Level {
-                    side = o1.side;
-                    qty = o1.qty + o2.qty;
-                    price = o1.price;
-                    num_orders = None;
-                }
-            | Level o1, NoLevel -> 
-                Level {
-                    side = o1.side;
-                    num_orders = None;
-                }
-            | NoLevel, Level o2 ->
-                Level {
-                    side = o1.side;
-                    price = o1.price;
-                    num_orders = None;
-                }
-            | NoLevel, NoLevel -> NoLevel
-        ) in 
-        new_level :: merge_side (xs, ys)
-    | _, _ -> []
-;;
-*)
-
-let is_msg_relevant (msg, s : ref_message * feed_state) = 
-    if msg.rm_security_id <> s.sec_id || 
-        msg_behind (msg, s.channels) || 
-        not (correct_level (msg, s.books.book_depth))  then false
-    else true
-;;
-
 (** *************************************************************** *)
 (** Process the next packet when book state is NORMAL               *)
 (** *************************************************************** *)
-(* 1. Get the earliest packet from either of the inc refresh *)
-(*      channels and process it *)
-(* 2. Since we're not listening to the snapshot channel, then *)
-(*      let's discard everything there *)
-(* 3. if we're still in the Normal state (after processing the message) *)
 let process_msg_normal (s : feed_state) =
     let channels = s.channels in
     let books = s.books in
 
     (** Since we're in a normal mode, we will simply move all of the
-        packets that we've received here into processed                 *)
+        packets that we've received here into processed  *)
     let channels' = {
         channels with
             snap_a = clean_snap_ch (channels.snap_a);
@@ -1112,50 +994,63 @@ let process_msg_normal (s : feed_state) =
     let src = next_packet.source in
 
     match next_packet.p with
-        | NoPacket ->  { s with channels = channels' }
+        | NoPacket -> {s with channels = channels' }
 
-        | SnapshotPacket _ -> add_int_message ({s with channels = channels' }, Book_Proc_NotRelevant)
+        (* We shouldn't be processing these here *)
+        | SnapshotPacket d -> {s with channels = channels' } 
 
         | IncRefreshPacket ref_packet ->
+
             let msg = ref_packet.rp_msg in
             let this_ch = process_ref_ch (get_ref_channel (channels', src)) in
 
             (** if it's the wrong security, just skip it *)
-            if not (is_msg_relevant (msg, s)) then 
-                let s' = { s with channels = set_ref_channel (channels', this_ch, src); } in 
-                add_int_message (s', Book_Proc_NotRelevant)
+            if msg.rm_security_id <> s.sec_id then
+                { s with channels = set_ref_channel (channels', this_ch, src); }
 
-            else if msg_correct_seq (msg, channels') then (
+            else if msg_behind (msg, channels') then
+                (** We have already processed this somewhere, so need to discard this message *)
+                { s with channels = set_ref_channel (channels', this_ch, src); }
+            
+            else if msg_correct_seq (msg, channels') then
                 (** This is the message that we need to process next *)
                 if is_msg_reset (msg) then
-                    let s' = {
-                        s with books = reset_books (s.books);
-                            feed_status = InRecovery; 
-                            channels = { s.channels with last_seq_processed = msg.rm_rep_seq_num} 
-                    } in 
-                    add_int_message (s', Book_Changed_to_InRecovery)
-                else 
+                    { s with books = reset_books (s.books); feed_status = InRecovery; }
+                
+                else (
                     let books' = process_md_update_action (books, msg) in
-                    let books'' = recalc_combined (books') in
                     let channels' =  set_ref_channel (channels', this_ch, src) in
-                    let s' = 
-                    { 
-                        s with
-                        books = books'';
-                        channels = { channels' with last_seq_processed = msg.rm_rep_seq_num };
-                    } 
-                in
-                add_int_message (s', Book_Proc_Normal_Update)
+                    { s with
+                        books = books';
+                        channels = { channels' with last_seq_processed = msg.rm_rep_seq_num };}
             )
             else
                 (** We've detected a gap in message sequences *)
                 let channels'' = { channels' with cache = channels'.cache @ [ msg ]; } in
-                let s' = { s with
+                { s with
                     feed_status = InRecovery;
                     books = { s.books with b_status = Empty };
                     channels = set_ref_channel (channels'', this_ch, src);
-                } in 
-                add_int_message (s', Book_Changed_to_InRecovery)
+                }
+;;
+
+(** *************************************************************** *)
+(*  Recalculate the combined book based on the implied and the      *)
+(*  multi-depth one                                                 *)
+(** *************************************************************** *)
+let recalc_combined (books : books) =
+    let buys' = add_levels (sort_side (books.multi.buys @ books.implied.buys, BUY)) in
+    let sells' = add_levels (sort_side (books.multi.sells @ books.implied.sells, SELL)) in
+    let combined = {
+        buys = trim_side (buys', books.book_depth, 1);
+        sells = trim_side (sells', books.book_depth, 1);
+    } in
+    { books with combined = combined }
+;;
+
+(** Add an internal state change message to the list of the feed state *)
+let add_int_message (s, ch_type : feed_state * book_change_type) =
+{ s with internal_changes = s.internal_changes @ [mk_int_msg (s, ch_type)] }
 ;;
 
 (*****************************************************************  *)
@@ -1167,9 +1062,32 @@ let one_step (s : feed_state) =
         (** If we're in inconsistent state, then we need to listen to the recovery
             messages as well and attemp to recover the book (if we're liquid) *)
         let s' = process_msg_recovery (s) in
-        attempt_recovery (s')
+        let s'' = attempt_recovery (s') in
 
-    | Normal -> process_msg_normal (s)
+        (* If we've managed to get back to Normal state, then need to flag the
+            transition *)
+        if s''.feed_status = Normal then
+            add_int_message (s'', Book_Changed_to_Normal)
+        else if s''.channels.cache <> s.channels.cache then 
+            add_int_message (s'', Book_Proc_Cache_Add)
+        else
+            s'
+
+    | Normal ->
+        (* 1. Get the earliest packet from either of the inc refresh *)
+        (*      channels and process it *)
+        (* 2. Since we're not listening to the snapshot channel, then *)
+        (*      let's discard everything there *)
+        (* 3. if we're still in the Normal state (after processing the message) *)
+        let s' = process_msg_normal (s) in
+        if s' <> s then (
+            if s'.feed_status = Normal then
+                let books' = recalc_combined (s'.books) in
+                add_int_message ({s' with books = books'}, Book_Proc_Normal_Update)
+            else
+                add_int_message (s', Book_Changed_to_InRecovery)
+        )
+        else s'
 ;;
 
 (** *************************************************************** *)
