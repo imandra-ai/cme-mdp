@@ -8,6 +8,18 @@
 :adts
 :p (in-theory (enable IML-ADT-EXECUTABLE-COUNTERPARTS-THEORY))
 
+:!disable
+ add_to_cache
+ apply_update_packets
+ delete_level
+ insert_level
+ insert_order
+ order_higher_ranked
+ update_cycle_hist
+ is_cache_sorted
+ recalc_combined  
+;;
+
 let large_call (s, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8) =
     let s' = { s with
            books = { book_depth = 5; multi = {buys = []; sells = []};
