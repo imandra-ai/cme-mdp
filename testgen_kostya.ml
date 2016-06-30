@@ -31,6 +31,7 @@ let large_call (s, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8) =
  let s' = one_step(s') in 
  one_step(s')
 ;;
+:testgen large_call with_printer cme_test_printer_8
 
 let large_call_3 (s, msg1, msg2, msg3) =
     let s' = { s with

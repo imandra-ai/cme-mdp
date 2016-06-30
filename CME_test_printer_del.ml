@@ -23,7 +23,6 @@ open CME;;
 open CME_test_helper;;
 open CME_printers;;
 open CME_json;;
-open CME_to_json_simple;;
 
 type test_file_data =
   {
@@ -54,7 +53,7 @@ let addresses = {
 
 let print_incoming_msg_json (s : feed_state) = 
 	let next_packets = merge_messages (s.channels) in 
-	string_of_packets next_packets
+	packets_to_string next_packets
 ;;
 
 let is_empty ( ch : channels ) =
@@ -102,11 +101,11 @@ let cme_test_printer ( s : feed_state ) =
 	let setup_msgs = book_to_messages(s) in 
 	let s_msgs = explode_ref_packets (setup_msgs, []) in
 
-	let str_incoming_data_a_ref = string_of_packets (create_packets_ref (s_msgs @ s.channels.ref_a.r_unproc_packets)) in 
-	let str_incoming_data_b_ref = string_of_packets (create_packets_ref (s.channels.ref_b.r_unproc_packets)) in 
+	let str_incoming_data_a_ref = packets_to_string (create_packets_ref (s_msgs @ s.channels.ref_a.r_unproc_packets)) in 
+	let str_incoming_data_b_ref = packets_to_string (create_packets_ref (s.channels.ref_b.r_unproc_packets)) in 
 
-	let str_incoming_data_a_snap = string_of_packets (create_packets_snap (s.channels.snap_a.s_unproc_packets)) in 
-	let str_incoming_data_b_snap = string_of_packets (create_packets_snap (s.channels.snap_b.s_unproc_packets)) in 
+	let str_incoming_data_a_snap = packets_to_string (create_packets_snap (s.channels.snap_a.s_unproc_packets)) in 
+	let str_incoming_data_b_snap = packets_to_string (create_packets_snap (s.channels.snap_b.s_unproc_packets)) in 
 
 	let str_state_changes = int_messages_to_str_format (gen_int_messages (s)) in
 	[ 
