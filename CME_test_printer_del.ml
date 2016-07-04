@@ -142,17 +142,42 @@ let cme_test_printer ( s : feed_state ) =
 ;;
 
 (** The wrapper to take into account the messages *)
-let cme_test_printer_8 (s, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8) = 
-	let s' = {
-			s with 
-      		channels = { 
-        		s.channels with ref_a = { s.channels.ref_a with r_unproc_packets = [msg1; msg2; msg3] };
-                        ref_b = { s.channels.ref_b with r_unproc_packets = [msg4; msg5] };
-                        snap_a = { s.channels.snap_a with s_unproc_packets = [msg6; msg7; msg8] };
-                        snap_b = { s.channels.snap_b with s_unproc_packets = [] };
-      		}
-  		} in 
-	cme_test_printer (s')
+let cme_test_printer_8 ( msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8) = 
+	let s = { 
+        books = { 
+            book_depth = 5; multi = {buys = []; sells = []};
+            implied = {buys = []; sells = []};
+            combined = {buys = []; sells = []};
+            b_status = Publishable; 
+        };
+        channels = {  
+            ref_a  = { r_unproc_packets = [msg1; msg2; msg3]; r_proc_packets=[] };
+            ref_b  = { r_unproc_packets = [msg4; msg5];       r_proc_packets=[] };
+            snap_a = { s_unproc_packets = [msg6; msg7; msg8]; s_proc_packets=[] };
+            snap_b = { s_unproc_packets = []; 		      s_proc_packets=[] };
+            last_seq_processed = 0;
+            last_snapshot = None;
+            cache = [];
+	    cycle_hist_a = { reference_sec_id = 10;
+                             self_sec_id = 123;
+                             ref_sec_snap_received = false;
+                             liq = Liquid;
+                            };
+            cycle_hist_b = { reference_sec_id = 10;
+                             self_sec_id = 123;
+                             ref_sec_snap_received = false;
+                             liq = Liquid;
+                           }; 
+	    };
+       feed_status = Normal;
+       sec_type = FUTURES;
+       sec_id   = 123;
+       internal_changes = [];
+       cur_time = 1;
+       new_packet = true;
+       last_packet_header = None;
+    } in
+	cme_test_printer (s)
 ;;
 
 
