@@ -1026,7 +1026,7 @@ let process_msg_recovery (s : feed_state) =
     let next_packet = get_next_packet (s.channels) in
     let src = next_packet.source in
     let s' = { s with
-        new_packet = (s.last_packet_header = get_packet_header next_packet.p);
+        new_packet = (s.last_packet_header <>  get_packet_header next_packet.p);
         last_packet_header = get_packet_header next_packet.p
     } in
     match next_packet.p with
@@ -1126,7 +1126,7 @@ let process_msg_normal (s : feed_state) =
     let next_packet = get_next_packet (channels') in
     let src = next_packet.source in
     let s' = { s with
-        new_packet = (s.last_packet_header = get_packet_header next_packet.p);
+        new_packet = (s.last_packet_header <> get_packet_header next_packet.p);
         last_packet_header = get_packet_header next_packet.p
     } in
     match next_packet.p with
