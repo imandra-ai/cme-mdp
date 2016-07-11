@@ -18,7 +18,7 @@ let packet_to_json (packet : packet) : Kojson.json  =
         ("SendingTime",    Int h.ph_sending_time)
         ] in
     let convert_inc  p = Assoc [
-        ( "SequrityID", Int p.rm_security_id );
+        ( "SecurityID", Int p.rm_security_id );
         ( "RepSeqNum",  Int p.rm_rep_seq_num );
         ( "PriceLevel", Int p.rm_price_level );
         ( "EntrySize",  Int p.rm_entry_size  );
