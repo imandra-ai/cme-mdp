@@ -1,10 +1,11 @@
-:load CME.ml
+:load Model/CME_Types.ml
+:load Model/CME.ml
 
-:load_ocaml CME_printers.ml
-:load_ocaml CME_test_helper.ml
-:load_ocaml kojson.ml
-:load_ocaml CME_json.ml
-:load_ocaml CME_test_printer_del.ml
+:load_ocaml Model/CME_test_helper.ml
+:load_ocaml Printers/CME_printers.ml
+:load_ocaml Printers/kojson.ml
+:load_ocaml Printers/CME_json.ml
+:load_ocaml Printers/CME_test_printer_del.ml
 
 :adts
 :p (in-theory (enable IML-ADT-EXECUTABLE-COUNTERPARTS-THEORY))
@@ -22,27 +23,12 @@
 ;;
 
  let good_levels ( msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8) = 
-msg1.rp_msg.rm_price_level > 0 &&
+    msg1.rp_msg.rm_price_level > 0  && msg1.rp_msg.rm_price_level <= 5 &&
+    msg2.rp_msg.rm_price_level > 0  && msg2.rp_msg.rm_price_level <= 5 && 
+    msg3.rp_msg.rm_price_level > 0  && msg3.rp_msg.rm_price_level <= 5 && 
+    msg4.rp_msg.rm_price_level > 0  && msg4.rp_msg.rm_price_level <= 5 && 
+    msg5.rp_msg.rm_price_level > 0  && msg5.rp_msg.rm_price_level <= 5 ;;
 
-    msg1.rp_msg.rm_price_level <= 5 &&
-
-    msg2.rp_msg.rm_price_level > 0  && 
-
-    msg2.rp_msg.rm_price_level <= 5 && 
-
-    msg3.rp_msg.rm_price_level <= 5 && 
-
-    msg3.rp_msg.rm_price_level > 0  && 
-
-    msg4.rp_msg.rm_price_level <= 5 && 
-
-    msg4.rp_msg.rm_price_level > 0  &&
-
-    msg5.rp_msg.rm_price_level <= 5 && 
-
-    msg5.rp_msg.rm_price_level > 0
-
-;;
 
 let large_call (msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8) =
     let s = { 

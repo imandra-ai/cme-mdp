@@ -57,7 +57,7 @@ let packet_to_json (packet : packet) : Kojson.json  =
     let convert_order_level = function
         | NoLevel -> Assoc []
         | Level o -> Assoc [
-            ("Side",      match o.side with BUY -> String "BUY" | SELL -> String "SELL");
+            ("Side",      match o.side with OrdBuy -> String "BUY" | OrdSell -> String "SELL");
             ("Quantity", Int o.qty   );
             ("Price",    Int o.price  );
             ("NumOrders", match o.num_orders with None -> Assoc [] | Some n -> Int n )
@@ -79,7 +79,9 @@ let packet_to_json (packet : packet) : Kojson.json  =
         | IncRefreshPacket p -> Assoc [ ( "IncRefreshPacket" , 
             Assoc [ ( "Header" , convert_header p.rp_header  );
                      ( "Message", convert_inc p.rp_msg ) ] 
-            ) ];;
+            ) ]
+        | NoPacket -> Assoc []
+;;
         
 
 let packets_to_json (packets : packet list) : Kojson.json  =

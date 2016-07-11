@@ -145,10 +145,10 @@ let rec gen_side_orders (side_orders, curr_idx, seq_num, is_implied, s : order_l
         | Level l -> 
         let ent_type = 
             match l.side, is_implied with 
-            | BUY, false    -> V_MDEntryType_Bid
-            | BUY, true     -> V_MDEntryType_ImpliedBid
-            | SELL, false   -> V_MDEntryType_Offer
-            | SELL, true    -> V_MDEntryType_ImpliedOffer in 
+            | OrdBuy, false    -> V_MDEntryType_Bid
+            | OrdBuy, true     -> V_MDEntryType_ImpliedBid
+            | OrdSell, false   -> V_MDEntryType_Offer
+            | OrdSell, true    -> V_MDEntryType_ImpliedOffer in 
         {  
             rm_security_id  = s.sec_id;
             rm_rep_seq_num  = seq_num + 1;

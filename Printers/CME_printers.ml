@@ -155,7 +155,8 @@ let internal_type_to_string it =
     | Book_Changed_to_Normal     -> "Book_Changed_to_Normal"
     | Book_Proc_Normal_Update    -> "Book_Proc_Normal_Update"
     | Book_Proc_Cache_Add        -> "Book_Proc_Cache_Add"
-(*    | Book_Proc_NotRelevant      -> "Book_Proc_NotRelevant" *)
+    | Book_Proc_NotRelevant      -> "Book_Proc_NotRelevant" 
+    | Book_Proc_Snap             -> "Book_Proc_Snap"
 ;;
 
 
@@ -203,7 +204,7 @@ let ord_level_to_str (ol : order_level) =
     | NoLevel -> "Empty"
     | Level d ->
         Printf.sprintf "[side=%s;price=%.2f;qty=%d;num_orders=%s]"
-        (if d.side = BUY then "Buy" else "Sell")
+        (if d.side = OrdBuy then "Buy" else "Sell")
         (dec_to_float (d.price))
         d.qty
         (match d.num_orders with
@@ -290,6 +291,7 @@ let rec int_messages_to_str_format (msgs : internal_msg list) =
             then h1::(filter_packets (h2::tl)) 
             else filter_packets (h2::tl)
         | h1::[] ->  h1::[]
+        | [] -> []
         in
     msgs |> filter_packets 
          |> List.mapi books_to_str
