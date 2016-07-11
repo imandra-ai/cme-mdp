@@ -170,7 +170,7 @@ let cme_test_printer_8 ( msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8) =
                            }; 
 	    };
        feed_status = Normal;
-       sec_type = FUTURES;
+       sec_type = SecA;
        sec_id   = 123;
        internal_changes = [];
        cur_time = 1;

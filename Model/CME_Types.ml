@@ -18,11 +18,7 @@ type order_info = {
 (** *************************************************************** *)
 (** Define the types that we support                                *)
 (** *************************************************************** *)
-type sec_type = 
-      FUTURES 
-    | SPREAD 
-    | OPTION 
-;;
+type sec_type = SecA | SecB ;;
 type book_type = 
     | Book_Type_Implied 
     | Book_Type_Multi 

@@ -369,10 +369,10 @@ let rec insert_order (a, s, orders : order_level * order_side * order_level list
 ;;
 
 (** Sort a single side of the book *)
-let rec sort_side (orders, order_side : order_level list * order_side) =
+let rec sort_side (orders, side : order_level list * order_side) =
     match orders with
     | [] -> []
-    | x::xs -> insert_order (x, order_side, sort_side (xs, side))
+    | x::xs -> insert_order (x, side, sort_side (xs, side))
 ;;
 
 (** Top-level sorting function *)
@@ -487,7 +487,7 @@ let rec ch_inplace (orders, curr_idx, target_idx, new_order_info : order_level l
 ;;
 
 (** Change an existing order level *)
-let bk_change (orders, side, price_level, entry_size, entry_price, num_orders : order_level list * order_side * int * int * int * opt_int_type) =
+let bk_change (orders, side, price_level, entry_size, entry_price, num_orders : order_level list * order_side * int * int * int * int option) =
     let new_order_info = Level {
         side = side;
         qty = entry_size;
@@ -508,7 +508,7 @@ let rec insert_level ( orders, new_order, curr_idx, target_idx : order_level lis
 ;;
 
 (** Add a new level to the book *)
-let bk_new (orders, side, price_level, entry_size, entry_price, num_orders : order_level list * order_side * int * int * int * opt_int_type) =
+let bk_new (orders, side, price_level, entry_size, entry_price, num_orders : order_level list * order_side * int * int * int * int option) =
     let new_order_info = Level {
         side = side;
         qty = entry_size;

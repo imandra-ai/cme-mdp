@@ -143,17 +143,17 @@ type exchange_state = {
 
 let level_exists ( s_state, book_t, od_side, l_num : security_state * book_type * order_side * int ) =
     match book_t with  
-    | Multi -> (
+    | Book_Type_Multi -> (
         let l = get_level (s_state.multi_book, l_num, od_side) in 
         match l with 
         | None -> true
         | Some _ -> false )
-    | Implied -> (
+    | Book_Type_Implied -> (
         let l = get_level (s_state.implied_book, l_num, od_side) in 
         match l with 
         | None -> true
-        | Some _ -> false
-    )
+        | Some _ -> false )
+    | Book_Type_Combined -> false
 ;;
 
 (** Check that the level exists for the whole security *)
