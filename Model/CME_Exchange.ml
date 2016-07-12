@@ -163,17 +163,17 @@ let send_o_del (state, o_del) =
     let level = get_level (state , o_del.od_sec_type, o_del.od_book_type, o_del.od_level_side, o_del.od_level_num ) in
     match level with None -> state | Some level -> 
     let del_m = RefreshMessage {
-        rm_security_id = get_security_id ( state, o_change.od_sec_type ) ;
-        rm_rep_seq_num = get_rep_seq_num ( state, o_change.od_sec_type ) ;
+        rm_security_id = get_security_id ( state, o_del.od_sec_type ) ;
+        rm_rep_seq_num = get_rep_seq_num ( state, o_del.od_sec_type ) ;
         rm_msg_type    = V_MDUpdateAction_Delete ;
 
-        rm_entry_type  = side_to_entry_type ( o_level.od_book_type, o_level.od_level_side ) ; 
+        rm_entry_type  = side_to_entry_type ( o_del.od_book_type, o_del.od_level_side ) ; 
         rm_price_level = o_del.od_level_num;
         rm_entry_size  = level.qty;
         rm_entry_px    = level.price;
         rm_num_orders  = level.num_orders
     } in 
-    { state with msg_queue = change_m :: state.msg_queue }
+    { state with msg_queue = del_m :: state.msg_queue }
 ;;
 
 :break
