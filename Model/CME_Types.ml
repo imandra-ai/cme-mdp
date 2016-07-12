@@ -16,7 +16,6 @@ type book_type =
     | Book_Type_Combined 
 ;;
 
-
 (** *************************************************************** *)
 (** Orders and books                                                *)
 (** *************************************************************** *)
@@ -80,12 +79,9 @@ type ref_message = {
     rm_price_level : int;
     rm_entry_size  : int;
     rm_entry_px    : int;
-    rm_num_orders  : int;
+    rm_num_orders  : int option;
 };;
 
-(** Internal snapshot message representation.                           *)
-(*  Note that in 'real' format, this would be spread across numerous    *)
-(*  messages within the same (potentially different) packets.           *)
 type snap_message = {
     sm_security_id : int;
     sm_last_msg_seq_num_processed : int;    (* this corresponds to packet number for Incremental update *)
@@ -97,28 +93,14 @@ type snap_message = {
     sm_imp_ask  : order_level;
 } ;;
 
-(** *************************************************************** *)
 
-(** *************************************************************** *)
-(* This is the top-level packet type including the global sequence  *)
-(* number                                                           *)
-(** *************************************************************** *)
+type message =
+    | RefreshMessage  of ref_message
+    | SnapshotMessage of snap_message
+;;
 
-(** Note about connecting Snapshots and Incremental Refresh messages:
-        --> Market recovery packet message contains field 369-LastMsgSeqNumProcessed
-            it corresponds to Incremental Refresh Message
-        --> Tag 83 RptSeq
-*)
-type packet_header = {
-    ph_packet_seq_num : int;
-    ph_sending_time : int;
+type packet = {
+    packet_seq_num : int;
+    messages : message list
 };;
-
-type ref_packet  = { rp_header : packet_header; rp_msg  : ref_message;  };;
-type snap_packet = { sp_header : packet_header; sp_snap : snap_message; };;
-
-(** We have two types of packets here: for Market Recovery (Snapshot) and Incremental
-    Refresh *)
-type packet = SnapshotPacket of snap_packet | IncRefreshPacket of ref_packet | NoPacket;;
-
 
