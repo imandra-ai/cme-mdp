@@ -41,12 +41,6 @@ type book_change_type =
     | Book_Proc_Snap                (* *)
 ;;
 
-(** Generic book type (used for all three types of books) *)
-type book = {
-    buys : order_level list;
-    sells : order_level list;
-};;
-
 type channel_type =
   | Ch_Ref_A
   | Ch_Ref_B

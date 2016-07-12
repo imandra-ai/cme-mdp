@@ -2,9 +2,24 @@
     Aesthetic Integration Ltd.
     Copyright 2016
 
-    CME_Exchange.ml
+    CME_Types.ml
 *)
 
+(** *************************************************************** *)
+(** Define the types that we support                                *)
+(** *************************************************************** *)
+type sec_type = SecA | SecB ;;
+
+type book_type = 
+    | Book_Type_Implied 
+    | Book_Type_Multi 
+    | Book_Type_Combined 
+;;
+
+
+(** *************************************************************** *)
+(** Orders and books                                                *)
+(** *************************************************************** *)
 type order_side = OrdBuy | OrdSell;;
 
 (** Order_info is used to represent levels within order book *)
@@ -15,18 +30,16 @@ type order_info = {
     num_orders : int option; (* Not provided for implied books *)
 };;
 
-(** Order_level *)
-type order_level = NoLevel | Level of order_info;;
+type order_level = order_info option ;;
+
+(** Generic book type (used for all three types of books) *)
+type book = {
+    buys : order_level list;
+    sells : order_level list;
+};;
 
 (** *************************************************************** *)
-(** Define the types that we support                                *)
-(** *************************************************************** *)
-type sec_type = SecA | SecB ;;
-type book_type = 
-    | Book_Type_Implied 
-    | Book_Type_Multi 
-    | Book_Type_Combined 
-;;
+(** Message types                                                   *)
 (** *************************************************************** *)
 
 (** The various types *)
@@ -40,16 +53,23 @@ type msg_type =
 ;;
 
 type entry_type =
-    V_MDEntryType_Bid
-  | V_MDEntryType_Offer
-  | V_MDEntryType_ImpliedBid
-  | V_MDEntryType_ImpliedOffer
-  | V_MDEntryType_EmptyBook
+    | V_MDEntryType_Bid
+    | V_MDEntryType_Offer
+    | V_MDEntryType_ImpliedBid
+    | V_MDEntryType_ImpliedOffer
+    | V_MDEntryType_EmptyBook
 ;;
 
-(** *************************************************************** *)
-(** Msg *)
-(** *************************************************************** *)
+(* entry_type utility function *)
+let side_to_entry_type ( book_type, side : book_type * order_side) = 
+    match ( book_type, side ) with 
+    | ( Book_Type_Implied  , OrdBuy  ) -> V_MDEntryType_ImpliedBid
+    | ( Book_Type_Multi    , OrdBuy  ) -> V_MDEntryType_Bid
+    | ( Book_Type_Combined , OrdBuy  ) -> V_MDEntryType_Bid
+    | ( Book_Type_Implied  , OrdSell ) -> V_MDEntryType_ImpliedOffer
+    | ( Book_Type_Multi    , OrdSell ) -> V_MDEntryType_Offer
+    | ( Book_Type_Combined , OrdSell ) -> V_MDEntryType_Offer
+;;
 
 type ref_message = {
     rm_security_id : int;
@@ -69,7 +89,7 @@ type ref_message = {
 type snap_message = {
     sm_security_id : int;
     sm_last_msg_seq_num_processed : int;    (* this corresponds to packet number for Incremental update *)
-    sm_rep_seq_num : int;               (* this corresponds to instrument RepSeqNum *)
+    sm_rep_seq_num : int;                   (* this corresponds to instrument RepSeqNum *)
 
     sm_real_bid : order_level;
     sm_real_ask : order_level;
@@ -91,31 +111,9 @@ type snap_message = {
 *)
 type packet_header = {
     ph_packet_seq_num : int;
-    (** Corresponds to MsgSeqNum
-        Packet sequence number.
-        A unique sequence number given to each packet sent.
-        Each channel will have its own separate set of sequence numbers that will increment sequentially
-        with each packet and reset weekly.
-
-        See: http://www.cmegroup.com/confluence/display/EPICSANDBOX/MDP+3.0+-+Binary+Packet+Header
-     *)
     ph_sending_time : int;
-    (** Corresponds to SendingTime
-        UTC Time of message transmission by the Gateway. UTC Timestamps are sent in number of nanoseconds
-        since Unix epoch with guaranteed microsecond precision.
-    *)
 };;
 
-(** Note about packet data types:
-    In the actual binary (and other) format, a packet has a header and a *list* of messages. For the purposes
-    of modelling the feed, we do not need to introduce this complexity. In the model, we use ref_packet and
-    snap_packet types. Note the at we have no restriction on repeating packet sequence numbers, hence a natural
-    way to replicate a *real* packet with multiple messages is just by having a list of *model* packets with
-    the same packet header, but different message fields.
-
-    Types ref_packet_lst & snap_packet_lst are to be used by the encoder/decoder to read/write from/into
-    the binary format.
-*)
 type ref_packet  = { rp_header : packet_header; rp_msg  : ref_message;  };;
 type snap_packet = { sp_header : packet_header; sp_snap : snap_message; };;
 
