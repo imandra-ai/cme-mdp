@@ -111,7 +111,7 @@ let send_add_level (state, o_add) =
         rm_entry_px    = o_add.oa_price;
         rm_price_level = o_add.oa_level_num;
         rm_entry_size  = o_add.oa_order_qty;
-        rm_num_orders  = o_add.oa_level_num
+        rm_num_orders  = o_add.oa_num_orders
     } in 
     { state with msg_queue = add_m :: state.msg_queue; }
 ;;
@@ -176,34 +176,48 @@ let send_o_del (state, o_del) =
     { state with msg_queue = del_m :: state.msg_queue }
 ;;
 
-:break
 
 
-(** 2.4 Snapshot sending event *)
-let send_snapshot (state) = 
-    let snap_a = SnapshotMessage {
-        sm_security_id                = get_security_id ( state, SecA ) ;
+(** 2.4 Snapshot sending  *)
+
+(** 2.4.1 This creates a message with a single level of a book*)
+let make_snapshot_message (state, sec_type, level ) = 
+    SnapshotMessage {
+        sm_security_id                = get_security_id ( state, SecA );
         sm_last_msg_seq_num_processed = state.p_seq_num;
-        sm_rep_seq_num                = get_rep_seq_num ( state, SecA ) ;   
-
-        sm_real_bid = None;
-        sm_real_ask = None;
-        sm_imp_bid  = None;
-        sm_imp_ask  = None;
-    } in
-    let snap_b = SnapshotMessage {
-        sm_security_id                = get_security_id ( state, SecB ) ;
-        sm_last_msg_seq_num_processed = state.p_seq_num;
-        sm_rep_seq_num                = get_rep_seq_num ( state, SecB ) ;   
-
-        sm_real_bid = None;
-        sm_real_ask = None;
-        sm_imp_bid  = None;
-        sm_imp_ask  = None;
-    } in
-    { state with msg_queue = snap_a :: (snap_b :: state.msg_queue); }
+        sm_rep_seq_num                = get_rep_seq_num ( state, SecA );
+        sm_real_bid = get_level ( state, sec_type, Book_Type_Multi,   OrdBuy,  level ); 
+        sm_real_ask = get_level ( state, sec_type, Book_Type_Multi,   OrdSell, level ); 
+        sm_imp_bid  = get_level ( state, sec_type, Book_Type_Implied, OrdBuy,  level );
+        sm_imp_ask  = get_level ( state, sec_type, Book_Type_Implied, OrdSell, level ); 
+    } 
 ;;
 
+(** 2.4.1 This generates messages for each security and each level of its books *)
+let send_snapshot (state) = 
+    let snaps = state.msg_queue in
+    let state = advance_rep_seq_num   ( state, SecA    )        in
+    let snaps = make_snapshot_message ( state, SecA, 1 )::snaps in
+    let state = advance_rep_seq_num   ( state, SecA    )        in
+    let snaps = make_snapshot_message ( state, SecA, 2 )::snaps in
+    let state = advance_rep_seq_num   ( state, SecA    )        in
+    let snaps = make_snapshot_message ( state, SecA, 3 )::snaps in
+    let state = advance_rep_seq_num   ( state, SecA    )        in
+    let snaps = make_snapshot_message ( state, SecA, 4 )::snaps in
+    let state = advance_rep_seq_num   ( state, SecA    )        in
+    let snaps = make_snapshot_message ( state, SecA, 5 )::snaps in
+    let state = advance_rep_seq_num   ( state, SecB    )        in
+    let snaps = make_snapshot_message ( state, SecB, 1 )::snaps in
+    let state = advance_rep_seq_num   ( state, SecB    )        in
+    let snaps = make_snapshot_message ( state, SecB, 2 )::snaps in
+    let state = advance_rep_seq_num   ( state, SecB    )        in
+    let snaps = make_snapshot_message ( state, SecB, 3 )::snaps in
+    let state = advance_rep_seq_num   ( state, SecB    )        in
+    let snaps = make_snapshot_message ( state, SecB, 4 )::snaps in
+    let state = advance_rep_seq_num   ( state, SecB    )        in
+    let snaps = make_snapshot_message ( state, SecB, 5 )::snaps in
+    { state with msg_queue = snaps; }
+;;
 
 
 
@@ -220,9 +234,7 @@ type int_state_trans =
 
 (** Check that the level exists for the whole security *)
 let sec_level_exists (state, sec_t, book_t, order_s, level_n : exchange_state * sec_type * book_type * order_side * int ) = 
-    match sec_t with
-    | SecA -> level_exists (state.sec_a, book_t, order_s, level_n)
-    | SecB -> level_exists (state.sec_b, book_t, order_s, level_n)
+    match get_level  (state, sec_t, book_t, order_s, level_n ) with None -> false | Some _ -> true 
 ;;
 
 (** Define a valid transition of the exchange *)
@@ -264,8 +276,8 @@ let is_trans_valid (state, trans) =
 (** Send the packet *)
 let send_packet (state) = 
     let new_p = {
-        pac_id = state.p_seq_num;
-        pac_msgs = state.msg_queue;
+        packet_seq_num  = state.p_seq_num;
+        packet_messages = state.msg_queue;
     } in 
     { state with 
         pac_queue = new_p :: state.pac_queue;
@@ -273,6 +285,7 @@ let send_packet (state) =
         p_seq_num = state.p_seq_num + 1;
     }
 ;;
+
 
 (** Here we actually maintain the order book and its states *)
 let process_int_trans (state, trans) =
@@ -294,10 +307,12 @@ let empty_book_side = {
     five = None;
 };;
 
+
 let init_state = {
     p_seq_num = 1;
     sec_a = {
         sec_id = 1;
+        last_rep_seq_num = 1;
         multi_book = {
             buy_orders = empty_book_side;
             sell_orders = empty_book_side;
@@ -309,6 +324,7 @@ let init_state = {
     };
     sec_b = {
         sec_id = 2;
+        last_rep_seq_num = 1;
         multi_book = {
             buy_orders = empty_book_side;
             sell_orders = empty_book_side;

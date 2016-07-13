@@ -100,7 +100,7 @@ type message =
 ;;
 
 type packet = {
-    packet_seq_num : int;
-    messages : message list
+    packet_seq_num  : int;
+    packet_messages : message list
 };;
 
