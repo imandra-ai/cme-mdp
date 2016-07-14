@@ -47,11 +47,13 @@ type exchange_state = {
     sec_b : security_state;	    (* Security B orderbook     *)
 
     (** Queue of events that have occured since the         *)
-    msg_queue : message list;
+     inc_msg_queue : message list;
+    snap_msg_queue : message list;
 
     (** Packets queue                                       *)
     pac_queue: packet list;
-    p_seq_num : int;            (* Packet sequence number   *)
+    last_inc_seq_num  : int;            (* Packet sequence number   *)
+    last_snap_seq_num : int;            (* Packet sequence number   *)
 };;
 
 (** 1.3.1 State access/modfication utility functions *)
@@ -113,7 +115,7 @@ let send_add_level (state, o_add) =
         rm_entry_size  = o_add.oa_order_qty;
         rm_num_orders  = o_add.oa_num_orders
     } in 
-    { state with msg_queue = add_m :: state.msg_queue; }
+    { state with inc_msg_queue = add_m :: state.inc_msg_queue; }
 ;;
 
 
@@ -145,7 +147,7 @@ let send_o_change (state, o_change) =
         rm_entry_px    = level.price;
         rm_num_orders  = level.num_orders
     } in 
-    { state with msg_queue = change_m :: state.msg_queue }
+    { state with inc_msg_queue = change_m :: state.inc_msg_queue }
 ;;
 
 (** 2.3 Order Delete internal event         *)
@@ -173,71 +175,59 @@ let send_o_del (state, o_del) =
         rm_entry_px    = level.price;
         rm_num_orders  = level.num_orders
     } in 
-    { state with msg_queue = del_m :: state.msg_queue }
+    { state with inc_msg_queue = del_m :: state.inc_msg_queue }
 ;;
-
 
 
 (** 2.4 Snapshot sending  *)
 
-(** 2.4.1 This creates a message with a single level of a book*)
-let make_snapshot_message (state, sec_type, level ) = 
-    SnapshotMessage {
-        sm_security_id                = get_security_id ( state, SecA );
-        sm_last_msg_seq_num_processed = state.p_seq_num;
-        sm_rep_seq_num                = get_rep_seq_num ( state, SecA );
-        sm_real_bid = get_level ( state, sec_type, Book_Type_Multi,   OrdBuy,  level ); 
-        sm_real_ask = get_level ( state, sec_type, Book_Type_Multi,   OrdSell, level ); 
-        sm_imp_bid  = get_level ( state, sec_type, Book_Type_Implied, OrdBuy,  level );
-        sm_imp_ask  = get_level ( state, sec_type, Book_Type_Implied, OrdSell, level ); 
-    } 
+(** 2.4.1 This creates a list of orders on a given side of a book *)
+let get_level_list (state, sec_type, book_type, side ) = [ 
+    get_level ( state, sec_type, book_type,  side, 1 ); 
+    get_level ( state, sec_type, book_type,  side, 2 ); 
+    get_level ( state, sec_type, book_type,  side, 3 ); 
+    get_level ( state, sec_type, book_type,  side, 4 ); 
+    get_level ( state, sec_type, book_type,  side, 5 ); 
+];;
+
+(** 2.4.2 This generates a snapshot message for the whole book of one security *)
+let send_snapshot ( state, sec_type ) = 
+    let state = advance_rep_seq_num  ( state, sec_type )        in
+    let m_snap  = SnapshotMessage {
+        sm_security_id = get_security_id ( state, sec_type ) ;
+        sm_rep_seq_num = get_rep_seq_num ( state, sec_type ) ;
+        sm_snapshot = {
+            snap_m_book = {
+                buys  = get_level_list ( state, sec_type, Book_Type_Multi, OrdBuy  );
+                sells = get_level_list ( state, sec_type, Book_Type_Multi, OrdSell ); 
+            };
+            snap_i_book = {
+                buys  = get_level_list ( state, sec_type, Book_Type_Multi, OrdBuy  );
+                sells = get_level_list ( state, sec_type, Book_Type_Multi, OrdSell ); 
+            }; 
+            snap_last_msg_seq_num_processed = state.last_inc_seq_num;
+        };
+    } in     
+    { state with snap_msg_queue = m_snap::state.snap_msg_queue; }
 ;;
 
-(** 2.4.1 This generates messages for each security and each level of its books *)
-let send_snapshot (state) = 
-    let snaps = state.msg_queue in
-    let state = advance_rep_seq_num   ( state, SecA    )        in
-    let snaps = make_snapshot_message ( state, SecA, 1 )::snaps in
-    let state = advance_rep_seq_num   ( state, SecA    )        in
-    let snaps = make_snapshot_message ( state, SecA, 2 )::snaps in
-    let state = advance_rep_seq_num   ( state, SecA    )        in
-    let snaps = make_snapshot_message ( state, SecA, 3 )::snaps in
-    let state = advance_rep_seq_num   ( state, SecA    )        in
-    let snaps = make_snapshot_message ( state, SecA, 4 )::snaps in
-    let state = advance_rep_seq_num   ( state, SecA    )        in
-    let snaps = make_snapshot_message ( state, SecA, 5 )::snaps in
-    let state = advance_rep_seq_num   ( state, SecB    )        in
-    let snaps = make_snapshot_message ( state, SecB, 1 )::snaps in
-    let state = advance_rep_seq_num   ( state, SecB    )        in
-    let snaps = make_snapshot_message ( state, SecB, 2 )::snaps in
-    let state = advance_rep_seq_num   ( state, SecB    )        in
-    let snaps = make_snapshot_message ( state, SecB, 3 )::snaps in
-    let state = advance_rep_seq_num   ( state, SecB    )        in
-    let snaps = make_snapshot_message ( state, SecB, 4 )::snaps in
-    let state = advance_rep_seq_num   ( state, SecB    )        in
-    let snaps = make_snapshot_message ( state, SecB, 5 )::snaps in
-    { state with msg_queue = snaps; }
-;;
-
-
-
-
-(** Possible events at the exchange *)
+(** 3. Possible events at the exchange *)
 type int_state_trans =
-    | ST_BookReset                  (* We reset the whole book *)
-    | ST_Add    of ord_add_data     (* Add order book level *)
-    | ST_Change of ord_change_data  (* Cancel an order in the book *)
-    | ST_Delete of ord_del_data     (* Delete book level *)
-    | ST_DataSend                   (* Indicates that we need to send out the event *)
-    | ST_Snapshot                   (* Indicates the need to send a snapshot message *)
+    | ST_BookReset                    (* We reset the whole book *)
+    | ST_Add      of ord_add_data     (* Add order book level *)
+    | ST_Change   of ord_change_data  (* Cancel an order in the book *)
+    | ST_Delete   of ord_del_data     (* Delete book level *)
+    | ST_DataSendInc                  (* Indicates that we need to send out the collected incremental refresh messages *)
+    | ST_DataSendSnap                 (* Indicates that we need to send out the collected snapshot refresh messages *)
+    | ST_Snapshot of sec_type         (* Indicates the need to send a snapshot message *)
 ;;
 
-(** Check that the level exists for the whole security *)
+(** 3.1 Check that the level exists for the whole security *)
 let sec_level_exists (state, sec_t, book_t, order_s, level_n : exchange_state * sec_type * book_type * order_side * int ) = 
     match get_level  (state, sec_t, book_t, order_s, level_n ) with None -> false | Some _ -> true 
 ;;
 
-(** Define a valid transition of the exchange *)
+(** 3.2 Define a valid transition of the exchange *)
 let is_trans_valid (state, trans) =
     match trans with
     | ST_BookReset -> true (** We can generally reset the book *)
@@ -268,24 +258,41 @@ let is_trans_valid (state, trans) =
                             od_data.od_level_num
                             )
 
-    | ST_DataSend -> true
-    | ST_Snapshot -> true
+    | ST_DataSendInc  -> state.inc_msg_queue  <> []
+    | ST_DataSendSnap -> state.snap_msg_queue <> []
+    | ST_Snapshot _ -> true
 ;;
 
 
-(** Send the packet *)
-let send_packet (state) = 
+(*  4. Packet sending *)
+
+(** 4.1 Send snapshot packet *)
+let send_snap_packet (state) = 
     let new_p = {
-        packet_seq_num  = state.p_seq_num;
-        packet_messages = state.msg_queue;
+        packet_seq_num  = state.last_snap_seq_num + 1;
+        packet_messages = state.snap_msg_queue;
+        packet_channel  = Ch_Snap_A
     } in 
     { state with 
-        pac_queue = new_p :: state.pac_queue;
-        msg_queue = [];
-        p_seq_num = state.p_seq_num + 1;
+        pac_queue = new_p :: { new_p with packet_channel = Ch_Snap_B } :: state.pac_queue;
+        snap_msg_queue = [];
+        last_snap_seq_num = state.last_snap_seq_num + 1;
     }
 ;;
 
+(** 4.2 Send incremental refresh packet *)
+let send_inc_packet (state) = 
+    let new_p = {
+        packet_seq_num  = state.last_inc_seq_num + 1;
+        packet_messages = state.inc_msg_queue;
+        packet_channel  = Ch_Ref_A
+    } in 
+    { state with 
+        pac_queue = new_p :: { new_p with packet_channel = Ch_Ref_B } :: state.pac_queue;
+        inc_msg_queue = [];
+        last_inc_seq_num = state.last_inc_seq_num + 1;
+    }
+;;
 
 (** Here we actually maintain the order book and its states *)
 let process_int_trans (state, trans) =
@@ -295,8 +302,9 @@ let process_int_trans (state, trans) =
         send_add_level (state, o_add)
     | ST_Change o_change -> send_o_change (state, o_change)
     | ST_Delete o_del -> send_o_del (state, o_del)
-    | ST_DataSend -> send_packet (state)
-    | ST_Snapshot -> send_snapshot (state)
+    | ST_DataSendInc  -> send_inc_packet  (state)
+    | ST_DataSendSnap -> send_snap_packet (state)
+    | ST_Snapshot sec_type-> send_snapshot (state, sec_type)
 ;;
 
 let empty_book_side = {
@@ -309,10 +317,9 @@ let empty_book_side = {
 
 
 let init_state = {
-    p_seq_num = 1;
     sec_a = {
         sec_id = 1;
-        last_rep_seq_num = 1;
+        last_rep_seq_num = 0;
         multi_book = {
             buy_orders = empty_book_side;
             sell_orders = empty_book_side;
@@ -324,7 +331,7 @@ let init_state = {
     };
     sec_b = {
         sec_id = 2;
-        last_rep_seq_num = 1;
+        last_rep_seq_num = 0;
         multi_book = {
             buy_orders = empty_book_side;
             sell_orders = empty_book_side;
@@ -335,7 +342,10 @@ let init_state = {
         };
     };
 
-    msg_queue = [];
+    last_snap_seq_num = 0;
+    last_inc_seq_num   = 0;
+    inc_msg_queue = [];
+    snap_msg_queue = [];
     pac_queue = [];
 };;
 

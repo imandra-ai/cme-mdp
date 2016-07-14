@@ -82,25 +82,35 @@ type ref_message = {
     rm_num_orders  : int option;
 };;
 
+
+(* Snapshot message *)
+type snapshot = {
+    snap_m_book : book; (* "multi-depth" book *)
+    snap_i_book : book; (* implied book       *)
+    snap_last_msg_seq_num_processed : int (* this corresponds to packet number for Incremental update *)
+};;
+
 type snap_message = {
     sm_security_id : int;
-    sm_last_msg_seq_num_processed : int;    (* this corresponds to packet number for Incremental update *)
     sm_rep_seq_num : int;                   (* this corresponds to instrument RepSeqNum *)
-
-    sm_real_bid : order_level;
-    sm_real_ask : order_level;
-    sm_imp_bid  : order_level;
-    sm_imp_ask  : order_level;
-} ;;
-
+    sm_snapshot: snapshot;
+};;
 
 type message =
     | RefreshMessage  of ref_message
     | SnapshotMessage of snap_message
 ;;
 
+type channel_type =
+    | Ch_Ref_A
+    | Ch_Ref_B
+    | Ch_Snap_A
+    | Ch_Snap_B
+;;
+
 type packet = {
     packet_seq_num  : int;
-    packet_messages : message list
+    packet_messages : message list;
+    packet_channel  : channel_type
 };;
 
