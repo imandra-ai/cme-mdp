@@ -1,6 +1,10 @@
 :load Model/CME_Types.ml
 :load Model/CME_Exchange.ml
 
+:adts
+:p (in-theory (enable IML-ADT-EXECUTABLE-COUNTERPARTS-THEORY))
+
+
 let twelve (m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12 : int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans) = 
     true
 ;;
