@@ -1,13 +1,14 @@
 First of all I'd do a brief tour to the way I organized everything there.
-:
-I'm starting imandra in this ("CME") folder. All the model-related things
-(things that you want to `:load`) are in the "Model" subfolder.  Printers and
-helpers (things that you want to `:load_ocaml`) are in the "Printers"
-subfolder. All the toplevel imandra scripts (like `testgen.ml` ones) are all in
-the "ImandraScripts". There are alsoia bunch of folders related to binary
-representation reading/writing.
 
-In order to reproduce the first problem you can jsut do this:
+I'm starting imandra in this ("CME") folder. 
+
+* All the model-related things (things that you want to `:load`) are in the "Model" subfolder.  
+* Printers andhelpers (things that you want to `:load_ocaml`) are in the "Printers" subfolder. 
+* All the toplevel imandra scripts (like `testgen.ml` ones) are all in the "ImandraScripts". 
+
+Also there are a bunch of folders related to binary representation reading/writing -- those are not relevant now.
+
+In order to reproduce the first problem you can just do this:
 
     :load ImandraScripts/stuck.ml
 
