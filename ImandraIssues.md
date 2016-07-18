@@ -8,6 +8,8 @@ I'm starting imandra in this ("CME") folder.
 
 Also there are a bunch of folders related to binary representation reading/writing -- those are not relevant now.
 
+### 1. 
+
 In order to reproduce the first problem you can just do this:
 
     :load ImandraScripts/stuck.ml
@@ -17,4 +19,16 @@ make sure it is really really stuck. The culprit is the `lx86cl64` process
 eating 99% of the CPU and 537GB of memory. Denis has reported similar behavior
 (it was the test case #22 for him).
 
+### 2. 
 
+In order to reproduce the second problem load this script:
+
+    :load ImandraScripts/smt_error.ml
+
+It breaks at the region #31 with this error: 
+
+    Directive error: testgen given invalid arguments (SMT prep: IML_temp_testcase_goal_30 <> IML_temp_testcase_goal_29).
+
+### Misc
+
+It turns out that the `subtree` directive is working with `:decompose`, but it is not working for the `:testgen`. Is there any fundamentl reason for that.   
