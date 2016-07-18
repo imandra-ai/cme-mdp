@@ -12,9 +12,9 @@ In order to reproduce the first problem you can just do this:
 
     :load ImandraScripts/stuck.ml
 
-On my machine it gets stuck at the test case #14. I've waited for an hour to
+On my machine it gets stuck at the test case #14 or #22. I've waited for an hour to
 make sure it is really really stuck. The culprit is the `lx86cl64` process
 eating 99% of the CPU and 537GB of memory. Denis has reported similar behavior
-(it was the test case #23 for him).
+(it was the test case #22 for him).
 
 
