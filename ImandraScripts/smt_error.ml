@@ -4,17 +4,14 @@
 let twelve (m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12 : int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans) = 
     true
 ;;
-(* Break assuming into two subsets: *)
-let first_six (s, s1, s2, s3, s4, s5, m1, m2, m3, m4, m5, m6) = 
+
+let v_t_twelve (s, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12) = 
     is_trans_valid (s, m1) && 
     is_trans_valid (s1, m2) && 
     is_trans_valid (s2, m3) && 
     is_trans_valid (s3, m4) &&
     is_trans_valid (s4, m5) && 
-    is_trans_valid (s5, m6)  
-;;
-
-let last_six (s6, s7, s8, s9, s10, s11, m7, m8, m9, m10, m11, m12) = 
+    is_trans_valid (s5, m6) && 
     is_trans_valid (s6, m7) && 
     is_trans_valid (s7, m8) && 
     is_trans_valid (s8, m9) && 
@@ -23,15 +20,7 @@ let last_six (s6, s7, s8, s9, s10, s11, m7, m8, m9, m10, m11, m12) =
     is_trans_valid (s11, m12) 
 ;;
 
-let v_t_twelve (s, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12) = 
-    first_six (s, s1, s2, s3, s4, s5, m1, m2, m3, m4, m5, m6) &&
-    last_six (s6, s7, s8, s9, s10, s11, m7, m8, m9, m10, m11, m12) 
-;;
-
-(*Disable one subset*)
-
-:disable first_six
-
+(** Are these transitions valid? *)
 let vd_twelve (m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12 : int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans) = 
     let s   = init_state in 
     let s1  = process_int_trans (s, m1) in 
@@ -48,5 +37,8 @@ let vd_twelve (m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12 : int_state_tra
     let s12 = process_int_trans (s11, m12) in 
     v_t_twelve (s, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12)
 ;;
+
+(* Disabling all the is_trans_valid *)
+:disable v_t_twelve
 
 :testgen twelve assuming vd_twelve
