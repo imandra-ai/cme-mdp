@@ -18,18 +18,6 @@ let float_to_dec (f) =
 
 (** We will use this type for setting property of our security *)
 type liq_type = Liquid | Illiquid | LiqUnknown;;
-(** The following two types of messages lists are directly used by the binary encoder/decoder *)
-type ref_packet_lst = {
-    rpl_header : packet_header;
-    rpl_msgs : ref_message list;
-};;
-
-type snap_packet_lst = {
-   spl_header : packet_header;
-   spl_snap : snap_message list;
-};;
-
-type packet_lst = SnapshotPacketLst of snap_packet_lst | IncRefreshPacketLst of ref_packet_lst;;
 
 (** These types represent the internal change book-keeping *)
 type book_change_type =
@@ -39,13 +27,6 @@ type book_change_type =
     | Book_Proc_Cache_Add           (* Processed a packet in InRecovery mode, stayed in InRecovery *)
     | Book_Proc_NotRelevant         (* Processed a packet that's not relevant (neither the current security nor the reference one) *)
     | Book_Proc_Snap                (* *)
-;;
-
-type channel_type =
-  | Ch_Ref_A
-  | Ch_Ref_B
-  | Ch_Snap_A
-  | Ch_Snap_B
 ;;
 
 (** This represents the current state of the books *)
@@ -71,35 +52,13 @@ type feed_status =
 
 (** Create a list of empty list of order levels *)
 let rec empty_order_levels (x) =
-    if x > 0 then NoLevel :: empty_order_levels (x - 1) else []
+    if x > 0 then None :: empty_order_levels (x - 1) else []
 ;;
 
 (** Create the empty book for a given depth *)
-let empty_book (num_levels : int) =
-{
-    buys = empty_order_levels (num_levels);
+let empty_book (num_levels : int) = {
+    buys  = empty_order_levels (num_levels);
     sells = empty_order_levels (num_levels);
-}
-;;
-
-(** States of the refresh and snapshot channels *)
-type ref_channel_state =
-{
-    r_unproc_packets : ref_packet list;  (** Unprocessed packets *)
-    r_proc_packets : ref_packet list;    (** Processed packets *)
-};;
-
-type snap_channel_state = 
-{
-    s_unproc_packets : snap_packet list;
-    s_proc_packets : snap_packet list; 
-};;
-
-(** This is how we will store the snapshot message *)
-type snapshot = {
-    snap_m_book : book;
-    snap_i_book : book;
-    snap_seq_num : int;
 };;
 
 (** ******************************************************* *)
@@ -110,8 +69,7 @@ type cycle_hist = {
     self_sec_id : int;                  (** This security ID *)
     ref_sec_snap_received : bool;       (**  *)
     liq : liq_type;
-}
-;;
+};;
 
 (** Structure with clean history *)
 let clean_cycle_hist = {
@@ -119,28 +77,29 @@ let clean_cycle_hist = {
    self_sec_id = -1;
    ref_sec_snap_received = false;
    liq = LiqUnknown;
-}
-;;
+};;
 
 (** We're encapsulating all of the messaging queues here *)
 type channels = {
-    ref_a : ref_channel_state;      (* Incremental Refresh Channel A *)
-    ref_b : ref_channel_state;      (* Incremental Refresh Channel B *)
+    unprocessed_packets : packet list;
+    current_packet : packet;
+
+    processed_messages : message list;
+    processed_ref_a : packet list;
+    processed_ref_b : packet list;
+    processed_snap_a : packet list;
+    processed_snap_b : packet list;
+
+    cycle_hist_a : cycle_hist;      (* Cycle history for channel A *)
+    cycle_hist_b : cycle_hist;      (* Cycle history for channel B *)
 
     last_seq_processed : int;       (* Last correctly processed sequence number *)
     cache : ref_message list;       (* These are cached incremental packets *)
 
     (** Last available snapshot -> updated only during recovery mode *)
     last_snapshot : snapshot option;
+};;
 
-    (** Refresh channels that we subscribe to only when in recovery mode *)
-    snap_a : snap_channel_state;    (* Full Refresh Channel A *)
-    cycle_hist_a : cycle_hist;      (* Cycle history for channel A *)
-
-    snap_b : snap_channel_state;    (* Full Refresh Channel B *)
-    cycle_hist_b : cycle_hist;      (* Cycle history for channel B *)
-}
-;;
 
 (**
     What are the state transitions:
@@ -157,14 +116,10 @@ type internal_msg =
     im_time : int;
     im_books : books;
     im_cache : ref_message list;    
-    im_new_packet : bool
 };;
 
 (** Contains full definition of the state of the exchange *)
 type feed_state = {
-    new_packet : bool;
-    last_packet_header : packet_header option;
-
     (* Keeping a record of the security that we're maintaining *)
     sec_type : sec_type;
     sec_id   : int;
@@ -210,10 +165,10 @@ let is_cache_valid_since_seq_num (cache, last_processed_seq, book_depth : ref_me
 (** ************************************************************** *)
 let order_higher_ranked (s, o1, o2 : order_side * order_level * order_level) =
     match o1, o2 with
-    | Level d_1, Level d_2 -> if s = OrdBuy then d_1.price >= d_2.price else d_1.price <= d_2.price
-    | Level d_1, NoLevel -> true
-    | NoLevel, Level d_2 -> false
-    | NoLevel, NoLevel -> true
+    | Some d_1, Some d_2 -> if s = OrdBuy then d_1.price >= d_2.price else d_1.price <= d_2.price
+    | Some d_1, None -> true
+    | None, Some d_2 -> false
+    | None, None -> true
 ;;
 
 (** Insert order into the book *)
@@ -256,9 +211,9 @@ let rec add_levels (orders : order_level list) =
     | [x] -> [x]
     | x :: y :: xs -> (
         match x, y with
-        | Level x_d, Level y_d ->
+        | Some x_d, Some y_d ->
             if x_d.price = y_d.price then
-                let o = Level {
+                let o = Some {
                     side = x_d.side;
                     qty = x_d.qty + y_d.qty;
                     price = x_d.price;
@@ -270,18 +225,6 @@ let rec add_levels (orders : order_level list) =
         )
 ;;
 
-(** Process a single channel msg *)
-let process_snap_ch ( ch : snap_channel_state ) =
-{
-    s_proc_packets = List.hd ch.s_unproc_packets :: ch.s_proc_packets;
-    s_unproc_packets = List.tl ch.s_unproc_packets;
-};;
-
-let process_ref_ch ( ch : ref_channel_state ) =
-{
-    r_proc_packets = List.hd ch.r_unproc_packets :: ch.r_proc_packets;
-    r_unproc_packets = List.tl ch.r_unproc_packets;
-};;
 
 (** *************************************************************** *)
 (** Functions used for book modifications                           *)
@@ -290,7 +233,7 @@ let rec adjust_orders_size (num_levels, ords : int * order_level list) =
     if num_levels <= 0 then
         ords
     else
-        adjust_orders_size (num_levels - 1, ords @ [NoLevel])
+        adjust_orders_size (num_levels - 1, ords @ [None])
 ;;
 
 (** Adjusts the number of levels within a single side of an order book *)
@@ -345,7 +288,7 @@ let rec ch_inplace (orders, curr_idx, target_idx, new_order_info : order_level l
 
 (** Change an existing order level *)
 let bk_change (orders, side, price_level, entry_size, entry_price, num_orders : order_level list * order_side * int * int * int * int option) =
-    let new_order_info = Level {
+    let new_order_info = Some {
         side = side;
         qty = entry_size;
         price = entry_price;
@@ -366,7 +309,7 @@ let rec insert_level ( orders, new_order, curr_idx, target_idx : order_level lis
 
 (** Add a new level to the book *)
 let bk_new (orders, side, price_level, entry_size, entry_price, num_orders : order_level list * order_side * int * int * int * int option) =
-    let new_order_info = Level {
+    let new_order_info = Some {
         side = side;
         qty = entry_size;
         price = entry_price;
@@ -381,7 +324,6 @@ let mk_int_msg (s, ct : feed_state * book_change_type) =
     im_change_type = ct; (* We're transitionaing to recovery state*)
     im_time = s.channels.last_seq_processed;
     im_books = s.books;
-    im_new_packet = s.new_packet
 };;
 
 let get_cycle_hist (ch_a, ch_b, src) =
@@ -431,19 +373,18 @@ let update_cycle_hist (ch, snap : cycle_hist * snap_message) =
 ;;
 
 (** We reset the cycle history if we transition out of Recovery state *)
-let reset_cycle_hist ( ch : cycle_hist ) =
-{
+let reset_cycle_hist ( ch : cycle_hist ) = {
     clean_cycle_hist with reference_sec_id = ch.reference_sec_id
-}
-;;
+};;
+
 
 (** *************************************************************** *)
 (** Here we need to figure out what we're doing, etc.               *)
 (** *************************************************************** *)
 (** Security sequence number of the last message                    *)
-let process_refresh_action (books, packet : books * snap_packet) =
-    let snap = packet.sp_snap in
-    let seq_num = snap.sm_last_msg_seq_num_processed in
+(*
+let process_refresh_action (books, snap : books * snap_message ) =
+    let seq_num = snap.sm_snapshot.snap_last_msg_seq_num_processed in
     let depth = books.book_depth in
     let books' = {
         books with
@@ -466,6 +407,7 @@ let process_refresh_action (books, packet : books * snap_packet) =
         snap_seq_num = seq_num;
     }
 ;;
+*)
 
 (** Replace the book information with snapshot data *)
 let apply_snapshot (books, snap : books * snapshot) =
@@ -477,20 +419,21 @@ let apply_snapshot (books, snap : books * snapshot) =
     }
 ;;
 
+(* :break *)
 (** Is the latest snapshot better (later) than the existing one? *)
 let new_snapshot_better (new_snap, old_snap : snapshot * snapshot option) =
     match old_snap with
         | None -> true
         | Some s ->
-            new_snap.snap_seq_num >= s.snap_seq_num
+            new_snap.snap_last_msg_seq_num_processed >= s.snap_last_msg_seq_num_processed
 ;;
 
 (** Change status of the books *)
 let reset_books ( b : books ) =
 {
     b with
-    multi = empty_book (b.book_depth);
-    implied = empty_book (b.book_depth);
+    multi    = empty_book (b.book_depth);
+    implied  = empty_book (b.book_depth);
     combined = empty_book (b.book_depth);
     b_status = Empty;
 };;
@@ -518,12 +461,12 @@ let process_md_update_action (books, msg : books * ref_message) =
         match msg.rm_entry_type with
         | V_MDEntryType_Bid -> 
             let buys' = bk_new (m.buys, OrdBuy, msg.rm_price_level, msg.rm_entry_size,
-                            msg.rm_entry_px, Some msg.rm_num_orders) in
+                            msg.rm_entry_px, msg.rm_num_orders) in
             let books' = { books with multi = { m with buys = buys'; }} in
             clean_multi_depth_book (books')
         | V_MDEntryType_Offer ->
             let sells' = bk_new (m.sells, OrdSell, msg.rm_price_level, msg.rm_entry_size,
-                                 msg.rm_entry_px, Some msg.rm_num_orders) in
+                                 msg.rm_entry_px, msg.rm_num_orders) in
             let books' = { books with multi = { m with sells = sells'; }} in
             clean_multi_depth_book (books')
         | V_MDEntryType_ImpliedBid ->
@@ -543,11 +486,11 @@ let process_md_update_action (books, msg : books * ref_message) =
         match msg.rm_entry_type with
         | V_MDEntryType_Bid ->
            let buys' = bk_change (m.buys, OrdBuy, msg.rm_price_level, msg.rm_entry_size,
-                                  msg.rm_entry_px, Some msg.rm_num_orders)
+                                  msg.rm_entry_px, msg.rm_num_orders)
            in { books with multi = { m with buys = buys' }}
         | V_MDEntryType_Offer ->
            let sells' = bk_change (m.sells, OrdSell, msg.rm_price_level, msg.rm_entry_size,
-                                   msg.rm_entry_px, Some msg.rm_num_orders)
+                                   msg.rm_entry_px, msg.rm_num_orders)
            in { books with multi = { m with sells = sells' }}
         | V_MDEntryType_ImpliedBid ->
            let buys' = bk_change (i.buys, OrdBuy, msg.rm_price_level, msg.rm_entry_size,
@@ -663,7 +606,11 @@ let attempt_recovery (s : feed_state) =
         else match channels.last_snapshot with
             | None -> s
             | Some snap ->
-                if is_cache_valid_since_seq_num (channels.cache, snap.snap_seq_num, s.books.book_depth) then
+                if is_cache_valid_since_seq_num (
+                        channels.cache, 
+                        snap.snap_last_msg_seq_num_processed, 
+                        s.books.book_depth
+                    ) then
                     let books' = apply_snapshot (books, snap) in
                     let books'' = apply_cache (books', channels) in
                     let books''' = recalc_combined (books'') in 
@@ -679,130 +626,33 @@ let attempt_recovery (s : feed_state) =
         )
 ;;
 
-(** Make all unprocessed packets to be processed *)
-let clean_snap_ch (ch : snap_channel_state) =
-{
-    s_proc_packets = ch.s_unproc_packets;
-    s_unproc_packets = [];
-}
-;;
-
-let clean_ref_ch (ch : ref_channel_state) =
-{
-    r_proc_packets = ch.r_unproc_packets;
-    r_unproc_packets = [];
-}
-;;
-
-(** Data structure used in returning the right packets *)
-type msg_source =
-{
-    p : packet;
-    source : channel_type;
-}
-;;
-
-(** Select the right channel from the list *)
-let get_snap_channel (channels, ct : channels * channel_type) =
-    match ct with
-    | Ch_Snap_A -> channels.snap_a
-    | Ch_Snap_B -> channels.snap_b
-    | _ -> channels.snap_b
-;;
-
-let get_ref_channel (channels, ct : channels * channel_type) =
-    match ct with
-    | Ch_Ref_A  -> channels.ref_a
-    | Ch_Ref_B  -> channels.ref_b
-    | _ -> channels.ref_b
-;;
-
-(** set_channel_snap *)
-let set_snap_channel (chs, ch, ch_t : channels * snap_channel_state * channel_type) =
-{
-    chs with
-        snap_a = if ch_t = Ch_Snap_A then ch else chs.snap_a;
-        snap_b = if ch_t = Ch_Snap_B then ch else chs.snap_b;
-};;
-
-(** set_channel_inc *)
-let set_ref_channel (chs, ch, ch_t : channels * ref_channel_state * channel_type) =
-{
-    chs with
-        ref_a = if ch_t = Ch_Ref_A then ch else chs.ref_a;
-        ref_b = if ch_t = Ch_Ref_B then ch else chs.ref_b;
-};;
-
-(** Return packet header *)
-let get_packet_header (p : packet) =
-    match p with
-        | NoPacket -> None
-        | SnapshotPacket d   ->  Some d.sp_header
-        | IncRefreshPacket d ->  Some d.rp_header
-;;
-
 (** Return sequence number of the packet *)
-let get_packet_time (p : packet) =
-    match p with
-    | NoPacket -> 0
-    | SnapshotPacket d -> d.sp_header.ph_packet_seq_num
-    | IncRefreshPacket d -> d.rp_header.ph_packet_seq_num
-;;
+let get_packet_time (p : packet) = p.packet_seq_num;;
 
 (** We need to compare between two packets here *)
-let comp_packets (a, b : msg_source * msg_source) =
-    match a.p, b.p with 
-    | NoPacket, NoPacket -> a
-    | NoPacket, _ -> b
-    | _, NoPacket -> a
-    | _, _ ->
-    if get_packet_time(a.p) <= get_packet_time(b.p) then a else b
-;;
-
-(** We're using this instead of List.hd to avoid exceptions *)
-let get_next_channel_packet_ref (ch : ref_channel_state) =
-    if ch.r_unproc_packets = [] then NoPacket
-    else IncRefreshPacket (List.hd ch.r_unproc_packets)
-;;
-
-let get_next_channel_packet_snap (ch : snap_channel_state) = 
-    if ch.s_unproc_packets = [] then NoPacket 
-    else SnapshotPacket (List.hd ch.s_unproc_packets)
-;;
-
-(** We need to select the next packet to parse from the 4 channels
-    available to us. We will select the packet with the smallest
-    sequence ID - i.e. the earliest one to arrive into the queue *)
-let get_next_packet (ch : channels) =
-    let pac_a = { p = get_next_channel_packet_ref (ch.ref_a); source = Ch_Ref_A} in
-    let next_b = { p = get_next_channel_packet_ref (ch.ref_b); source = Ch_Ref_B} in
-    let curr_min = comp_packets(pac_a, next_b) in
-    let next_c = { p = get_next_channel_packet_snap (ch.snap_a); source = Ch_Snap_A} in
-    let curr_min_c = comp_packets(curr_min, next_c) in
-    let next_d = { p = get_next_channel_packet_snap (ch.snap_b); source = Ch_Snap_B }  in
-    comp_packets (next_d, curr_min_c)
+let comp_packets (a, b : packet * packet) =
+    if get_packet_time a <= get_packet_time b then a else b
 ;;
 
 (* *************************************************************** *)
 (* Process the next packet when book state is RECOVERY             *)
 (* *************************************************************** *)
 
-(** Process snapshot packet when in recovery *)
-let process_rec_snapshot (s, snap_p, src : feed_state * snap_packet * channel_type) = 
+(** Process snapshot message when in recovery *)
+let process_rec_snapshot (s, snap, src : feed_state * snap_message * channel_type) = 
     (** This is a snapshot message. We need to do the following:
         1. Amend our liquidity state
         2. Save the snapshot if it's for our security. *)
-    let last_snap = process_refresh_action (s.books, snap_p) in
-
+    let new_snap = snap.sm_snapshot in
     let new_snap = (
-        if new_snapshot_better (last_snap, s.channels.last_snapshot) then
-            Some last_snap
+        if new_snapshot_better (new_snap, s.channels.last_snapshot) then
+            Some new_snap
         else
             s.channels.last_snapshot) in
 
     (* We now need to update the cycle history *)
     let cycle_hist = get_cycle_hist (s.channels.cycle_hist_a, s.channels.cycle_hist_b, src) in
-    let cycle_hist' = update_cycle_hist (cycle_hist, snap_p.sp_snap) in
+    let cycle_hist' = update_cycle_hist (cycle_hist, snap ) in
 
     (** We're returning the exchange_state variable with updated channel info *)
     {
@@ -810,7 +660,9 @@ let process_rec_snapshot (s, snap_p, src : feed_state * snap_packet * channel_ty
         channels = { s.channels with
             cycle_hist_a = if src = Ch_Snap_A then cycle_hist' else s.channels.cycle_hist_a;
             cycle_hist_b = if src = Ch_Snap_B then cycle_hist' else s.channels.cycle_hist_b;
-            last_seq_processed = snap_p.sp_snap.sm_last_msg_seq_num_processed;
+            last_seq_processed = ( match new_snap with
+                | None  -> s.channels.last_seq_processed
+                | Some new_snap ->  new_snap.snap_last_msg_seq_num_processed ) ;
             last_snapshot = new_snap;
         }
     }
@@ -851,34 +703,49 @@ let rec is_cache_sorted (cache : ref_message list) =
             is_cache_sorted(y::xs)
 ;;
 
+
+(* If we dont't have any  messages to process in the current 
+packet -- move it to processed and get a new one *)
+let update_current_packet (channels : channels ) = 
+    if channels.current_packet.packet_messages <> [] then channels else
+    let processed = { channels.current_packet with 
+            packet_messages = List.rev channels.processed_messages 
+        } in
+    let channels = match channels.current_packet.packet_channel with
+        | Ch_Ref_A  -> { channels with processed_ref_a  = processed::channels.processed_ref_a  }
+        | Ch_Ref_B  -> { channels with processed_ref_b  = processed::channels.processed_ref_b  }
+        | Ch_Snap_A -> { channels with processed_snap_a = processed::channels.processed_snap_a }
+        | Ch_Snap_B -> { channels with processed_snap_b = processed::channels.processed_snap_b }
+        in
+    { channels with 
+        current_packet = List.hd channels.unprocessed_packets ;
+        unprocessed_packets = List.tl channels.unprocessed_packets;
+        processed_messages = []
+    } 
+;;
+
+
 let process_msg_recovery (s : feed_state) =
-    let channels = s.channels in
-    let next_packet = get_next_packet (s.channels) in
-    let src = next_packet.source in
-    let s' = { s with
-        new_packet = (s.last_packet_header <>  get_packet_header next_packet.p);
-        last_packet_header = get_packet_header next_packet.p
-    } in
-    match next_packet.p with
-    | NoPacket -> s
-        (* If there's nothing to process, then we simply return the current state *)
-
-    | SnapshotPacket sp ->        
-        let this_ch = process_snap_ch ( get_snap_channel (channels, src)) in
-        let channels' = set_snap_channel (channels, this_ch, src) in
-        let s'' = process_rec_snapshot ({ s' with channels = channels' }, sp, src) in 
-        add_int_message(s'', Book_Proc_Snap)
-
-    | IncRefreshPacket rp ->
-        let this_ch = process_ref_ch ( get_ref_channel (channels, src)) in
-        let channels' = set_ref_channel (channels, this_ch, src) in
-        let s'' = { s' with channels = channels' } in 
-        if rp.rp_msg.rm_security_id <> s.sec_id then
-            add_int_message (s'', Book_Proc_NotRelevant)
+    (* If there's nothing to process, then we simply return the current state *)
+    if  s.channels.current_packet.packet_messages = [] &&
+        s.channels.unprocessed_packets            = [] then s else
+    (* else we update current packet and get our next message*)
+    let s = { s with channels = update_current_packet s.channels } in
+    let next_message = List.hd s.channels.current_packet.packet_messages in
+    let s = { s with channels = { s.channels with 
+        processed_messages = next_message::s.channels.processed_messages } } in
+    match next_message with
+    | SnapshotMessage sm ->        
+        (* ?Kostya? why dont we check relevance of the seq id *)
+        let s = process_rec_snapshot ( s, sm, s.channels.current_packet.packet_channel ) in 
+        add_int_message  (s, Book_Proc_Snap)
+    | RefreshMessage rm ->
+        if rm.rm_security_id <> s.sec_id then
+            add_int_message (s, Book_Proc_NotRelevant)
         else
-            let cache' = add_to_cache (rp.rp_msg , s''.channels.cache) in
-            let s3' = { s'' with channels = { s''.channels with cache = cache'} } in 
-            add_int_message (s3', Book_Proc_Cache_Add)
+            let cache = add_to_cache (rm , s.channels.cache) in
+            let s = { s with channels = { s.channels with cache = cache} } in 
+            add_int_message (s, Book_Proc_Cache_Add)
 ;;
 
 (** This will indicate that we need to reset the book and change to InRecovery *)
@@ -943,67 +810,48 @@ let is_msg_relevant (msg, s : ref_message * feed_state) =
 (*      let's discard everything there *)
 (* 3. if we're still in the Normal state (after processing the message) *)
 let process_msg_normal (s : feed_state) =
-    let channels = s.channels in
-    let books = s.books in
-
-    (** Since we're in a normal mode, we will simply move all of the
-        packets that we've received here into processed                 *)
-    let channels' = {
-        channels with
-            snap_a = clean_snap_ch (channels.snap_a);
-            snap_b = clean_snap_ch (channels.snap_b); } in
-
-    let next_packet = get_next_packet (channels') in
-    let src = next_packet.source in
-    let s' = { s with
-        new_packet = (s.last_packet_header <> get_packet_header next_packet.p);
-        last_packet_header = get_packet_header next_packet.p
-    } in
-    match next_packet.p with
-        | NoPacket ->  { s with channels = channels' }
-
-        | SnapshotPacket _ -> add_int_message ({s' with channels = channels' }, Book_Proc_NotRelevant)
-
-        | IncRefreshPacket ref_packet ->
-            let msg = ref_packet.rp_msg in
-            let this_ch = process_ref_ch (get_ref_channel (channels', src)) in
-
+    (* If there's nothing to process, then we simply return the current state *)
+    if  s.channels.current_packet.packet_messages = [] &&
+        s.channels.unprocessed_packets            = [] then s else
+    (* else we update current packet and get our next message*)
+    let s = { s with channels = update_current_packet s.channels } in
+    let next_message = List.hd s.channels.current_packet.packet_messages in
+    let s = { s with channels = { s.channels with 
+        processed_messages = next_message::s.channels.processed_messages } } in
+    match next_message with
+        | SnapshotMessage _ -> 
+            add_int_message ( s , Book_Proc_NotRelevant )
+        | RefreshMessage rm ->
             (** if it's the wrong security, just skip it *)
-            if not (is_msg_relevant (msg, s')) then 
-                let s'' = { s' with channels = set_ref_channel (channels', this_ch, src); } in 
-                add_int_message (s'', Book_Proc_NotRelevant)
+            if not (is_msg_relevant (rm, s)) then 
+                add_int_message (s, Book_Proc_NotRelevant)
 
-            else if msg_correct_seq (msg, channels') then (
+            else if msg_correct_seq (rm, s.channels) then begin
                 (** This is the message that we need to process next *)
-                if is_msg_reset (msg) then
-                    let s'' = {
-                        s' with books = reset_books (s'.books);
-                            feed_status = InRecovery; 
-                            channels = { s.channels with last_seq_processed = msg.rm_rep_seq_num} 
+                let s = { s with 
+                    channels = { s.channels with last_seq_processed = rm.rm_rep_seq_num } } in
+                if is_msg_reset rm then
+                    let s = { s with 
+                        books = reset_books (s.books);
+                        feed_status = InRecovery; 
                     } in 
-                    add_int_message (s'', Book_Changed_to_InRecovery)
+                    add_int_message (s, Book_Changed_to_InRecovery)
                 else 
-                    let books' = process_md_update_action (books, msg) in
-                    let books'' = recalc_combined (books') in
-                    let channels' =  set_ref_channel (channels', this_ch, src) in
-                    let s'' = 
-                    { 
-                        s' with
-                        books = books'';
-                        channels = { channels' with last_seq_processed = msg.rm_rep_seq_num };
-                    } 
+                    let books = process_md_update_action (s.books, rm) in
+                    let books = recalc_combined books in
+                    let s = { s with books = books; } 
                 in
-                add_int_message (s'', Book_Proc_Normal_Update)
-            )
+                add_int_message (s, Book_Proc_Normal_Update)
+            end 
             else
                 (** We've detected a gap in message sequences *)
-                let channels'' = { channels' with cache = channels'.cache @ [ msg ]; } in
-                let s'' = { s' with
+                let channels = { s.channels with cache = s.channels.cache @ [ rm ]; } in
+                let s = { s with
                     feed_status = InRecovery;
                     books = { s.books with b_status = Empty };
-                    channels = set_ref_channel (channels'', this_ch, src);
+                    channels = channels;
                 } in 
-                add_int_message (s'', Book_Changed_to_InRecovery)
+                add_int_message (s, Book_Changed_to_InRecovery)
 ;;
 
 (*****************************************************************  *)
