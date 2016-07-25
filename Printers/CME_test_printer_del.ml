@@ -95,7 +95,6 @@ let gen_int_messages (s : feed_state) =
 	s'.internal_changes
 ;;
 
-
 (** The actual test case printer *)
 let cme_test_printer ( s : feed_state ) = 
 	let setup_msgs = book_to_messages(s) in 
@@ -141,57 +140,103 @@ let cme_test_printer ( s : feed_state ) =
 	]
 ;;
 
-(** The wrapper to take into account the messages *)
-let cme_test_printer_8 ( msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8) = 
-	let s = { 
-        books = { 
-            book_depth = 5; multi = {buys = []; sells = []};
-            implied = {buys = []; sells = []};
-            combined = {buys = []; sells = []};
-            b_status = Publishable; 
-        };
-        channels = {  
-            ref_a  = { r_unproc_packets = [msg1; msg2; msg3]; r_proc_packets=[] };
-            ref_b  = { r_unproc_packets = [msg4; msg5];       r_proc_packets=[] };
-            snap_a = { s_unproc_packets = [msg6; msg7; msg8]; s_proc_packets=[] };
-            snap_b = { s_unproc_packets = []; 		      s_proc_packets=[] };
-            last_seq_processed = 0;
-            last_snapshot = None;
-            cache = [];
-	    cycle_hist_a = { reference_sec_id = 10;
-                             self_sec_id = 123;
-                             ref_sec_snap_received = false;
-                             liq = Liquid;
-                            };
-            cycle_hist_b = { reference_sec_id = 10;
-                             self_sec_id = 123;
-                             ref_sec_snap_received = false;
-                             liq = Liquid;
-                           }; 
-	    };
-       feed_status = Normal;
-       sec_type = SecA;
-       sec_id   = 123;
-       internal_changes = [];
-       cur_time = 1;
-       new_packet = true;
-       last_packet_header = None;
-    } in
-	cme_test_printer (s)
+(**  Extract the right messages from the packet stream. TODO: should probably a better way to do this. *)
+let rec get_a_ref ( packets ) = 
+	match packets with 
+	| [] -> []
+	| x::xs -> 
+		match x.packet_channel with
+		| Ch_Ref_A -> x :: get_a_ref (xs)
+		| _ -> get_a_ref(xs)
 ;;
 
-
-(** The wrapper to take into account the messages *)
-let cme_test_printer_3 (s, msg1, msg2, msg3) = 
-	let s' = {
-			s with 
-      		channels = { 
-        		s.channels with ref_a = { s.channels.ref_a with r_unproc_packets = [msg1; msg2; msg3] };
-                        ref_b = { s.channels.ref_b with r_unproc_packets = [] };
-                        snap_a = { s.channels.snap_a with s_unproc_packets = [] };
-                        snap_b = { s.channels.snap_b with s_unproc_packets = [] };
-      		}
-  		} in 
-	cme_test_printer (s')
+let rec get_b_ref ( packets ) = 
+	match packets with 
+	| [] -> []
+	| x :: xs ->
+		match x.packet_channel with 
+		| Ch_Ref_B -> x :: get_b_ref (xs)
+		| _ -> get_b_ref (xs)
 ;;
-  	
+
+let rec get_snap_a ( packets ) = 
+	match packets with 
+	| [] -> []
+	| x :: xs ->
+		match x.packet_channel with
+		| Ch_Snap_A -> x :: get_snap_a (xs)
+		| _ -> get_snap_a (xs)
+;;
+
+let rec get_snap_b ( packets ) =
+	match packets with 
+	| [] -> []
+	| x :: xs -> 
+		match x.packet_channel with 
+		| Ch_Snap_B -> x :: get_snap_b (xs)
+		| _ -> get_snap_b (xs)
+;;
+
+(** Run the simulation of the feed model from here *)
+let get_feed_state_changes (packets) =
+	(** Note that we should be  *)
+	let s = { init_feed_state with 
+				unprocessed_packets = packets; } in 
+	
+	let s' = simulate (s) in 
+;; 
+
+(** New printer for the CME model *)
+let cme_new_test_printer ( msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8 ) = 
+
+	(** We need to accept individual messages, so we compose a list out of them here *)
+	let int_m_list = [ msg1; msg2; msg3; msg4; msg5; msg6; msg7; msg8] in 
+
+	(** Now we run the simulation of the exchange to generate all of the  *)
+	let proc_exchange_state = simulate_exchange (init_ex_state, int_m_list) in 
+	
+	(** proc_exchange_state should now contains all of the packets that the Exchanges generates
+		so here we extract the individual channels so we can later save them in binary format *)
+	let str_incoming_data_a_ref = get_a_ref (proc_exchange_state.packets) in 
+	let str_incoming_data_b_ref = get_b_ref (proc_echange_state.packets) in 
+	let str_incoming_data_a_snap = get_a_snap (proc_exchange_state.packets) in 
+	let str_incoming_data_b_snap = get_b_snap (proc_exchange_state.packets) in 
+
+	(** The last step is to run simulation on the feed using the individual channel data so 
+		we get a list of internal state transitions *)
+	let str_state_changes = int_messages_to_str_format (get_int_messages (proc_exchange_state.packets)) in 
+	[
+		{
+			tf_name_prefix = addresses.ia_ref_a ^ "_ref_a";
+			tf_name_extension = "json";
+			tf_data = str_incoming_data_a_ref;
+		};
+
+		{
+			tf_name_prefix = addresses.ia_ref_b ^ "_ref_b";
+			tf_name_extension = "json";
+			tf_data = str_incoming_data_b_ref;
+		};
+
+		{
+			tf_name_prefix = addresses.ia_snap_a ^ "_snap_a";
+			tf_name_extension = "json";
+			tf_data = str_incoming_data_snap_a;
+		};
+
+		{
+			tf_name_prefix = addresses._ia_snap_b ^ "_snap_b";
+			tf_name_extension = "json";
+			tf_data = str_incoming_data_snap_b;
+		};
+		{
+
+			tf_name_prefix = "state_ch";
+			tf_name_extension = "txt";
+			tf_data = str_state_changes;
+		};
+	]
+
+
+;;
+
