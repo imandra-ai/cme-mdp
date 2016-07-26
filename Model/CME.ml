@@ -7,6 +7,10 @@
 
 *)
 
+(* @meta[imandra_ignore] on @end *)
+open CME_Types;;
+(* @meta[imandra_ignore] off @end *)
+
 let dec_units = 1000;;
 
 (** Helper functions to convert between various *)

@@ -270,8 +270,8 @@ let write_msg_ChannelReset4 v =
     let bits = write_uInt64 bits v.f_ChannelReset4_TransactTime in
     let bits = write_MatchEventIndicator bits v.f_ChannelReset4_MatchEventIndicator in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoMDEntries , 2 ) in
-         List.fold_left ( write_g_ChannelReset4_NoMDEntries 2 ) gbits v.f_NoMDEntries in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_ChannelReset4_NoMDEntries , 2 ) in
+         List.fold_left ( write_g_ChannelReset4_NoMDEntries 2 ) gbits v.f_ChannelReset4_NoMDEntries in
     bits, gbits
 let write_msg_AdminHeartbeat12 x = Binparser.create_out (), Binparser.create_out () 
 
@@ -358,17 +358,17 @@ let write_msg_MDInstrumentDefinitionFuture27 v =
     let bits = write_UserDefinedInstrument bits v.f_MDInstrumentDefinitionFuture27_UserDefinedInstrument in
     let bits = write_LocalMktDate bits v.f_MDInstrumentDefinitionFuture27_TradingReferenceDate in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoEvents , 9 ) in
-         List.fold_left ( write_g_MDInstrumentDefinitionFuture27_NoEvents 9 ) gbits v.f_NoEvents in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDInstrumentDefinitionFuture27_NoEvents , 9 ) in
+         List.fold_left ( write_g_MDInstrumentDefinitionFuture27_NoEvents 9 ) gbits v.f_MDInstrumentDefinitionFuture27_NoEvents in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoMDFeedTypes , 4 ) in
-         List.fold_left ( write_g_MDInstrumentDefinitionFuture27_NoMDFeedTypes 4 ) gbits v.f_NoMDFeedTypes in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDInstrumentDefinitionFuture27_NoMDFeedTypes , 4 ) in
+         List.fold_left ( write_g_MDInstrumentDefinitionFuture27_NoMDFeedTypes 4 ) gbits v.f_MDInstrumentDefinitionFuture27_NoMDFeedTypes in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoInstAttrib , 4 ) in
-         List.fold_left ( write_g_MDInstrumentDefinitionFuture27_NoInstAttrib 4 ) gbits v.f_NoInstAttrib in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDInstrumentDefinitionFuture27_NoInstAttrib , 4 ) in
+         List.fold_left ( write_g_MDInstrumentDefinitionFuture27_NoInstAttrib 4 ) gbits v.f_MDInstrumentDefinitionFuture27_NoInstAttrib in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoLotTypeRules , 5 ) in
-         List.fold_left ( write_g_MDInstrumentDefinitionFuture27_NoLotTypeRules 5 ) gbits v.f_NoLotTypeRules in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDInstrumentDefinitionFuture27_NoLotTypeRules , 5 ) in
+         List.fold_left ( write_g_MDInstrumentDefinitionFuture27_NoLotTypeRules 5 ) gbits v.f_MDInstrumentDefinitionFuture27_NoLotTypeRules in
     bits, gbits
 let write_g_MDInstrumentDefinitionSpread29_NoEvents n bits v = 
     let nbits = Binparser.create_out () in 
@@ -447,20 +447,20 @@ let write_msg_MDInstrumentDefinitionSpread29 v =
     let bits = write_uInt8NULL bits v.f_MDInstrumentDefinitionSpread29_SubFraction in
     let bits = write_LocalMktDate bits v.f_MDInstrumentDefinitionSpread29_TradingReferenceDate in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoEvents , 9 ) in
-         List.fold_left ( write_g_MDInstrumentDefinitionSpread29_NoEvents 9 ) gbits v.f_NoEvents in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDInstrumentDefinitionSpread29_NoEvents , 9 ) in
+         List.fold_left ( write_g_MDInstrumentDefinitionSpread29_NoEvents 9 ) gbits v.f_MDInstrumentDefinitionSpread29_NoEvents in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoMDFeedTypes , 4 ) in
-         List.fold_left ( write_g_MDInstrumentDefinitionSpread29_NoMDFeedTypes 4 ) gbits v.f_NoMDFeedTypes in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDInstrumentDefinitionSpread29_NoMDFeedTypes , 4 ) in
+         List.fold_left ( write_g_MDInstrumentDefinitionSpread29_NoMDFeedTypes 4 ) gbits v.f_MDInstrumentDefinitionSpread29_NoMDFeedTypes in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoInstAttrib , 4 ) in
-         List.fold_left ( write_g_MDInstrumentDefinitionSpread29_NoInstAttrib 4 ) gbits v.f_NoInstAttrib in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDInstrumentDefinitionSpread29_NoInstAttrib , 4 ) in
+         List.fold_left ( write_g_MDInstrumentDefinitionSpread29_NoInstAttrib 4 ) gbits v.f_MDInstrumentDefinitionSpread29_NoInstAttrib in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoLotTypeRules , 5 ) in
-         List.fold_left ( write_g_MDInstrumentDefinitionSpread29_NoLotTypeRules 5 ) gbits v.f_NoLotTypeRules in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDInstrumentDefinitionSpread29_NoLotTypeRules , 5 ) in
+         List.fold_left ( write_g_MDInstrumentDefinitionSpread29_NoLotTypeRules 5 ) gbits v.f_MDInstrumentDefinitionSpread29_NoLotTypeRules in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoLegs , 18 ) in
-         List.fold_left ( write_g_MDInstrumentDefinitionSpread29_NoLegs 18 ) gbits v.f_NoLegs in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDInstrumentDefinitionSpread29_NoLegs , 18 ) in
+         List.fold_left ( write_g_MDInstrumentDefinitionSpread29_NoLegs 18 ) gbits v.f_MDInstrumentDefinitionSpread29_NoLegs in
     bits, gbits
 
 let write_msg_SecurityStatus30 v = 
@@ -493,8 +493,8 @@ let write_msg_MDIncrementalRefreshBook32 v =
     let bits = write_uInt64 bits v.f_MDIncrementalRefreshBook32_TransactTime in
     let bits = write_MatchEventIndicator bits v.f_MDIncrementalRefreshBook32_MatchEventIndicator in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoMDEntries , 32 ) in
-         List.fold_left ( write_g_MDIncrementalRefreshBook32_NoMDEntries 32 ) gbits v.f_NoMDEntries in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDIncrementalRefreshBook32_NoMDEntries , 32 ) in
+         List.fold_left ( write_g_MDIncrementalRefreshBook32_NoMDEntries 32 ) gbits v.f_MDIncrementalRefreshBook32_NoMDEntries in
     bits, gbits
 let write_g_MDIncrementalRefreshDailyStatistics33_NoMDEntries n bits v = 
     let nbits = Binparser.create_out () in 
@@ -514,8 +514,8 @@ let write_msg_MDIncrementalRefreshDailyStatistics33 v =
     let bits = write_uInt64 bits v.f_MDIncrementalRefreshDailyStatistics33_TransactTime in
     let bits = write_MatchEventIndicator bits v.f_MDIncrementalRefreshDailyStatistics33_MatchEventIndicator in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoMDEntries , 32 ) in
-         List.fold_left ( write_g_MDIncrementalRefreshDailyStatistics33_NoMDEntries 32 ) gbits v.f_NoMDEntries in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDIncrementalRefreshDailyStatistics33_NoMDEntries , 32 ) in
+         List.fold_left ( write_g_MDIncrementalRefreshDailyStatistics33_NoMDEntries 32 ) gbits v.f_MDIncrementalRefreshDailyStatistics33_NoMDEntries in
     bits, gbits
 let write_g_MDIncrementalRefreshLimitsBanding34_NoMDEntries n bits v = 
     let nbits = Binparser.create_out () in 
@@ -534,8 +534,8 @@ let write_msg_MDIncrementalRefreshLimitsBanding34 v =
     let bits = write_uInt64 bits v.f_MDIncrementalRefreshLimitsBanding34_TransactTime in
     let bits = write_MatchEventIndicator bits v.f_MDIncrementalRefreshLimitsBanding34_MatchEventIndicator in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoMDEntries , 32 ) in
-         List.fold_left ( write_g_MDIncrementalRefreshLimitsBanding34_NoMDEntries 32 ) gbits v.f_NoMDEntries in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDIncrementalRefreshLimitsBanding34_NoMDEntries , 32 ) in
+         List.fold_left ( write_g_MDIncrementalRefreshLimitsBanding34_NoMDEntries 32 ) gbits v.f_MDIncrementalRefreshLimitsBanding34_NoMDEntries in
     bits, gbits
 let write_g_MDIncrementalRefreshSessionStatistics35_NoMDEntries n bits v = 
     let nbits = Binparser.create_out () in 
@@ -553,8 +553,8 @@ let write_msg_MDIncrementalRefreshSessionStatistics35 v =
     let bits = write_uInt64 bits v.f_MDIncrementalRefreshSessionStatistics35_TransactTime in
     let bits = write_MatchEventIndicator bits v.f_MDIncrementalRefreshSessionStatistics35_MatchEventIndicator in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoMDEntries , 24 ) in
-         List.fold_left ( write_g_MDIncrementalRefreshSessionStatistics35_NoMDEntries 24 ) gbits v.f_NoMDEntries in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDIncrementalRefreshSessionStatistics35_NoMDEntries , 24 ) in
+         List.fold_left ( write_g_MDIncrementalRefreshSessionStatistics35_NoMDEntries 24 ) gbits v.f_MDIncrementalRefreshSessionStatistics35_NoMDEntries in
     bits, gbits
 let write_g_MDIncrementalRefreshTrade36_NoMDEntries n bits v = 
     let nbits = Binparser.create_out () in 
@@ -575,8 +575,8 @@ let write_msg_MDIncrementalRefreshTrade36 v =
     let bits = write_uInt64 bits v.f_MDIncrementalRefreshTrade36_TransactTime in
     let bits = write_MatchEventIndicator bits v.f_MDIncrementalRefreshTrade36_MatchEventIndicator in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoMDEntries , 32 ) in
-         List.fold_left ( write_g_MDIncrementalRefreshTrade36_NoMDEntries 32 ) gbits v.f_NoMDEntries in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDIncrementalRefreshTrade36_NoMDEntries , 32 ) in
+         List.fold_left ( write_g_MDIncrementalRefreshTrade36_NoMDEntries 32 ) gbits v.f_MDIncrementalRefreshTrade36_NoMDEntries in
     bits, gbits
 let write_g_MDIncrementalRefreshVolume37_NoMDEntries n bits v = 
     let nbits = Binparser.create_out () in 
@@ -593,8 +593,8 @@ let write_msg_MDIncrementalRefreshVolume37 v =
     let bits = write_uInt64 bits v.f_MDIncrementalRefreshVolume37_TransactTime in
     let bits = write_MatchEventIndicator bits v.f_MDIncrementalRefreshVolume37_MatchEventIndicator in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoMDEntries , 16 ) in
-         List.fold_left ( write_g_MDIncrementalRefreshVolume37_NoMDEntries 16 ) gbits v.f_NoMDEntries in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDIncrementalRefreshVolume37_NoMDEntries , 16 ) in
+         List.fold_left ( write_g_MDIncrementalRefreshVolume37_NoMDEntries 16 ) gbits v.f_MDIncrementalRefreshVolume37_NoMDEntries in
     bits, gbits
 let write_g_SnapshotFullRefresh38_NoMDEntries n bits v = 
     let nbits = Binparser.create_out () in 
@@ -623,8 +623,8 @@ let write_msg_SnapshotFullRefresh38 v =
     let bits = write_PRICENULL bits v.f_SnapshotFullRefresh38_LowLimitPrice in
     let bits = write_PRICENULL bits v.f_SnapshotFullRefresh38_MaxPriceVariation in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoMDEntries , 22 ) in
-         List.fold_left ( write_g_SnapshotFullRefresh38_NoMDEntries 22 ) gbits v.f_NoMDEntries in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_SnapshotFullRefresh38_NoMDEntries , 22 ) in
+         List.fold_left ( write_g_SnapshotFullRefresh38_NoMDEntries 22 ) gbits v.f_SnapshotFullRefresh38_NoMDEntries in
     bits, gbits
 let write_g_QuoteRequest39_NoRelatedSym n bits v = 
     let nbits = Binparser.create_out () in 
@@ -642,8 +642,8 @@ let write_msg_QuoteRequest39 v =
     let bits = write_QuoteReqId bits v.f_QuoteRequest39_QuoteReqID in
     let bits = write_MatchEventIndicator bits v.f_QuoteRequest39_MatchEventIndicator in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoRelatedSym , 32 ) in
-         List.fold_left ( write_g_QuoteRequest39_NoRelatedSym 32 ) gbits v.f_NoRelatedSym in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_QuoteRequest39_NoRelatedSym , 32 ) in
+         List.fold_left ( write_g_QuoteRequest39_NoRelatedSym 32 ) gbits v.f_QuoteRequest39_NoRelatedSym in
     bits, gbits
 let write_g_MDInstrumentDefinitionOption41_NoEvents n bits v = 
     let nbits = Binparser.create_out () in 
@@ -723,20 +723,20 @@ let write_msg_MDInstrumentDefinitionOption41 v =
     let bits = write_UserDefinedInstrument bits v.f_MDInstrumentDefinitionOption41_UserDefinedInstrument in
     let bits = write_LocalMktDate bits v.f_MDInstrumentDefinitionOption41_TradingReferenceDate in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoEvents , 9 ) in
-         List.fold_left ( write_g_MDInstrumentDefinitionOption41_NoEvents 9 ) gbits v.f_NoEvents in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDInstrumentDefinitionOption41_NoEvents , 9 ) in
+         List.fold_left ( write_g_MDInstrumentDefinitionOption41_NoEvents 9 ) gbits v.f_MDInstrumentDefinitionOption41_NoEvents in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoMDFeedTypes , 4 ) in
-         List.fold_left ( write_g_MDInstrumentDefinitionOption41_NoMDFeedTypes 4 ) gbits v.f_NoMDFeedTypes in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDInstrumentDefinitionOption41_NoMDFeedTypes , 4 ) in
+         List.fold_left ( write_g_MDInstrumentDefinitionOption41_NoMDFeedTypes 4 ) gbits v.f_MDInstrumentDefinitionOption41_NoMDFeedTypes in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoInstAttrib , 4 ) in
-         List.fold_left ( write_g_MDInstrumentDefinitionOption41_NoInstAttrib 4 ) gbits v.f_NoInstAttrib in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDInstrumentDefinitionOption41_NoInstAttrib , 4 ) in
+         List.fold_left ( write_g_MDInstrumentDefinitionOption41_NoInstAttrib 4 ) gbits v.f_MDInstrumentDefinitionOption41_NoInstAttrib in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoLotTypeRules , 5 ) in
-         List.fold_left ( write_g_MDInstrumentDefinitionOption41_NoLotTypeRules 5 ) gbits v.f_NoLotTypeRules in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDInstrumentDefinitionOption41_NoLotTypeRules , 5 ) in
+         List.fold_left ( write_g_MDInstrumentDefinitionOption41_NoLotTypeRules 5 ) gbits v.f_MDInstrumentDefinitionOption41_NoLotTypeRules in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoUnderlyings , 24 ) in
-         List.fold_left ( write_g_MDInstrumentDefinitionOption41_NoUnderlyings 24 ) gbits v.f_NoUnderlyings in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDInstrumentDefinitionOption41_NoUnderlyings , 24 ) in
+         List.fold_left ( write_g_MDInstrumentDefinitionOption41_NoUnderlyings 24 ) gbits v.f_MDInstrumentDefinitionOption41_NoUnderlyings in
     bits, gbits
 let write_g_MDIncrementalRefreshTradeSummary42_NoMDEntries n bits v = 
     let nbits = Binparser.create_out () in 
@@ -762,11 +762,11 @@ let write_msg_MDIncrementalRefreshTradeSummary42 v =
     let bits = write_uInt64 bits v.f_MDIncrementalRefreshTradeSummary42_TransactTime in
     let bits = write_MatchEventIndicator bits v.f_MDIncrementalRefreshTradeSummary42_MatchEventIndicator in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoMDEntries , 32 ) in
-         List.fold_left ( write_g_MDIncrementalRefreshTradeSummary42_NoMDEntries 32 ) gbits v.f_NoMDEntries in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDIncrementalRefreshTradeSummary42_NoMDEntries , 32 ) in
+         List.fold_left ( write_g_MDIncrementalRefreshTradeSummary42_NoMDEntries 32 ) gbits v.f_MDIncrementalRefreshTradeSummary42_NoMDEntries in
     let gbits = 
-         let gbits = Binparser.write_group_info  gbits ( List.length v.f_NoOrderIDEntries , 16 ) in
-         List.fold_left ( write_g_MDIncrementalRefreshTradeSummary42_NoOrderIDEntries 16 ) gbits v.f_NoOrderIDEntries in
+         let gbits = Binparser.write_group_info  gbits ( List.length v.f_MDIncrementalRefreshTradeSummary42_NoOrderIDEntries , 16 ) in
+         List.fold_left ( write_g_MDIncrementalRefreshTradeSummary42_NoOrderIDEntries 16 ) gbits v.f_MDIncrementalRefreshTradeSummary42_NoOrderIDEntries in
     bits, gbits
 let write_message bits md msg =
     let fields, groups = match msg with
