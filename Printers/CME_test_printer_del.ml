@@ -21,8 +21,8 @@
 (* @meta[imandra_ignore] on @end *)
 open CME;;
 open CME_test_helper;;
-open CME_printers;;
-open CME_json;;
+open Printers/CME_printers;;
+open Printers/CME_json;;
 
 type test_file_data =
   {
@@ -177,14 +177,6 @@ let rec get_snap_b ( packets ) =
 		| _ -> get_snap_b (xs)
 ;;
 
-(** Run the simulation of the feed model from here *)
-let get_feed_state_changes (packets) =
-	(** Note that we should be  *)
-	let s = { init_feed_state with 
-				unprocessed_packets = packets; } in 
-	
-	let s' = simulate (s) in 
-;; 
 
 (** New printer for the CME model *)
 let cme_new_test_printer ( msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8 ) = 
@@ -201,6 +193,7 @@ let cme_new_test_printer ( msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8 ) =
 	let str_incoming_data_b_ref = get_b_ref (proc_echange_state.packets) in 
 	let str_incoming_data_a_snap = get_a_snap (proc_exchange_state.packets) in 
 	let str_incoming_data_b_snap = get_b_snap (proc_exchange_state.packets) in 
+
 
 	(** The last step is to run simulation on the feed using the individual channel data so 
 		we get a list of internal state transitions *)

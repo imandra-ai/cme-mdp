@@ -16,7 +16,7 @@
         tf_name_extension : string;
         tf_data : string;
       }
- *)
+*)
 
 (* @meta[imandra_ignore] on @end *)
 open CME;;

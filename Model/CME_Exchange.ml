@@ -6,9 +6,11 @@
 *)
 
 
+open CME_Types;;
+
 (** 1. Internal state *)
 
-(** 1.1 Books.  *)
+(** 1.1 Books. *)
 (** We will just hard-code the book levels here *)
 type book_side = {
     one   : order_level;
@@ -33,24 +35,24 @@ let get_obook_level (bs, level_num : book_side * int) =
     | _ -> bs.five
 ;;
 
-(** 1.2 Security state including the order book         *)
+(** 1.2 Security state including the order book.                    *)
 type security_state = {
-    last_rep_seq_num : int;     (* Last RepSeqNum for the sc*)
-    sec_id : int;               (* Security ID              *)
-    multi_book : order_book;    (* Multi depth book         *)
-    implied_book : order_book;  (* Implied book             *)
+    last_rep_seq_num : int;     (* Last RepSeqNum for the sc        *)
+    sec_id : int;               (* Security ID                      *)
+    multi_book : order_book;    (* Multi depth book                 *)
+    implied_book : order_book;  (* Implied book                     *)
 };;
 
-(** 1.3 The state of the whole exchange.                  *)
+(** 1.3 The state of the whole exchange.                            *)
 type exchange_state = {
-    sec_a : security_state;     (* Security A orderbook     *)
-    sec_b : security_state;	    (* Security B orderbook     *)
+    sec_a : security_state;     (* Security A orderbook             *)
+    sec_b : security_state;	    (* Security B orderbook             *)
 
-    (** Queue of events that have occured since the         *)
+    (** Queue of events that have occured since the last packet submission *)
      inc_msg_queue : message list;
     snap_msg_queue : message list;
 
-    (** Packets queue                                       *)
+    (** Packets queue                                               *)
     pac_queue: packet list;
     last_inc_seq_num  : int;            (* Packet sequence number   *)
     last_snap_seq_num : int;            (* Packet sequence number   *)
@@ -316,7 +318,7 @@ let empty_book_side = {
 };;
 
 
-let init_state = {
+let init_ex_state = {
     sec_a = {
         sec_id = 1;
         last_rep_seq_num = 0;
@@ -341,7 +343,7 @@ let init_state = {
             sell_orders = empty_book_side;
         };
     };
-
+    
     last_snap_seq_num = 0;
     last_inc_seq_num   = 0;
     inc_msg_queue = [];
@@ -349,21 +351,86 @@ let init_state = {
     pac_queue = [];
 };;
 
-(** testgen *)
-let t_three (msg1, msg2, msg3) = 
-    let s = init_state in 
-    let s1 = process_int_trans (s, msg1) in 
-    let s2 = process_int_trans (s1, msg2) in 
-    process_int_trans (s2, msg3)
+(** simulate *)
+let rec simulate_exchange ( s, int_tran_list : exchange_state * int_state_trans list ) = 
+    match int_tran_list with 
+    | [] -> s
+    | x::xs -> simulate_exchange (process_int_trans (s, x), xs)
 ;;
 
-(** Are these transitions valid? *)
-let vt (msg1, msg2, msg3) = 
-    let s = init_state in 
+(**
+(****** **************************************************************************************************** *)
+(** testgen *)
+let t_three (msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8 : int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans) = 
+    let s = init_ex_state in 
     let s1 = process_int_trans (s, msg1) in 
     let s2 = process_int_trans (s1, msg2) in 
     let s3 = process_int_trans (s2, msg3) in 
+    let s4 = process_int_trans (s3, msg4) in 
+    let s5 = process_int_trans (s4, msg5) in 
+    let s6 = process_int_trans (s5, msg6) in 
+    let s7 = process_int_trans (s6, msg7) in 
+    process_int_trans (s7, msg8)
+;;
+
+let six (msg1, msg2, msg3, msg4 : int_state_trans * int_state_trans * int_state_trans * int_state_trans ) = 
+    true
+;;
+
+let valid_tranny (s, s1, s2, s3, msg1, msg2, msg3, msg4) = 
     is_trans_valid (s, msg1) && 
     is_trans_valid (s1, msg2) && 
-    is_trans_valid (s2, msg3)
+    is_trans_valid (s2, msg3) && 
+    is_trans_valid (s3, msg4)
 ;;
+
+(** Are these transitions valid? *)
+let vd_new (msg1, msg2, msg3, msg4 : int_state_trans * int_state_trans * int_state_trans * int_state_trans) = 
+    let s = init_ex_state in 
+    let s1 = process_int_trans (s, msg1) in 
+    let s2 = process_int_trans (s1, msg2) in 
+    let s3 = process_int_trans (s2, msg3) in 
+    let s4 = process_int_trans (s3, msg4) in 
+    valid_tranny (s, s1, s2, s3, msg1, msg2, msg3, msg4)
+;;
+
+let twelve (m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12 : int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans) = 
+    true
+;;
+
+
+let v_t_twelve (s, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12) = 
+    is_trans_valid (s, m1) && 
+    is_trans_valid (s1, m2) && 
+    is_trans_valid (s2, m3) && 
+    is_trans_valid (s3, m4) &&
+    is_trans_valid (s4, m5) && 
+    is_trans_valid (s5, m6) && 
+    is_trans_valid (s6, m7) && 
+    is_trans_valid (s7, m8) && 
+    is_trans_valid (s8, m9) && 
+    is_trans_valid (s9, m10) &&
+    is_trans_valid (s10, m11) && 
+    is_trans_valid (s11, m12) 
+;;
+
+
+(** Are these transitions valid? *)
+let vd_twelve (m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12 : int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans) = 
+    let s = init_ex_state in 
+    let s1 = process_int_trans (s, m1) in 
+    let s2 = process_int_trans (s1, m2) in 
+    let s3 = process_int_trans (s2, m3) in 
+    let s4 = process_int_trans (s3, m4) in 
+    let s5 = process_int_trans (s4, m5) in 
+    let s6 = process_int_trans (s5, m6) in 
+    let s7 = process_int_trans (s6, m7) in 
+    let s8 = process_int_trans (s7, m8) in 
+    let s9 = process_int_trans (s8, m9) in 
+    let s10 = process_int_trans (s9, m10) in 
+    let s11 = process_int_trans (s10, m11) in 
+    let s12 = process_int_trans (s11, m12) in 
+    v_t_twelve (s, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12)
+;;
+
+**)

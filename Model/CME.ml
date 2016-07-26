@@ -350,9 +350,9 @@ let recalc_combined (books : books) =
 (** *************************************************************** *)
 (** Update cycle history for this channel                           *)
 (** *************************************************************** *)
-(**
+(** 
     Is the liquidity state 'sticky' in that once a security is deemed
-    illiquid, could it be reset?
+    illiquid, could it be reset? 
 *)
 let update_cycle_hist (ch, snap : cycle_hist * snap_message) =
     let is_ref_sec = ch.reference_sec_id = snap.sm_security_id in
@@ -724,8 +724,13 @@ let update_current_packet (channels : channels ) =
     } 
 ;;
 
-
 let process_msg_recovery (s : feed_state) =
+    (* 
+        ?Kostya? why dont we check relevance of the seq id.
+        
+    
+    *)
+
     (* If there's nothing to process, then we simply return the current state *)
     if  s.channels.current_packet.packet_messages = [] &&
         s.channels.unprocessed_packets            = [] then s else
@@ -736,7 +741,6 @@ let process_msg_recovery (s : feed_state) =
         processed_messages = next_message::s.channels.processed_messages } } in
     match next_message with
     | SnapshotMessage sm ->        
-        (* ?Kostya? why dont we check relevance of the seq id *)
         let s = process_rec_snapshot ( s, sm, s.channels.current_packet.packet_channel ) in 
         add_int_message  (s, Book_Proc_Snap)
     | RefreshMessage rm ->
@@ -760,39 +764,6 @@ let msg_behind (msg, ch) =
 let msg_correct_seq (msg, ch) = 
     msg.rm_rep_seq_num = (ch.last_seq_processed + 1) 
 ;;
-
-(** Merging a single side of the book *)
-
-(**
-let rec merge_side (ords1, ords2 : order_level list * order_level list) = 
-    match ords1, ords2 with 
-    | x::xs, y::ys ->
-        let new_level = ( 
-            match x, y with 
-            | Level o1, Level o2 -> 
-                Level {
-                    side = o1.side;
-                    qty = o1.qty + o2.qty;
-                    price = o1.price;
-                    num_orders = None;
-                }
-            | Level o1, NoLevel -> 
-                Level {
-                    side = o1.side;
-                    num_orders = None;
-                }
-            | NoLevel, Level o2 ->
-                Level {
-                    side = o1.side;
-                    price = o1.price;
-                    num_orders = None;
-                }
-            | NoLevel, NoLevel -> NoLevel
-        ) in 
-        new_level :: merge_side (xs, ys)
-    | _, _ -> []
-;;
-*)
 
 let is_msg_relevant (msg, s : ref_message * feed_state) = 
     if msg.rm_security_id <> s.sec_id || 
