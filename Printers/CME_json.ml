@@ -174,4 +174,19 @@ let packet_of_json (json : Yojson.Basic.json) : CME_Types.packet  =
     }
 ;;
 
+let packets_to_json (packets : CME_Types.packet list) : Yojson.Basic.json  =
+    (* This weirdness is just for performance reasons *)
+    let rec tail_map current = function
+        | h::tl -> tail_map ( packet_to_json h :: current ) tl
+        | [] -> List.rev current
+        in
+    `Assoc [( "packets", `List ( tail_map [] packets ))] 
+;;
+
+let packets_of_json (json : Yojson.Basic.json) : CME_Types.packet list =
+    let open Yojson.Basic in 
+    match json with
+        | `Assoc [( "packets", `List packets)] -> List.map packet_of_json packets
+        | _ -> raise (Failure "A single toplevel \"packets\" key is expected.")
+;;
 

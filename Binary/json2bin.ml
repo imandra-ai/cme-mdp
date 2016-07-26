@@ -1,17 +1,14 @@
 let process infile outfile =
-    let write_packet = function
-        | CME.SnapshotPacket   p -> CME_writer.snap_packet_write ( Binparser.create_out () ) [p]
-        | CME.IncRefreshPacket p -> CME_writer.ref_packet_write  ( Binparser.create_out () ) [p]
-        in
-    Yojson.Safe.from_file infile
+    let write_packet packet = CME_writer.packet_write ( Binparser.create_out () ) packet in
+    Yojson.Basic.from_file infile
         |> CME_json.packets_of_json
-        |> List.map write_packet 
+        |> List.map ( write_packet 1469570654 )
         |> Binparser.concat_out
         |> Binparser.write_out outfile
 
 let command =
     Core.Std.Command.basic
-        ~summary:"Reads packets from a JSON file and ."
+        ~summary:"Reads packets from a JSON file and wirtes down the binary file."
         ~readme:(fun () -> "")
         Core.Std.Command.Spec.(
             empty
