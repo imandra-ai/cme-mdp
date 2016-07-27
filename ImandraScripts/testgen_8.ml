@@ -1,10 +1,11 @@
+
 :load Model/CME_Types.ml
 :load Model/CME.ml
 
+:load_ocaml _build/Printers/CME_json.cmo
 :load_ocaml Model/CME_test_helper.ml
 :load_ocaml Printers/CME_printers.ml
 :load_ocaml Printers/kojson.ml
-:load_ocaml Printers/CME_json.ml
 :load_ocaml Printers/CME_test_printer_del.ml
 
 :adts
