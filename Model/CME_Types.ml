@@ -29,7 +29,7 @@ type order_info = {
     num_orders : int option; (* Not provided for implied books *)
 };;
 
-type order_level = order_info option ;;
+type order_level = Level of order_info | NoLevel;;
 
 (** Generic book type (used for all three types of books) *)
 type book = {

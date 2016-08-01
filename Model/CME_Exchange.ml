@@ -6,7 +6,9 @@
 *)
 
 
+(* @meta[imandra_ignore] on @end *)
 open CME_Types;;
+(* @meta[imandra_ignore] off @end *)
 
 (** 1. Internal state *)
 
@@ -79,7 +81,7 @@ let get_level ( state, security, book_type, order_side, nlevel  : exchange_state
         | Book_Type_Implied  , OrdBuy  -> get_obook_level ( s_state.implied_book.buy_orders  , nlevel )
         | Book_Type_Multi    , OrdSell -> get_obook_level ( s_state.multi_book.sell_orders   , nlevel )
         | Book_Type_Implied  , OrdSell -> get_obook_level ( s_state.implied_book.sell_orders , nlevel )
-        | Book_Type_Combined ,  _ -> None 
+        | Book_Type_Combined ,  _ -> NoLevel 
 ;;
 
 let advance_rep_seq_num ( state, sec_type ) =
@@ -137,7 +139,7 @@ type ord_change_data = {
 let send_o_change (state, o_change) = 
     let state = advance_rep_seq_num ( state, o_change.oc_sec_type ) in
     let level = get_level (state , o_change.oc_sec_type, o_change.oc_book_type, o_change.oc_level_side, o_change.oc_level_num ) in
-    match level with None -> state | Some level -> 
+    match level with NoLevel -> state | Level level -> 
     let change_m = RefreshMessage {
         rm_security_id = get_security_id ( state, o_change.oc_sec_type ) ;
         rm_rep_seq_num = get_rep_seq_num ( state, o_change.oc_sec_type ) ;
@@ -165,7 +167,7 @@ type ord_del_data = {
 let send_o_del (state, o_del) = 
     let state = advance_rep_seq_num ( state, o_del.od_sec_type ) in
     let level = get_level (state , o_del.od_sec_type, o_del.od_book_type, o_del.od_level_side, o_del.od_level_num ) in
-    match level with None -> state | Some level -> 
+    match level with NoLevel -> state | Level level -> 
     let del_m = RefreshMessage {
         rm_security_id = get_security_id ( state, o_del.od_sec_type ) ;
         rm_rep_seq_num = get_rep_seq_num ( state, o_del.od_sec_type ) ;
@@ -226,7 +228,7 @@ type int_state_trans =
 
 (** 3.1 Check that the level exists for the whole security *)
 let sec_level_exists (state, sec_t, book_t, order_s, level_n : exchange_state * sec_type * book_type * order_side * int ) = 
-    match get_level  (state, sec_t, book_t, order_s, level_n ) with None -> false | Some _ -> true 
+    match get_level  (state, sec_t, book_t, order_s, level_n ) with NoLevel -> false | Level _ -> true 
 ;;
 
 (** 3.2 Define a valid transition of the exchange *)
@@ -310,11 +312,11 @@ let process_int_trans (state, trans) =
 ;;
 
 let empty_book_side = {
-    one = None;
-    two = None;
-    three = None;
-    four = None;
-    five = None;
+    one   = NoLevel;
+    two   = NoLevel;
+    three = NoLevel;
+    four  = NoLevel;
+    five  = NoLevel;
 };;
 
 

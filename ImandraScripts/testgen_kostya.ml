@@ -1,65 +1,92 @@
-:load CME.ml
+:load Model/CME_Types.ml
+:load Model/CME_Exchange.ml
+:load Model/CME.ml
 
+(*
 :load_ocaml CME_printers.ml
 :load_ocaml CME_test_helper.ml
 :load_ocaml kojson.ml
 :load_ocaml CME_json.ml
 :load_ocaml CME_test_printer_del.ml
+*)
 
 :adts
 :p (in-theory (enable IML-ADT-EXECUTABLE-COUNTERPARTS-THEORY))
 
-:!disable
- add_to_cache
- apply_update_packets
- delete_level
- insert_level
- insert_order
- order_higher_ranked
- update_cycle_hist
- is_cache_sorted
- recalc_combined  
+
+
+
+let four (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_state_trans * int_state_trans) = 
+    true
 ;;
 
-let large_call_3 (s, msg1, msg2, msg3) =
-    let s' = { 
+let valid_trans_4_s (s1, s2, s3, s4, m1, m2, m3, m4) = 
+    is_trans_valid (s1, m1)
+    && is_trans_valid (s2, m2)
+    && is_trans_valid (s3, m3)
+    && is_trans_valid (s4, m4)
+;;
+
+(** Are these transitions valid? *)
+let valid_trans_4 (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_state_trans * int_state_trans) = 
+    let s1  = init_ex_state in 
+    let s2  = process_int_trans (s1, m1) in 
+    let s3  = process_int_trans (s2, m2) in 
+    let s4  = process_int_trans (s3, m3) in 
+    valid_trans_4_s (s1, s2, s3, s4, m1, m2, m3, m4)
+;;
+
+let valid_4_limit_resets (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_state_trans * int_state_trans) =   
+  (* No more than two resets *)
+  int_of_book_reset m1 + int_of_book_reset m2 + int_of_book_reset m3 + int_of_book_reset m4 <= 2
+  (* Transitions valid *)
+  && valid_trans_4 (m1,m2,m3,m4)
+;;
+
+let pipe_to_model (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_state_trans * int_state_trans) =
+    let exchange_state = simulate_exchange ( init_ex_state , [m1,m2,m3,m4] ) in
+    let s = { 
+        sec_id   = get_security_id (exchange_state, SecA);
+        sec_type = SecA;
         books = { 
-            book_depth = 5; multi = {buys = []; sells = []};
-            implied = {buys = []; sells = []};
-            combined = {buys = []; sells = []};
-            b_status = Publishable; 
+            book_depth = 4;
+            multi    = { buys = []; sells = [] };
+            implied  = { buys = []; sells = [] };
+            combined = { buys = []; sells = [] };
+            b_status = Empty ;
         };
-        channels = {  
-            ref_a  = { s.channels.ref_a with r_unproc_packets = [msg1; msg2; msg3]; };
-            ref_b  = { s.channels.ref_b with r_unproc_packets = []        };
-            snap_a = { s.channels.snap_a with s_unproc_packets = [] };
-            snap_b = { s.channels.snap_b with s_unproc_packets = [] };
-            last_seq_processed = 0;
+        (* Communication channels *)
+        channels = {
+            unprocessed_packets : List.hd exchange_state.pac_queue;
+            current_packet : List.tl exchange_state.pac_queue;;
+
+            processed_messages = [];
+            processed_ref_a    = [];
+            processed_ref_b    = [];
+            processed_snap_a   = [];
+            processed_snap_b   = [];
+
+            cycle_hist_a = clean_cycle_hist;
+            cycle_hist_b = clean_cycle_hist;
+            last_seq_processed = -1;    
+            cache = [];       
             last_snapshot = None;
-            cache = [];
-	    cycle_hist_a = { reference_sec_id = 10;
-                             self_sec_id = 123;
-                             ref_sec_snap_received = false;
-                             liq = Liquid;
-                            };
-            cycle_hist_b = { reference_sec_id = 10;
-                             self_sec_id = 123;
-                             ref_sec_snap_received = false;
-                             liq = Liquid;
-                           }; 
-	    };
-       feed_status = Normal;
-       sec_type = FUTURES;
-       sec_id   = 123;
-       internal_changes = [];
-       cur_time = 1;
-       new_packet = true;
-       last_packet_header = None;
+        };
+        feed_status = Normal;
+        internal_changes : [];
+        cur_time = 0;
     } in
- let s' = one_step(s') in 
- let s' = one_step(s') in 
- let s' = one_step(s') in 
- one_step(s')
+    let s = one_step s in
+    let s = one_step s in
+    let s = one_step s in
+    let s = one_step s in
+    s
 ;;
 
-:testgen large_call_3 with_printer cme_test_printer_3
+
+(* Let's set max_region_time! *)
+(* :max_region_time 5 *)
+
+:testgen four assuming valid_4_limit_resets with_printer pipe_to_model
+ 
+

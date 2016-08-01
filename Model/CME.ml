@@ -55,15 +55,22 @@ type feed_status =
 ;;
 
 (** Create a list of empty list of order levels *)
-let rec empty_order_levels (x) =
-    if x > 0 then None :: empty_order_levels (x - 1) else []
+let rec empty_order_levels (x:int) : order_level list =
+    if x > 0 then NoLevel :: empty_order_levels (x - 1) else []
 ;;
 
 (** Create the empty book for a given depth *)
+(* Ask why it doesnt work
 let empty_book (num_levels : int) = {
     buys  = empty_order_levels (num_levels);
     sells = empty_order_levels (num_levels);
-};;
+};; *)
+
+let empty_book (num_levels : int) = {
+    buys  = [ NoLevel; NoLevel; NoLevel; NoLevel; NoLevel ];
+    sells = [ NoLevel; NoLevel; NoLevel; NoLevel; NoLevel ];
+};; 
+
 
 (** ******************************************************* *)
 (** This structure represents the history that we maintain  *)
@@ -125,8 +132,8 @@ type internal_msg =
 (** Contains full definition of the state of the exchange *)
 type feed_state = {
     (* Keeping a record of the security that we're maintaining *)
-    sec_type : sec_type;
-    sec_id   : int;
+    feed_sec_type : sec_type;
+    feed_sec_id   : int;
 
     (* The books that we're maintaining, etc... *)
     books : books;
@@ -169,10 +176,10 @@ let is_cache_valid_since_seq_num (cache, last_processed_seq, book_depth : ref_me
 (** ************************************************************** *)
 let order_higher_ranked (s, o1, o2 : order_side * order_level * order_level) =
     match o1, o2 with
-    | Some d_1, Some d_2 -> if s = OrdBuy then d_1.price >= d_2.price else d_1.price <= d_2.price
-    | Some d_1, None -> true
-    | None, Some d_2 -> false
-    | None, None -> true
+    | Level d_1, Level d_2 -> if s = OrdBuy then d_1.price >= d_2.price else d_1.price <= d_2.price
+    | Level d_1, NoLevel -> true
+    | NoLevel, Level d_2 -> false
+    | NoLevel, NoLevel -> true
 ;;
 
 (** Insert order into the book *)
@@ -215,9 +222,9 @@ let rec add_levels (orders : order_level list) =
     | [x] -> [x]
     | x :: y :: xs -> (
         match x, y with
-        | Some x_d, Some y_d ->
+        | Level x_d, Level y_d ->
             if x_d.price = y_d.price then
-                let o = Some {
+                let o = Level {
                     side = x_d.side;
                     qty = x_d.qty + y_d.qty;
                     price = x_d.price;
@@ -237,7 +244,7 @@ let rec adjust_orders_size (num_levels, ords : int * order_level list) =
     if num_levels <= 0 then
         ords
     else
-        adjust_orders_size (num_levels - 1, ords @ [None])
+        adjust_orders_size (num_levels - 1, ords @ [NoLevel])
 ;;
 
 (** Adjusts the number of levels within a single side of an order book *)
@@ -292,7 +299,7 @@ let rec ch_inplace (orders, curr_idx, target_idx, new_order_info : order_level l
 
 (** Change an existing order level *)
 let bk_change (orders, side, price_level, entry_size, entry_price, num_orders : order_level list * order_side * int * int * int * int option) =
-    let new_order_info = Some {
+    let new_order_info = Level {
         side = side;
         qty = entry_size;
         price = entry_price;
@@ -313,7 +320,7 @@ let rec insert_level ( orders, new_order, curr_idx, target_idx : order_level lis
 
 (** Add a new level to the book *)
 let bk_new (orders, side, price_level, entry_size, entry_price, num_orders : order_level list * order_side * int * int * int * int option) =
-    let new_order_info = Some {
+    let new_order_info = Level {
         side = side;
         qty = entry_size;
         price = entry_price;
@@ -748,7 +755,7 @@ let process_msg_recovery (s : feed_state) =
         let s = process_rec_snapshot ( s, sm, s.channels.current_packet.packet_channel ) in 
         add_int_message  (s, Book_Proc_Snap)
     | RefreshMessage rm ->
-        if rm.rm_security_id <> s.sec_id then
+        if rm.rm_security_id <> s.feed_sec_id then
             add_int_message (s, Book_Proc_NotRelevant)
         else
             let cache = add_to_cache (rm , s.channels.cache) in
@@ -770,7 +777,7 @@ let msg_correct_seq (msg, ch) =
 ;;
 
 let is_msg_relevant (msg, s : ref_message * feed_state) = 
-    if msg.rm_security_id <> s.sec_id || 
+    if msg.rm_security_id <> s.feed_sec_id || 
         msg_behind (msg, s.channels) || 
         not (correct_level (msg, s.books.book_depth))  then false
     else true
