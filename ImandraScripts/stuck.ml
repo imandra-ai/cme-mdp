@@ -16,6 +16,13 @@ let four (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_state_trans *
     true
 ;;
 
+let valid_trans_4_s (s1, s2, s3, s4, m1, m2, m3, m4) =
+    is_trans_valid (s1, m1)
+    && is_trans_valid (s2, m2)
+    && is_trans_valid (s3, m3)
+    && is_trans_valid (s4, m4)
+;;
+
 (** Are these transitions valid? *)
 let valid_trans_4 (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_state_trans * int_state_trans) =
     let s1  = init_ex_state in
