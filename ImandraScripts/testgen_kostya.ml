@@ -14,11 +14,10 @@
 :p (in-theory (enable IML-ADT-EXECUTABLE-COUNTERPARTS-THEORY))
 
 
+let int_of_book_reset x = match x with ST_BookReset -> 1 | _ -> 0 ;;
 
 
-let four (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_state_trans * int_state_trans) = 
-    true
-;;
+let four (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_state_trans * int_state_trans) = true ;;
 
 let valid_trans_4_s (s1, s2, s3, s4, m1, m2, m3, m4) = 
     is_trans_valid (s1, m1)
@@ -44,10 +43,10 @@ let valid_4_limit_resets (m1, m2, m3, m4 : int_state_trans * int_state_trans * i
 ;;
 
 let pipe_to_model (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_state_trans * int_state_trans) =
-    let exchange_state = simulate_exchange ( init_ex_state , [m1,m2,m3,m4] ) in
+    let exchange_state = simulate_exchange ( init_ex_state , [m1; m2; m3; m4] ) in
     let s = { 
-        sec_id   = get_security_id (exchange_state, SecA);
-        sec_type = SecA;
+        feed_sec_id   = get_security_id (exchange_state, SecA);
+        feed_sec_type = SecA;
         books = { 
             book_depth = 4;
             multi    = { buys = []; sells = [] };
@@ -57,8 +56,8 @@ let pipe_to_model (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_stat
         };
         (* Communication channels *)
         channels = {
-            unprocessed_packets : List.hd exchange_state.pac_queue;
-            current_packet : List.tl exchange_state.pac_queue;;
+            unprocessed_packets = List.tl exchange_state.pac_queue;
+            current_packet = List.hd exchange_state.pac_queue;
 
             processed_messages = [];
             processed_ref_a    = [];
@@ -73,14 +72,19 @@ let pipe_to_model (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_stat
             last_snapshot = None;
         };
         feed_status = Normal;
-        internal_changes : [];
+        internal_changes = [];
         cur_time = 0;
     } in
     let s = one_step s in
     let s = one_step s in
     let s = one_step s in
-    let s = one_step s in
-    s
+    let s = one_step s in [
+        { 
+            tf_name_prefix = "test";
+            tf_name_extension = "json";
+            tf_data = "{}"
+        }
+    ]
 ;;
 
 
