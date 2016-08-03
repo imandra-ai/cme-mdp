@@ -94,9 +94,6 @@ let clean_cycle_hist = {
 type channels = {
     unprocessed_packets : packet list;
 
-    current_packet  : packet option;
-    current_message : message option;
-
     processed_messages : message list;
     processed_ref_a : packet list;
     processed_ref_b : packet list;
@@ -800,7 +797,7 @@ let process_msg_normal ( s , next_message : feed_state * message ) =
 
 
 (* Helper for the top-level transition *)
-let move_to_next_packet ( s, current_packet, rest_packets : feed_state * packet * packet list ) : feed_state =
+let move_to_next_packet ( s, current_packet, rest_packets : feed_state * packet * packet list )  =
     let c = s.channels in
     let processed = { current_packet with packet_messages = List.rev c.processed_messages } in
     let c = match current_packet.packet_channel with

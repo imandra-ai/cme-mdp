@@ -55,8 +55,6 @@ let str_reg = ref [];;
 
 let pipe_to_model (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_state_trans * int_state_trans) =
     let exchange_state = simulate_exchange ( init_ex_state , [m1; m2; m3; m4] ) in
-    let pq = exchange_state.pac_queue in
-    if pq = [] then () else
     let s = { 
         feed_sec_id   = get_security_id (exchange_state, SecA);
         feed_sec_type = SecA;
@@ -69,8 +67,7 @@ let pipe_to_model (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_stat
         };
         (* Communication channels *)
         channels = {
-            unprocessed_packets = List.tl pq;
-            current_packet = List.hd pq;
+            unprocessed_packets = exchange_state.pac_queue;
 
             processed_messages = [];
             processed_ref_a    = [];
