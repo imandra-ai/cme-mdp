@@ -749,7 +749,11 @@ let process_msg_recovery (s : feed_state) =
     let s = { s with channels = update_current_packet s.channels } in
     let next_message = List.hd s.channels.current_packet.packet_messages in
     let s = { s with channels = { s.channels with 
-        processed_messages = next_message::s.channels.processed_messages } } in
+        current_packet = { s.channels.current_packet with 
+            packet_messages = List.tl s.channels.current_packet.packet_messages
+        };
+        processed_messages = next_message::s.channels.processed_messages 
+    } } in
     match next_message with
     | SnapshotMessage sm ->        
         let s = process_rec_snapshot ( s, sm, s.channels.current_packet.packet_channel ) in 
@@ -799,7 +803,11 @@ let process_msg_normal (s : feed_state) =
     let s = { s with channels = update_current_packet s.channels } in
     let next_message = List.hd s.channels.current_packet.packet_messages in
     let s = { s with channels = { s.channels with 
-        processed_messages = next_message::s.channels.processed_messages } } in
+        current_packet = { s.channels.current_packet with 
+            packet_messages = List.tl s.channels.current_packet.packet_messages
+        };
+        processed_messages = next_message::s.channels.processed_messages 
+    } } in
     match next_message with
         | SnapshotMessage _ -> 
             add_int_message ( s , Book_Proc_NotRelevant )

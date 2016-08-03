@@ -1,6 +1,11 @@
+#use "topfind";;
+#require "yojson";;
+
 :load Model/CME_Types.ml
 :load Model/CME_Exchange.ml
 :load Model/CME.ml
+
+:load_ocaml Printers/CME_json.ml
 
 (*
 :load_ocaml CME_printers.ml
@@ -42,8 +47,16 @@ let valid_4_limit_resets (m1, m2, m3, m4 : int_state_trans * int_state_trans * i
   && valid_trans_4 (m1,m2,m3,m4)
 ;;
 
+
+:shadow off
+
+let end_reg = ref [];;
+let str_reg = ref [];;
+
 let pipe_to_model (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_state_trans * int_state_trans) =
     let exchange_state = simulate_exchange ( init_ex_state , [m1; m2; m3; m4] ) in
+    let pq = exchange_state.pac_queue in
+    if pq = [] then () else
     let s = { 
         feed_sec_id   = get_security_id (exchange_state, SecA);
         feed_sec_type = SecA;
@@ -56,8 +69,8 @@ let pipe_to_model (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_stat
         };
         (* Communication channels *)
         channels = {
-            unprocessed_packets = List.tl exchange_state.pac_queue;
-            current_packet = List.hd exchange_state.pac_queue;
+            unprocessed_packets = List.tl pq;
+            current_packet = List.hd pq;
 
             processed_messages = [];
             processed_ref_a    = [];
@@ -75,22 +88,26 @@ let pipe_to_model (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_stat
         internal_changes = [];
         cur_time = 0;
     } in
-    let s = one_step s in
-    let s = one_step s in
-    let s = one_step s in
-    let s = one_step s in [
-        { 
-            tf_name_prefix = "test";
-            tf_name_extension = "json";
-            tf_data = "{}"
-        }
-    ]
+    let () = str_reg := s :: !str_reg in 
+    let s = simulate s in
+    let out_json : Yojson.Basic.json = `Assoc [
+        ( "ref_a", s.channels.processed_ref_a  |> packets_to_json );
+        ( "ref_b", s.channels.processed_ref_b  |> packets_to_json );
+        ("snap_a", s.channels.processed_snap_a |> packets_to_json );
+        ("snap_b", s.channels.processed_snap_b |> packets_to_json );
+    ] in
+    let () = end_reg := s :: !end_reg in 
+    out_json |> Yojson.Basic.pretty_to_string |> print_string 
 ;;
 
+:shadow on
 
 (* Let's set max_region_time! *)
 (* :max_region_time 5 *)
 
-:testgen four assuming valid_4_limit_resets with_printer pipe_to_model
+:max_region_time 5
+:max_regions 50       (* Limiting # regions to 50 so you can quickly see some results *)
+
+:testgen four assuming valid_4_limit_resets with_code pipe_to_model
  
 

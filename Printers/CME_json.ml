@@ -19,7 +19,6 @@ let intopt_of_json : ( Yojson.Basic.json -> int option) =
 (* But worth trying and benchmarking. *)
 
 let msgtype_to_json, msgtype_of_json =
-    let open CME_Types in
     let m2j : (msg_type * Yojson.Basic.json ) list = [
         ( V_MDUpdateAction_New        , `String "New"        );
         ( V_MDUpdateAction_Change     , `String "Change"     );
@@ -33,7 +32,6 @@ let msgtype_to_json, msgtype_of_json =
 
 
 let entrytype_to_json, entrytype_of_json = 
-    let open CME_Types in
     let e2j : ( entry_type * Yojson.Basic.json ) list = [
         ( V_MDEntryType_Bid                      , `String "Bid"          );
         ( V_MDEntryType_Offer                    , `String "Offer"        );
@@ -46,7 +44,6 @@ let entrytype_to_json, entrytype_of_json =
 
 
 let channel_to_json, channel_of_json = 
-    let open CME_Types in
     let c2j : ( channel_type * Yojson.Basic.json ) list = [
         ( Ch_Ref_A  , `String "RefreshA"  );
         ( Ch_Ref_B  , `String "RefreshB"  );
@@ -57,11 +54,10 @@ let channel_to_json, channel_of_json =
 ;;
 
 
-let book_to_json : ( CME_Types.book -> Yojson.Basic.json ) =
-    let open CME_Types in
+let book_to_json : (book -> Yojson.Basic.json ) =
     let convert_order_level : (order_level -> Yojson.Basic.json) = function 
-        | None -> `Assoc []
-        | Some o -> `Assoc [
+        | NoLevel -> `Assoc []
+        | Level o -> `Assoc [
             ("Side",      match o.side with OrdBuy -> `String "BUY" | OrdSell -> `String "SELL");
             ("Quantity", `Int o.qty   );
             ("Price",    `Int o.price  );
@@ -74,12 +70,11 @@ let book_to_json : ( CME_Types.book -> Yojson.Basic.json ) =
 ;;
     
 
-let book_of_json : ( Yojson.Basic.json -> CME_Types.book ) =
-    let open CME_Types in
+let book_of_json : ( Yojson.Basic.json -> book ) =
     let open Yojson.Basic.Util in
     let read_order_level : ( Yojson.Basic.json -> order_level ) = function 
-        | `Assoc [] -> None
-        | j -> Some { 
+        | `Assoc [] -> NoLevel
+        | j -> Level { 
             qty        = j |> member "Quantity"  |> to_int;
             price      = j |> member "Price"     |> to_int;
             num_orders = j |> member "NumOrders" |> to_int_option;
@@ -95,8 +90,7 @@ let book_of_json : ( Yojson.Basic.json -> CME_Types.book ) =
 ;;    
     
 
-let message_to_json (message : CME_Types.message) : Yojson.Basic.json  =
-    let open CME_Types in
+let message_to_json (message : message) : Yojson.Basic.json  =
     let convert_inc_refresh : ref_message -> Yojson.Basic.json = 
         fun p -> `Assoc [
             ( "SequrityID", `Int p.rm_security_id );
@@ -122,15 +116,15 @@ let message_to_json (message : CME_Types.message) : Yojson.Basic.json  =
 ;;
         
     
-let message_of_json ( json : Yojson.Basic.json) : CME_Types.message =
+let message_of_json ( json : Yojson.Basic.json) : message =
     let open Yojson.Basic.Util in
-    let open CME_Types in
     (* NOTE : Cutting ALL negative integers across the board *)
-    let to_int j = to_int j |> max 0 in 
+    let to_int j = to_int j |> fun x -> max (0,x) in 
+    let cap255 j = min (j, 255) in 
     let read_inc j = {
             rm_security_id = j |> member "SequrityID"  |> to_int;
             rm_rep_seq_num = j |> member "RepSeqNum"   |> to_int;
-            rm_price_level = j |> member "PriceLevel"  |> to_int |> min 255;  (* NOTE: fix for pricelevel above 255*)
+            rm_price_level = j |> member "PriceLevel"  |> to_int |> cap255 ;  (* NOTE: fix for pricelevel above 255*)
             rm_entry_size  = j |> member "EntrySize"   |> to_int;
             rm_entry_px    = j |> member "EntryPrice"  |> to_int;
             rm_num_orders  = j |> member "NumOrders"   |> intopt_of_json;
@@ -153,7 +147,7 @@ let message_of_json ( json : Yojson.Basic.json) : CME_Types.message =
 ;;
         
         
-let packet_to_json ( packet : CME_Types.packet ) : Yojson.Basic.json  =
+let packet_to_json ( packet : packet ) : Yojson.Basic.json  =
     `Assoc [
         ( "SeqNum"   , `Int packet.packet_seq_num );
         ( "Channel"  , packet.packet_channel |> channel_to_json );
@@ -162,9 +156,8 @@ let packet_to_json ( packet : CME_Types.packet ) : Yojson.Basic.json  =
 ;;
 
 
-let packet_of_json (json : Yojson.Basic.json) : CME_Types.packet  =
-    let open Yojson.Basic.Util in
-    let open CME_Types in {
+let packet_of_json (json : Yojson.Basic.json) : packet  =
+    let open Yojson.Basic.Util in {
         packet_seq_num  = json |> member "SeqNum"   |> to_int;
         packet_channel  = json |> member "Channel"  |> channel_of_json;
         packet_messages = json |> member "Messages" |> ( function
@@ -174,7 +167,7 @@ let packet_of_json (json : Yojson.Basic.json) : CME_Types.packet  =
     }
 ;;
 
-let packets_to_json (packets : CME_Types.packet list) : Yojson.Basic.json  =
+let packets_to_json (packets : packet list) : Yojson.Basic.json  =
     (* This weirdness is just for performance reasons *)
     let rec tail_map current = function
         | h::tl -> tail_map ( packet_to_json h :: current ) tl
@@ -183,7 +176,7 @@ let packets_to_json (packets : CME_Types.packet list) : Yojson.Basic.json  =
     `Assoc [( "packets", `List ( tail_map [] packets ))] 
 ;;
 
-let packets_of_json (json : Yojson.Basic.json) : CME_Types.packet list =
+let packets_of_json (json : Yojson.Basic.json) : packet list =
     let open Yojson.Basic in 
     match json with
         | `Assoc [( "packets", `List packets)] -> List.map packet_of_json packets
