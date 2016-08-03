@@ -93,7 +93,9 @@ let clean_cycle_hist = {
 (** We're encapsulating all of the messaging queues here *)
 type channels = {
     unprocessed_packets : packet list;
-    current_packet : packet;
+
+    current_packet  : packet option;
+    current_message : message option;
 
     processed_messages : message list;
     processed_ref_a : packet list;
@@ -715,48 +717,10 @@ let rec is_cache_sorted (cache : ref_message list) =
 ;;
 
 
-(* If we dont't have any  messages to process in the current 
-packet -- move it to processed and get a new one *)
-let update_current_packet (channels : channels ) = 
-    if channels.current_packet.packet_messages <> [] then channels else
-    let processed = { channels.current_packet with 
-            packet_messages = List.rev channels.processed_messages 
-        } in
-    let channels = match channels.current_packet.packet_channel with
-        | Ch_Ref_A  -> { channels with processed_ref_a  = processed::channels.processed_ref_a  }
-        | Ch_Ref_B  -> { channels with processed_ref_b  = processed::channels.processed_ref_b  }
-        | Ch_Snap_A -> { channels with processed_snap_a = processed::channels.processed_snap_a }
-        | Ch_Snap_B -> { channels with processed_snap_b = processed::channels.processed_snap_b }
-        in
-    { channels with 
-        current_packet = List.hd channels.unprocessed_packets ;
-        unprocessed_packets = List.tl channels.unprocessed_packets;
-        processed_messages = []
-    } 
-;;
-
-let process_msg_recovery (s : feed_state) =
-    (* 
-        ?Kostya? why dont we check relevance of the seq id.
-        
-    
-    *)
-
-    (* If there's nothing to process, then we simply return the current state *)
-    if  s.channels.current_packet.packet_messages = [] &&
-        s.channels.unprocessed_packets            = [] then s else
-    (* else we update current packet and get our next message*)
-    let s = { s with channels = update_current_packet s.channels } in
-    let next_message = List.hd s.channels.current_packet.packet_messages in
-    let s = { s with channels = { s.channels with 
-        current_packet = { s.channels.current_packet with 
-            packet_messages = List.tl s.channels.current_packet.packet_messages
-        };
-        processed_messages = next_message::s.channels.processed_messages 
-    } } in
+let process_msg_recovery (s, next_message, channel_type  : feed_state * message * channel_type) =
     match next_message with
     | SnapshotMessage sm ->        
-        let s = process_rec_snapshot ( s, sm, s.channels.current_packet.packet_channel ) in 
+        let s = process_rec_snapshot ( s, sm, channel_type) in 
         add_int_message  (s, Book_Proc_Snap)
     | RefreshMessage rm ->
         if rm.rm_security_id <> s.feed_sec_id then
@@ -787,6 +751,7 @@ let is_msg_relevant (msg, s : ref_message * feed_state) =
     else true
 ;;
 
+
 (** *************************************************************** *)
 (** Process the next packet when book state is NORMAL               *)
 (** *************************************************************** *)
@@ -795,20 +760,8 @@ let is_msg_relevant (msg, s : ref_message * feed_state) =
 (* 2. Since we're not listening to the snapshot channel, then *)
 (*      let's discard everything there *)
 (* 3. if we're still in the Normal state (after processing the message) *)
-let process_msg_normal (s : feed_state) =
-    (* If there's nothing to process, then we simply return the current state *)
-    if  s.channels.current_packet.packet_messages = [] &&
-        s.channels.unprocessed_packets            = [] then s else
-    (* else we update current packet and get our next message*)
-    let s = { s with channels = update_current_packet s.channels } in
-    let next_message = List.hd s.channels.current_packet.packet_messages in
-    let s = { s with channels = { s.channels with 
-        current_packet = { s.channels.current_packet with 
-            packet_messages = List.tl s.channels.current_packet.packet_messages
-        };
-        processed_messages = next_message::s.channels.processed_messages 
-    } } in
-    match next_message with
+let process_msg_normal ( s , next_message : feed_state * message ) =
+   match next_message with
         | SnapshotMessage _ -> 
             add_int_message ( s , Book_Proc_NotRelevant )
         | RefreshMessage rm ->
@@ -844,18 +797,47 @@ let process_msg_normal (s : feed_state) =
                 add_int_message (s, Book_Changed_to_InRecovery)
 ;;
 
+
+
+(* Helper for the top-level transition *)
+let move_to_next_packet ( s, current_packet, rest_packets : feed_state * packet * packet list ) : feed_state =
+    let c = s.channels in
+    let processed = { current_packet with packet_messages = List.rev c.processed_messages } in
+    let c = match current_packet.packet_channel with
+        | Ch_Ref_A  -> { c with processed_ref_a  = processed::c.processed_ref_a  }
+        | Ch_Ref_B  -> { c with processed_ref_b  = processed::c.processed_ref_b  }
+        | Ch_Snap_A -> { c with processed_snap_a = processed::c.processed_snap_a }
+        | Ch_Snap_B -> { c with processed_snap_b = processed::c.processed_snap_b }
+        in
+    let c = { c with unprocessed_packets = rest_packets; processed_messages = [] } in
+    { s with channels = c }
+;;
+
+
 (*****************************************************************  *)
 (** Top-level transition function                                   *)
 (** *************************************************************** *)
 let one_step (s : feed_state) =
-    match s.feed_status with
-    | InRecovery ->
-        (** If we're in inconsistent state, then we need to listen to the recovery
-            messages as well and attemp to recover the book (if we're liquid) *)
-        let s' = process_msg_recovery (s) in
-        attempt_recovery (s')
-
-    | Normal -> process_msg_normal (s)
+    (* If there's no packet to process, then we simply return the current state *)
+    match s.channels.unprocessed_packets with [] -> s | current_packet::rest_packets ->
+    match current_packet.packet_messages with 
+        (* If there's no message to process, then we shift the current packet *)
+        | [] -> move_to_next_packet (s, current_packet, rest_packets )
+        (* If there's a message to process, then we can process it *)
+        | current_message::rest_messages ->
+        let s = match s.feed_status with
+            | InRecovery ->
+                (** If we're in inconsistent state, then we need to listen to the recovery
+                    messages as well and attemp to recover the book (if we're liquid) *)
+                let s' = process_msg_recovery ( s, current_message, current_packet.packet_channel ) in
+                attempt_recovery (s')
+            | Normal -> process_msg_normal (s, current_message)
+            in
+        let channels = { s.channels with  
+            unprocessed_packets = {current_packet with packet_messages = rest_messages}::rest_packets;
+            processed_messages  = current_message::s.channels.processed_messages
+            } in
+        { s with channels = channels}
 ;;
 
 (** *************************************************************** *)
