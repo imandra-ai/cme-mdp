@@ -1,78 +1,132 @@
+#use "topfind";;
+#require "yojson";;
 
 :load Model/CME_Types.ml
+:load Model/CME_Exchange.ml
 :load Model/CME.ml
 
-:load_ocaml _build/Printers/CME_json.cmo
-:load_ocaml Model/CME_test_helper.ml
-:load_ocaml Printers/CME_printers.ml
-:load_ocaml Printers/kojson.ml
-:load_ocaml Printers/CME_test_printer_del.ml
+:load_ocaml Printers/CME_json.ml
 
 :adts
 :p (in-theory (enable IML-ADT-EXECUTABLE-COUNTERPARTS-THEORY))
 
-:!disable
- add_to_cache
- apply_update_packets
- delete_level
- insert_level
- insert_order
- order_higher_ranked
- update_cycle_hist
- is_cache_sorted
- recalc_combined  
+let int_of_book_reset x = match x with ST_BookReset -> 1 | _ -> 0 ;;
+
+type m_eight = {
+    m1 : int_state_trans;
+    m2 : int_state_trans;
+    m3 : int_state_trans;
+    m4 : int_state_trans;
+    m5 : int_state_trans;
+    m6 : int_state_trans;
+    m7 : int_state_trans;
+    m8 : int_state_trans;
+};;
+
+let eight ( m : m_eight ) = true ;;
+
+let valid_trans_8_s ( s1, s2, s3, s4, s5, s6, s7, s8, m ) = 
+       is_trans_valid (s1, m.m1)
+    && is_trans_valid (s2, m.m2)
+    && is_trans_valid (s3, m.m3)
+    && is_trans_valid (s4, m.m4)
+    && is_trans_valid (s5, m.m5)
+    && is_trans_valid (s6, m.m6)
+    && is_trans_valid (s7, m.m7)
+    && is_trans_valid (s8, m.m8)
 ;;
 
- let good_levels ( msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8) = 
-    msg1.rp_msg.rm_price_level > 0  && msg1.rp_msg.rm_price_level <= 5 &&
-    msg2.rp_msg.rm_price_level > 0  && msg2.rp_msg.rm_price_level <= 5 && 
-    msg3.rp_msg.rm_price_level > 0  && msg3.rp_msg.rm_price_level <= 5 && 
-    msg4.rp_msg.rm_price_level > 0  && msg4.rp_msg.rm_price_level <= 5 && 
-    msg5.rp_msg.rm_price_level > 0  && msg5.rp_msg.rm_price_level <= 5 ;;
+(** Are these transitions valid? *)
+let valid_trans_8 ( m : m_eight ) = 
+    let s1  = init_ex_state in 
+    let s2  = process_int_trans (s1, m.m1) in 
+    let s3  = process_int_trans (s2, m.m2) in 
+    let s4  = process_int_trans (s3, m.m3) in 
+    let s5  = process_int_trans (s4, m.m4) in 
+    let s6  = process_int_trans (s5, m.m5) in 
+    let s7  = process_int_trans (s6, m.m6) in 
+    let s8  = process_int_trans (s7, m.m7) in 
+
+    valid_trans_8_s ( s1, s2, s3, s4, s5, s6, s7, s8, m ) 
+;;
+
+let valid_8_limit_resets ( m : m_eight ) =   
+  (* No more than two resets *)
+  int_of_book_reset m.m1 + int_of_book_reset m.m2 + int_of_book_reset m.m3 + int_of_book_reset m.m4 +
+  int_of_book_reset m.m5 + int_of_book_reset m.m6 + int_of_book_reset m.m7 + int_of_book_reset m.m8 <= 2
+  (* Transitions valid *)
+  && valid_trans_8 m
+;;
 
 
-let large_call (msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8) =
+:shadow off
+
+let m_reg = ref [];;
+let str_reg = ref [];;
+
+let pipe_to_model m =
+    let exchange_state = simulate_exchange ( init_ex_state , [ m.m1; m.m2; m.m3; m.m4; m.m5; m.m6; m.m7; m.m8 ] ) in
+    (* This flushes the unsent messages *)
+    let exchange_state = 
+        if( is_trans_valid (exchange_state, ST_DataSendInc ) ) 
+        then simulate_exchange ( exchange_state , [ ST_DataSendInc ] )
+        else exchange_state in
+    let exchange_state = 
+        if( is_trans_valid (exchange_state, ST_DataSendSnap ) ) 
+        then simulate_exchange ( exchange_state , [ ST_DataSendSnap ] )
+        else exchange_state in
+    let () = m_reg := m :: !m_reg in 
+    let () = str_reg := exchange_state :: !str_reg in 
     let s = { 
+        feed_sec_id   = get_security_id (exchange_state, SecA);
+        feed_sec_type = SecA;
         books = { 
-            book_depth = 5; multi = {buys = []; sells = []};
-            implied = {buys = []; sells = []};
-            combined = {buys = []; sells = []};
-            b_status = Publishable; 
+            book_depth = 4;
+            multi    = { buys = []; sells = [] };
+            implied  = { buys = []; sells = [] };
+            combined = { buys = []; sells = [] };
+            b_status = Empty ;
         };
-        channels = {  
-            ref_a  = { r_unproc_packets = [msg1; msg2; msg3]; r_proc_packets=[] };
-            ref_b  = { r_unproc_packets = [msg4; msg5];       r_proc_packets=[] };
-            snap_a = { s_unproc_packets = [msg6; msg7; msg8]; s_proc_packets=[] };
-            snap_b = { s_unproc_packets = []; 		      s_proc_packets=[] };
-            last_seq_processed = 0;
+        (* Communication channels *)
+        channels = {
+            unprocessed_packets = exchange_state.pac_queue;
+
+            processed_messages = [];
+            processed_ref_a    = [];
+            processed_ref_b    = [];
+            processed_snap_a   = [];
+            processed_snap_b   = [];
+
+            cycle_hist_a = clean_cycle_hist;
+            cycle_hist_b = clean_cycle_hist;
+            last_seq_processed = -1;    
+            cache = [];       
             last_snapshot = None;
-            cache = [];
-	    cycle_hist_a = { reference_sec_id = 10;
-                             self_sec_id = 123;
-                             ref_sec_snap_received = false;
-                             liq = Liquid;
-                            };
-            cycle_hist_b = { reference_sec_id = 10;
-                             self_sec_id = 123;
-                             ref_sec_snap_received = false;
-                             liq = Liquid;
-                           }; 
-	    };
-       feed_status = Normal;
-       sec_type = SecA;
-       sec_id   = 123;
-       internal_changes = [];
-       cur_time = 1;
-       new_packet = true;
-       last_packet_header = None;
+        };
+        feed_status = Normal;
+        internal_changes = [];
+        cur_time = 0;
     } in
-    let s = one_step(s) in 
-    let s = one_step(s) in 
-    let s = one_step(s) in 
-    let s = one_step(s) in 
-    let s = one_step(s) in 
-    let s = one_step(s) in 
-    let s = one_step(s) in 
-    one_step(s)
+    (* let () = str_reg := s :: !str_reg in *)
+    let s = simulate s in
+    let out_json : Yojson.Basic.json = `Assoc [
+        ( "ref_a", s.channels.processed_ref_a  |> packets_to_json );
+        ( "ref_b", s.channels.processed_ref_b  |> packets_to_json );
+        ("snap_a", s.channels.processed_snap_a |> packets_to_json );
+        ("snap_b", s.channels.processed_snap_b |> packets_to_json );
+    ] in
+    (* let () = end_reg := s :: !end_reg in *)
+    out_json |> Yojson.Basic.pretty_to_string |> print_string 
 ;;
-:testgen large_call assuming good_levels with_printer cme_test_printer_8
+
+:shadow on
+
+(* Let's set max_region_time! *)
+(* :max_region_time 5 *)
+
+:max_region_time 5
+:max_regions 50       (* Limiting # regions to 50 so you can quickly see some results *)
+
+:testgen eight assuming valid_8_limit_resets with_code pipe_to_model
+ 
+
