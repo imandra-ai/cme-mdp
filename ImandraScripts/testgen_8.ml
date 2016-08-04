@@ -75,8 +75,6 @@ let pipe_to_model m =
         if( is_trans_valid (exchange_state, ST_DataSendSnap ) ) 
         then simulate_exchange ( exchange_state , [ ST_DataSendSnap ] )
         else exchange_state in
-    let () = m_reg := m :: !m_reg in 
-    let () = str_reg := exchange_state :: !str_reg in 
     let s = { 
         feed_sec_id   = get_security_id (exchange_state, SecA);
         feed_sec_type = SecA;
@@ -124,8 +122,9 @@ let pipe_to_model m =
 (* Let's set max_region_time! *)
 (* :max_region_time 5 *)
 
-:max_region_time 5
-:max_regions 50       (* Limiting # regions to 50 so you can quickly see some results *)
+(*:max_region_time 5 *)
+(*:max_regions 50  *)     
+(* Limiting # regions to 50 so you can quickly see some results *)
 
 :testgen eight assuming valid_8_limit_resets with_code pipe_to_model
  

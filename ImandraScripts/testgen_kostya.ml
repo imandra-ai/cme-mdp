@@ -7,59 +7,66 @@
 
 :load_ocaml Printers/CME_json.ml
 
-(*
-:load_ocaml CME_printers.ml
-:load_ocaml CME_test_helper.ml
-:load_ocaml kojson.ml
-:load_ocaml CME_json.ml
-:load_ocaml CME_test_printer_del.ml
-*)
-
 :adts
 :p (in-theory (enable IML-ADT-EXECUTABLE-COUNTERPARTS-THEORY))
 
-
 let int_of_book_reset x = match x with ST_BookReset -> 1 | _ -> 0 ;;
 
+type m_four = {
+    m1 : int_state_trans;
+    m2 : int_state_trans;
+    m3 : int_state_trans;
+    m4 : int_state_trans;
+};;
 
-let four (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_state_trans * int_state_trans) = true ;;
+let four ( m : m_four ) = true ;;
 
-let valid_trans_4_s (s1, s2, s3, s4, m1, m2, m3, m4) = 
-    is_trans_valid (s1, m1)
-    && is_trans_valid (s2, m2)
-    && is_trans_valid (s3, m3)
-    && is_trans_valid (s4, m4)
+let valid_trans_4_s ( s1, s2, s3, s4, m ) = 
+       is_trans_valid (s1, m.m1)
+    && is_trans_valid (s2, m.m2)
+    && is_trans_valid (s3, m.m3)
+    && is_trans_valid (s4, m.m4)
 ;;
 
 (** Are these transitions valid? *)
-let valid_trans_4 (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_state_trans * int_state_trans) = 
+let valid_trans_4 ( m : m_four ) = 
     let s1  = init_ex_state in 
-    let s2  = process_int_trans (s1, m1) in 
-    let s3  = process_int_trans (s2, m2) in 
-    let s4  = process_int_trans (s3, m3) in 
-    valid_trans_4_s (s1, s2, s3, s4, m1, m2, m3, m4)
+    let s2  = process_int_trans (s1, m.m1) in 
+    let s3  = process_int_trans (s2, m.m2) in 
+    let s4  = process_int_trans (s3, m.m3) in 
+
+    valid_trans_4_s ( s1, s2, s3, s4, m ) 
 ;;
 
-let valid_4_limit_resets (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_state_trans * int_state_trans) =   
+let valid_4_limit_resets ( m : m_four ) =   
   (* No more than two resets *)
-  int_of_book_reset m1 + int_of_book_reset m2 + int_of_book_reset m3 + int_of_book_reset m4 <= 2
+  int_of_book_reset m.m1 + int_of_book_reset m.m2 + int_of_book_reset m.m3 + int_of_book_reset m.m4 <= 2
   (* Transitions valid *)
-  && valid_trans_4 (m1,m2,m3,m4)
+  && valid_trans_4 m
 ;;
 
 
 :shadow off
 
-let end_reg = ref [];;
+let m_reg = ref [];;
 let str_reg = ref [];;
 
-let pipe_to_model (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_state_trans * int_state_trans) =
-    let exchange_state = simulate_exchange ( init_ex_state , [m1; m2; m3; m4] ) in
+let pipe_to_model m =
+    let exchange_state = simulate_exchange ( init_ex_state , [ m.m1; m.m2; m.m3; m.m4 ] ) in
+    (* This flushes the unsent messages *)
+    let exchange_state = 
+        if( is_trans_valid (exchange_state, ST_DataSendInc ) ) 
+        then simulate_exchange ( exchange_state , [ ST_DataSendInc ] )
+        else exchange_state in
+    let exchange_state = 
+        if( is_trans_valid (exchange_state, ST_DataSendSnap ) ) 
+        then simulate_exchange ( exchange_state , [ ST_DataSendSnap ] )
+        else exchange_state in
     let s = { 
         feed_sec_id   = get_security_id (exchange_state, SecA);
         feed_sec_type = SecA;
         books = { 
-            book_depth = 4;
+            book_depth = 5;
             multi    = { buys = []; sells = [] };
             implied  = { buys = []; sells = [] };
             combined = { buys = []; sells = [] };
@@ -85,7 +92,7 @@ let pipe_to_model (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_stat
         internal_changes = [];
         cur_time = 0;
     } in
-    let () = str_reg := s :: !str_reg in 
+    (* let () = str_reg := s :: !str_reg in *)
     let s = simulate s in
     let out_json : Yojson.Basic.json = `Assoc [
         ( "ref_a", s.channels.processed_ref_a  |> packets_to_json );
@@ -93,7 +100,7 @@ let pipe_to_model (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_stat
         ("snap_a", s.channels.processed_snap_a |> packets_to_json );
         ("snap_b", s.channels.processed_snap_b |> packets_to_json );
     ] in
-    let () = end_reg := s :: !end_reg in 
+    (* let () = end_reg := s :: !end_reg in *)
     out_json |> Yojson.Basic.pretty_to_string |> print_string 
 ;;
 
@@ -102,8 +109,9 @@ let pipe_to_model (m1, m2, m3, m4 : int_state_trans * int_state_trans * int_stat
 (* Let's set max_region_time! *)
 (* :max_region_time 5 *)
 
-:max_region_time 5
-:max_regions 50       (* Limiting # regions to 50 so you can quickly see some results *)
+(*:max_region_time 5 *)
+(*:max_regions 50  *)     
+(* Limiting # regions to 50 so you can quickly see some results *)
 
 :testgen four assuming valid_4_limit_resets with_code pipe_to_model
  
