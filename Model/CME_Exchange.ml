@@ -37,6 +37,21 @@ let get_obook_level (bs, level_num : book_side * int) =
     | _ -> bs.five
 ;;
 
+(** 1.1.2 Book access function: set level  *)
+let set_obook_level (bs, level_num, level : book_side * int * order_level ) = 
+    match level_num with 
+    | 1 -> { bs with one   = level }
+    | 2 -> { bs with two   = level }
+    | 3 -> { bs with three = level }
+    | 4 -> { bs with four  = level }
+    | _ -> { bs with five  = level }
+;;
+
+(** 1.1.3 Empty book constant *)
+let empty_book_side = { 
+    one = NoLevel; two = NoLevel; three = NoLevel; four = NoLevel; five = NoLevel 
+};;
+
 (** 1.2 Security state including the order book.                    *)
 type security_state = {
     last_rep_seq_num : int;     (* Last RepSeqNum for the sc        *)
@@ -84,10 +99,31 @@ let get_level ( state, security, book_type, order_side, nlevel  : exchange_state
         | Book_Type_Combined ,  _ -> NoLevel 
 ;;
 
+let set_level ( state, security, book_type, order_side, nlevel, level  : exchange_state * sec_type * book_type * order_side * int * order_level ) =
+    let s_state = match security with | SecA -> state.sec_a | SecB -> state.sec_b in
+    let s_state = match book_type, order_side with 
+        | Book_Type_Multi    , OrdBuy  -> { s_state with multi_book   = { s_state.multi_book   with  buy_orders = set_obook_level ( s_state.multi_book.buy_orders    , nlevel , level ) } }
+        | Book_Type_Implied  , OrdBuy  -> { s_state with implied_book = { s_state.implied_book with  buy_orders = set_obook_level ( s_state.implied_book.buy_orders  , nlevel , level ) } }
+        | Book_Type_Multi    , OrdSell -> { s_state with multi_book   = { s_state.multi_book   with sell_orders = set_obook_level ( s_state.multi_book.sell_orders   , nlevel , level ) } }
+        | Book_Type_Implied  , OrdSell -> { s_state with implied_book = { s_state.implied_book with sell_orders = set_obook_level ( s_state.implied_book.sell_orders , nlevel , level ) } }
+        | Book_Type_Combined ,  _      -> s_state 
+        in
+    match security with 
+        | SecA -> { state with sec_a = s_state }
+        | SecB -> { state with sec_b = s_state }
+;;
+
 let advance_rep_seq_num ( state, sec_type ) =
     match sec_type with 
     | SecA -> { state with sec_a = {state.sec_a with last_rep_seq_num = state.sec_a.last_rep_seq_num } }
     | SecB -> { state with sec_b = {state.sec_b with last_rep_seq_num = state.sec_b.last_rep_seq_num } }
+;;
+
+let reset_books_exchange state = 
+    let empty = { buy_orders = empty_book_side; sell_orders = empty_book_side } in
+    { state with 
+        sec_a = {state.sec_a with multi_book = empty; implied_book = empty } ;
+        sec_b = {state.sec_a with multi_book = empty; implied_book = empty } }
 ;;
 
 
@@ -108,18 +144,25 @@ type ord_add_data = {
 (** 2.1.1 Send a new level command *)
 let send_add_level (state, o_add) = 
     let state = advance_rep_seq_num ( state, o_add.oa_sec_type ) in
+    let side       = o_add.oa_level_side in
+    let price      = o_add.oa_price      in
+    let qty        = o_add.oa_order_qty  in
+    let num_orders = o_add.oa_num_orders in
+    let nlevel     = o_add.oa_level_num  in
     let add_m = RefreshMessage {
         rm_security_id = get_security_id ( state, o_add.oa_sec_type ) ;
         rm_rep_seq_num = get_rep_seq_num ( state, o_add.oa_sec_type ) ;
         rm_msg_type    = V_MDUpdateAction_New ;
 
-        rm_entry_type  = side_to_entry_type ( o_add.oa_book_type, o_add.oa_level_side ) ; 
-        rm_entry_px    = o_add.oa_price;
-        rm_price_level = o_add.oa_level_num;
-        rm_entry_size  = o_add.oa_order_qty;
-        rm_num_orders  = o_add.oa_num_orders
+        rm_entry_type  = side_to_entry_type ( o_add.oa_book_type, side ) ; 
+        rm_price_level = nlevel;
+        rm_entry_px    = price;
+        rm_entry_size  = qty;
+        rm_num_orders  = num_orders
     } in 
-    { state with inc_msg_queue = add_m :: state.inc_msg_queue; }
+    let newlevel = Level { side; price; qty; num_orders } in
+    let state = set_level ( state, o_add.oa_sec_type, o_add.oa_book_type, side, nlevel, newlevel ) in 
+    { state with inc_msg_queue = add_m :: state.inc_msg_queue }
 ;;
 
 
@@ -137,20 +180,24 @@ type ord_change_data = {
 
 (** 2.2.1 Send change of level command *)
 let send_o_change (state, o_change) = 
-    let state = advance_rep_seq_num ( state, o_change.oc_sec_type ) in
-    let level = get_level (state , o_change.oc_sec_type, o_change.oc_book_type, o_change.oc_level_side, o_change.oc_level_num ) in
+    let state  = advance_rep_seq_num ( state, o_change.oc_sec_type ) in
+    let side   = o_change.oc_level_side in
+    let nlevel = o_change.oc_level_num  in
+    let level  = get_level (state , o_change.oc_sec_type, o_change.oc_book_type, side, nlevel) in
     match level with NoLevel -> state | Level level -> 
+    let level = { level with qty =  o_change.oc_new_qty } in
     let change_m = RefreshMessage {
         rm_security_id = get_security_id ( state, o_change.oc_sec_type ) ;
         rm_rep_seq_num = get_rep_seq_num ( state, o_change.oc_sec_type ) ;
         rm_msg_type    = V_MDUpdateAction_Change ;
 
-        rm_entry_type  = side_to_entry_type ( o_change.oc_book_type, o_change.oc_level_side ) ; 
-        rm_price_level = o_change.oc_level_num;
-        rm_entry_size  = o_change.oc_new_qty;
+        rm_entry_type  = side_to_entry_type ( o_change.oc_book_type, side ) ; 
+        rm_price_level = nlevel;
+        rm_entry_size  = level.qty;
         rm_entry_px    = level.price;
         rm_num_orders  = level.num_orders
     } in 
+    let state = set_level ( state, o_change.oc_sec_type, o_change.oc_book_type, side, nlevel, Level level ) in 
     { state with inc_msg_queue = change_m :: state.inc_msg_queue }
 ;;
 
@@ -166,7 +213,9 @@ type ord_del_data = {
 (** 2.3.1 Order Delete seding         *)
 let send_o_del (state, o_del) = 
     let state = advance_rep_seq_num ( state, o_del.od_sec_type ) in
-    let level = get_level (state , o_del.od_sec_type, o_del.od_book_type, o_del.od_level_side, o_del.od_level_num ) in
+    let side   = o_del.od_level_side in
+    let nlevel = o_del.od_level_num  in
+    let level = get_level (state , o_del.od_sec_type, o_del.od_book_type, side, nlevel ) in
     match level with NoLevel -> state | Level level -> 
     let del_m = RefreshMessage {
         rm_security_id = get_security_id ( state, o_del.od_sec_type ) ;
@@ -179,6 +228,7 @@ let send_o_del (state, o_del) =
         rm_entry_px    = level.price;
         rm_num_orders  = level.num_orders
     } in 
+    let state = set_level ( state, o_del.od_sec_type, o_del.od_book_type, side, nlevel, NoLevel ) in 
     { state with inc_msg_queue = del_m :: state.inc_msg_queue }
 ;;
 
@@ -206,8 +256,8 @@ let send_snapshot ( state, sec_type ) =
                 sells = get_level_list ( state, sec_type, Book_Type_Multi, OrdSell ); 
             };
             snap_i_book = {
-                buys  = get_level_list ( state, sec_type, Book_Type_Multi, OrdBuy  );
-                sells = get_level_list ( state, sec_type, Book_Type_Multi, OrdSell ); 
+                buys  = get_level_list ( state, sec_type, Book_Type_Implied, OrdBuy  );
+                sells = get_level_list ( state, sec_type, Book_Type_Implied, OrdSell ); 
             }; 
             snap_last_msg_seq_num_processed = state.last_inc_seq_num;
         };
@@ -301,24 +351,14 @@ let send_inc_packet (state) =
 (** Here we actually maintain the order book and its states *)
 let process_int_trans (state, trans) =
     match trans with 
-    | ST_BookReset -> state
-    | ST_Add o_add ->
-        send_add_level (state, o_add)
-    | ST_Change o_change -> send_o_change (state, o_change)
-    | ST_Delete o_del -> send_o_del (state, o_del)
-    | ST_DataSendInc  -> send_inc_packet  (state)
-    | ST_DataSendSnap -> send_snap_packet (state)
-    | ST_Snapshot sec_type-> send_snapshot (state, sec_type)
+    | ST_BookReset         -> reset_books_exchange state
+    | ST_Add o_add         -> send_add_level (state, o_add)
+    | ST_Change o_change   -> send_o_change (state, o_change)
+    | ST_Delete o_del      -> send_o_del (state, o_del)
+    | ST_DataSendInc       -> send_inc_packet  (state)
+    | ST_DataSendSnap      -> send_snap_packet (state)
+    | ST_Snapshot sec_type -> send_snapshot (state, sec_type)
 ;;
-
-let empty_book_side = {
-    one   = NoLevel;
-    two   = NoLevel;
-    three = NoLevel;
-    four  = NoLevel;
-    five  = NoLevel;
-};;
-
 
 let init_ex_state = {
     sec_a = {
@@ -360,79 +400,3 @@ let rec simulate_exchange ( s, int_tran_list : exchange_state * int_state_trans 
     | x::xs -> simulate_exchange (process_int_trans (s, x), xs)
 ;;
 
-(**
-(****** **************************************************************************************************** *)
-(** testgen *)
-let t_three (msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8 : int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans) = 
-    let s = init_ex_state in 
-    let s1 = process_int_trans (s, msg1) in 
-    let s2 = process_int_trans (s1, msg2) in 
-    let s3 = process_int_trans (s2, msg3) in 
-    let s4 = process_int_trans (s3, msg4) in 
-    let s5 = process_int_trans (s4, msg5) in 
-    let s6 = process_int_trans (s5, msg6) in 
-    let s7 = process_int_trans (s6, msg7) in 
-    process_int_trans (s7, msg8)
-;;
-
-let six (msg1, msg2, msg3, msg4 : int_state_trans * int_state_trans * int_state_trans * int_state_trans ) = 
-    true
-;;
-
-let valid_tranny (s, s1, s2, s3, msg1, msg2, msg3, msg4) = 
-    is_trans_valid (s, msg1) && 
-    is_trans_valid (s1, msg2) && 
-    is_trans_valid (s2, msg3) && 
-    is_trans_valid (s3, msg4)
-;;
-
-(** Are these transitions valid? *)
-let vd_new (msg1, msg2, msg3, msg4 : int_state_trans * int_state_trans * int_state_trans * int_state_trans) = 
-    let s = init_ex_state in 
-    let s1 = process_int_trans (s, msg1) in 
-    let s2 = process_int_trans (s1, msg2) in 
-    let s3 = process_int_trans (s2, msg3) in 
-    let s4 = process_int_trans (s3, msg4) in 
-    valid_tranny (s, s1, s2, s3, msg1, msg2, msg3, msg4)
-;;
-
-let twelve (m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12 : int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans) = 
-    true
-;;
-
-
-let v_t_twelve (s, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12) = 
-    is_trans_valid (s, m1) && 
-    is_trans_valid (s1, m2) && 
-    is_trans_valid (s2, m3) && 
-    is_trans_valid (s3, m4) &&
-    is_trans_valid (s4, m5) && 
-    is_trans_valid (s5, m6) && 
-    is_trans_valid (s6, m7) && 
-    is_trans_valid (s7, m8) && 
-    is_trans_valid (s8, m9) && 
-    is_trans_valid (s9, m10) &&
-    is_trans_valid (s10, m11) && 
-    is_trans_valid (s11, m12) 
-;;
-
-
-(** Are these transitions valid? *)
-let vd_twelve (m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12 : int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans * int_state_trans) = 
-    let s = init_ex_state in 
-    let s1 = process_int_trans (s, m1) in 
-    let s2 = process_int_trans (s1, m2) in 
-    let s3 = process_int_trans (s2, m3) in 
-    let s4 = process_int_trans (s3, m4) in 
-    let s5 = process_int_trans (s4, m5) in 
-    let s6 = process_int_trans (s5, m6) in 
-    let s7 = process_int_trans (s6, m7) in 
-    let s8 = process_int_trans (s7, m8) in 
-    let s9 = process_int_trans (s8, m9) in 
-    let s10 = process_int_trans (s9, m10) in 
-    let s11 = process_int_trans (s10, m11) in 
-    let s12 = process_int_trans (s11, m12) in 
-    v_t_twelve (s, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12)
-;;
-
-**)
