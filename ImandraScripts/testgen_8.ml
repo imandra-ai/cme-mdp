@@ -53,7 +53,7 @@ let valid_trans_8 ( m : m_eight ) =
 let valid_8_limit_resets ( m : m_eight ) =   
   (* No more than two resets *)
   int_of_book_reset m.m1 + int_of_book_reset m.m2 + int_of_book_reset m.m3 + int_of_book_reset m.m4 +
-  int_of_book_reset m.m5 + int_of_book_reset m.m6 + int_of_book_reset m.m7 + int_of_book_reset m.m8 <= 2
+  int_of_book_reset m.m5 + int_of_book_reset m.m6 + int_of_book_reset m.m7 + int_of_book_reset m.m8 <= 4
   (* Transitions valid *)
   && valid_trans_8 m
 ;;
@@ -63,6 +63,7 @@ let valid_8_limit_resets ( m : m_eight ) =
 
 let m_reg = ref [];;
 let str_reg = ref [];;
+let n = ref 0;;
 
 let pipe_to_model m =
     let exchange_state = simulate_exchange ( init_ex_state , [ m.m1; m.m2; m.m3; m.m4; m.m5; m.m6; m.m7; m.m8 ] ) in
@@ -114,7 +115,8 @@ let pipe_to_model m =
         ("snap_b", s.channels.processed_snap_b |> packets_to_json );
     ] in
     (* let () = end_reg := s :: !end_reg in *)
-    out_json |> Yojson.Basic.pretty_to_string |> print_string 
+    let () = n := !n + 1 in
+    out_json |> Yojson.Basic.to_file (Printf.sprintf "testgen/test_%d.json" !n)
 ;;
 
 :shadow on
@@ -126,6 +128,7 @@ let pipe_to_model m =
 (*:max_regions 50  *)     
 (* Limiting # regions to 50 so you can quickly see some results *)
 
+:max_region_depth 10 
 :testgen eight assuming valid_8_limit_resets with_code pipe_to_model
  
 
