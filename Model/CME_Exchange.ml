@@ -96,7 +96,6 @@ let get_level ( state, security, book_type, order_side, nlevel  : exchange_state
         | Book_Type_Implied  , OrdBuy  -> get_obook_level ( s_state.implied_book.buy_orders  , nlevel )
         | Book_Type_Multi    , OrdSell -> get_obook_level ( s_state.multi_book.sell_orders   , nlevel )
         | Book_Type_Implied  , OrdSell -> get_obook_level ( s_state.implied_book.sell_orders , nlevel )
-        | Book_Type_Combined ,  _ -> NoLevel 
 ;;
 
 let set_level ( state, security, book_type, order_side, nlevel, level  : exchange_state * sec_type * book_type * order_side * int * order_level ) =
@@ -106,7 +105,6 @@ let set_level ( state, security, book_type, order_side, nlevel, level  : exchang
         | Book_Type_Implied  , OrdBuy  -> { s_state with implied_book = { s_state.implied_book with  buy_orders = set_obook_level ( s_state.implied_book.buy_orders  , nlevel , level ) } }
         | Book_Type_Multi    , OrdSell -> { s_state with multi_book   = { s_state.multi_book   with sell_orders = set_obook_level ( s_state.multi_book.sell_orders   , nlevel , level ) } }
         | Book_Type_Implied  , OrdSell -> { s_state with implied_book = { s_state.implied_book with sell_orders = set_obook_level ( s_state.implied_book.sell_orders , nlevel , level ) } }
-        | Book_Type_Combined ,  _      -> s_state 
         in
     match security with 
         | SecA -> { state with sec_a = s_state }
@@ -292,8 +290,7 @@ let is_trans_valid (state, trans) =
                                 oa_data.oa_level_side,
                                 oa_data.oa_level_num )) && 
         oa_data.oa_level_num > 0 &&
-        oa_data.oa_level_num < 6 &&
-        oa_data.oa_book_type <> Book_Type_Combined
+        oa_data.oa_level_num < 6 
     | ST_Change oc_data ->
         sec_level_exists (  state, 
                             oc_data.oc_sec_type,

@@ -13,7 +13,6 @@ type sec_type = SecA | SecB ;;
 type book_type = 
     | Book_Type_Implied 
     | Book_Type_Multi 
-    | Book_Type_Combined 
 ;;
 
 (** *************************************************************** *)
