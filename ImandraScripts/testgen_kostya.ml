@@ -50,6 +50,7 @@ let valid_4_limit_resets ( m : m_four ) =
 
 let m_reg = ref [];;
 let str_reg = ref [];;
+let n = ref 0;;
 
 let pipe_to_model m =
     let exchange_state = simulate_exchange ( init_ex_state , [ m.m1; m.m2; m.m3; m.m4 ] ) in
@@ -101,7 +102,9 @@ let pipe_to_model m =
         ("snap_b", s.channels.processed_snap_b |> packets_to_json );
     ] in
     (* let () = end_reg := s :: !end_reg in *)
-    out_json |> Yojson.Basic.pretty_to_string |> print_string 
+    (* out_json |> Yojson.Basic.pretty_to_string |> print_string *)
+    let () = n := !n + 1 in
+    out_json |> Yojson.Basic.to_file (Printf.sprintf "testgen/test_%d.json" !n)
 ;;
 
 :shadow on
