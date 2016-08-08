@@ -63,10 +63,8 @@ let side_to_entry_type ( book_type, side : book_type * order_side) =
     match ( book_type, side ) with 
     | ( Book_Type_Implied  , OrdBuy  ) -> V_MDEntryType_ImpliedBid
     | ( Book_Type_Multi    , OrdBuy  ) -> V_MDEntryType_Bid
-    | ( Book_Type_Combined , OrdBuy  ) -> V_MDEntryType_Bid
     | ( Book_Type_Implied  , OrdSell ) -> V_MDEntryType_ImpliedOffer
     | ( Book_Type_Multi    , OrdSell ) -> V_MDEntryType_Offer
-    | ( Book_Type_Combined , OrdSell ) -> V_MDEntryType_Offer
 ;;
 
 type ref_message = {
