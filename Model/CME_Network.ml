@@ -9,7 +9,8 @@
 
 
 
-type net_effect = PacketLoss | NetworkSlow | Network
+type net_effect = NoEffect | PacketLoss | PacketMoveToCache | PacketMoveFromCache;;
+
 
 (** Module representing the *)
 type network_state = {
