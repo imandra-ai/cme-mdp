@@ -22,8 +22,9 @@ let orderside_to_json, orderside_of_json =
     (fun x -> List.assoc x o2j), (fun x -> List.assoc x j2o  )
 ;;
 
+(******************* Writers *************************)
 
-let add_to_json data = `Assoc [
+let add_to_json data : Yojson.Basic.json = `Assoc [
     (       "Qty" , `Int data.oa_order_qty );
     (     "Price" , `Int data.oa_price     );
     (  "LevelNum" , `Int data.oa_level_num );
@@ -33,7 +34,7 @@ let add_to_json data = `Assoc [
     ( "NumOrders" , data.oa_num_orders |> (function Some x -> `Int x | None -> `Assoc []) )
 ];;
 
-let change_to_json data = `Assoc [
+let change_to_json data : Yojson.Basic.json = `Assoc [
     (       "Qty" , `Int data.oc_new_qty   );
     (  "LevelNum" , `Int data.oc_level_num );
     (   "SecType" , data.oc_sec_type   |>   sectype_to_json );
@@ -41,15 +42,14 @@ let change_to_json data = `Assoc [
     ( "LevelSide" , data.oc_level_side |> orderside_to_json );
 ];;
 
-let delete_to_json data = `Assoc [
+let delete_to_json data : Yojson.Basic.json = `Assoc [
     (  "LevelNum" , `Int data.od_level_num );
     (   "SecType" , data.od_sec_type   |>   sectype_to_json );
     (  "BookType" , data.od_book_type  |>  booktype_to_json ); 
     ( "LevelSide" , data.od_level_side |> orderside_to_json );
 ];;
 
-
-let state_transition_to_json st =
+let state_transition_to_json st : Yojson.Basic.json =
     match st with
     | ST_BookReset     -> `Assoc [ ( "BookReset", `Assoc []             ) ]
     | ST_Add data      -> `Assoc [ ( "Add"      , add_to_json data      ) ]
@@ -60,4 +60,46 @@ let state_transition_to_json st =
     | ST_DataSendSnap  -> `Assoc [ ( "SendSnapshot"         , `Assoc [] ) ] 
 ;;
 
+(******************* Readers *************************)
+
+let add_of_json ( json : Yojson.Basic.json ) = 
+    let open Yojson.Basic.Util in {
+    oa_order_qty  = json |> member "Qty"       |> to_int ;
+    oa_price      = json |> member "Price"     |> to_int ;
+    oa_level_num  = json |> member "LevelNum"  |> to_int ;
+    oa_sec_type   = json |> member "SecType"   |>   sectype_of_json ;
+    oa_book_type  = json |> member "BookType"  |>  booktype_of_json ; 
+    oa_level_side = json |> member "LevelSide" |> orderside_of_json ;
+    oa_num_orders = json |> member "NumOrders" |> (function `Int x -> Some x | _ -> None) 
+};;
+
+let change_of_json ( json : Yojson.Basic.json ) =
+    let open Yojson.Basic.Util in {
+    oc_new_qty    = json |> member "Qty"       |> to_int ;
+    oc_level_num  = json |> member "LevelNum"  |> to_int ;
+    oc_sec_type   = json |> member "SecType"   |>   sectype_of_json ;
+    oc_book_type  = json |> member "BookType"  |>  booktype_of_json ; 
+    oc_level_side = json |> member "LevelSide" |> orderside_of_json ;
+};;
+
+let delete_of_json ( json : Yojson.Basic.json ) = 
+    let open Yojson.Basic.Util in {
+    od_level_num  = json |> member "LevelNum"  |> to_int ;
+    od_sec_type   = json |> member "SecType"   |>   sectype_of_json ;
+    od_book_type  = json |> member "BookType"  |>  booktype_of_json ; 
+    od_level_side = json |> member "LevelSide" |> orderside_of_json ;
+};;
+
+
+let state_transition_of_json ( json : Yojson.Basic.json ) =
+    match json with
+    | `Assoc [ ( "BookReset", `Assoc [] ) ]  -> ST_BookReset     
+    | `Assoc [ ( "Add"      , data      ) ]  -> ST_Add    (    add_of_json data )
+    | `Assoc [ ( "Change"   , data      ) ]  -> ST_Change ( change_of_json data )    
+    | `Assoc [ ( "Delete"   , data      ) ]  -> ST_Delete ( delete_of_json data ) 
+    | `Assoc [ ( "Snapshot" , sec       ) ]  -> ST_Snapshot ( sectype_of_json sec )  
+    | `Assoc [ ( "SendIncrementRefresh" , `Assoc [] ) ]  -> ST_DataSendInc   
+    | `Assoc [ ( "SendSnapshot"         , `Assoc [] ) ]  -> ST_DataSendSnap  
+    | _ -> failwith "Unrecognized exchange transition entry."              
+;;
 
