@@ -1,0 +1,1 @@
+{"ExchangeTransitions":[{"Add":{"Qty":0,"Price":6,"LevelNum":1,"SecType":"SecA","BookType":"BookImplied","LevelSide":"Buy","NumOrders":10}},{"BookReset":{}},{"Add":{"Qty":7,"Price":8,"LevelNum":5,"SecType":"SecB","BookType":"BookMulti","LevelSide":"Buy","NumOrders":11}},{"Delete":{"LevelNum":9,"SecType":"SecB","BookType":"BookMulti","LevelSide":"Buy"}}]}
