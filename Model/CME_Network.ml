@@ -9,7 +9,7 @@
 
 
 
-type net_effect = NoEffect | PacketLoss | PacketMoveToCache | PacketMoveFromCache;;
+type net_effect = NoEffect | PacketLoss | PacketMoveToCache | PacketMoveFromCache of int;;
 
 
 (** Module representing the *)
@@ -25,7 +25,7 @@ type network_state = {
 
 
 (** Is the transition valid? *)
-let is_trans_valid (n, e : network_state, net_effect) =
+let is_trans_valid (n, e : network_state * net_effect) =
     let queue_not_empty = n.incoming <> [] in  
     match e with 
     | NoEffect              -> true
@@ -34,25 +34,39 @@ let is_trans_valid (n, e : network_state, net_effect) =
     | PacketMoveFromCache x -> 0 <= x && x < List.length n.cache
 ;;
 
+(** Get n_th element from the list *)
+let rec get_nth ( packets, n, idx : packet list * int * int ) = 
+    match packets with 
+    | h::tl -> if idx = n then h else get_nth ( tl, n, idx+1 )
+    | [] -> {
+        packet_seq_num  = 0;
+        packet_messages = [];
+        packet_channel  = Ch_Ref_A 
+    }
+;;
+
 (** Remove n_th element from the list *)
 let rec remove_nth ( packets, n, idx : packet list * int * int ) = 
-
+    match packets with 
+    | h::tl -> if idx = n then tl else h :: remove_nth ( tl, n, idx+1 )
+    | [] -> []
 ;;
 
 (** Process network effect *)
-let process_net_effect (n, e : network_state, net_effect) =
+let process_net_effect (n, e : network_state * net_effect) =
     match e with 
     | NoEffect              -> n
     | PacketLoss            -> { n with incoming = List.tl n.incoming; }
-    | PacketMoveToCache     -> 
+    | PacketMoveToCache     -> begin
         match n.incoming with 
         | [] -> n
-        | x::xs -> { n with inoming = xs; cache = }
-
-    | PacketMoveFromCache x -> 
+        | h::tl -> { n with incoming = tl; cache = h::n.cache }
+        end
+    | PacketMoveFromCache x -> begin
         match n.cache with 
-        | [] -> 
-
+        | [] -> n
+        | h::tl -> { n with cache = remove_nth (n.cache, x, 0 ) ; outgoing = (get_nth (n.cache, x, 0))::n.outgoing }
+        end
 ;;
 
 (** Simulate  *)

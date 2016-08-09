@@ -10,11 +10,6 @@
 (** *************************************************************** *)
 type sec_type = SecA | SecB ;;
 
-type book_type = 
-    | Book_Type_Implied 
-    | Book_Type_Multi 
-;;
-
 (** *************************************************************** *)
 (** Orders and books                                                *)
 (** *************************************************************** *)
@@ -56,15 +51,6 @@ type entry_type =
     | V_MDEntryType_ImpliedBid
     | V_MDEntryType_ImpliedOffer
     | V_MDEntryType_EmptyBook
-;;
-
-(* entry_type utility function *)
-let side_to_entry_type ( book_type, side : book_type * order_side) = 
-    match ( book_type, side ) with 
-    | ( Book_Type_Implied  , OrdBuy  ) -> V_MDEntryType_ImpliedBid
-    | ( Book_Type_Multi    , OrdBuy  ) -> V_MDEntryType_Bid
-    | ( Book_Type_Implied  , OrdSell ) -> V_MDEntryType_ImpliedOffer
-    | ( Book_Type_Multi    , OrdSell ) -> V_MDEntryType_Offer
 ;;
 
 type ref_message = {

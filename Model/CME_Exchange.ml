@@ -27,6 +27,8 @@ type order_book = {
     sell_orders : book_side;
 };;
 
+
+
 (** 1.1.1 Book access function: get level  *)
 let get_obook_level (bs, level_num : book_side * int) = 
     match level_num with 
@@ -87,6 +89,20 @@ let get_rep_seq_num ( state, security ) =
     match security with 
     | SecA -> state.sec_a.last_rep_seq_num
     | SecB -> state.sec_b.last_rep_seq_num
+;;
+
+type book_type = 
+    | Book_Type_Implied 
+    | Book_Type_Multi 
+;;
+
+(* entry_type utility function *)
+let side_to_entry_type ( book_type, side : book_type * order_side) = 
+    match ( book_type, side ) with 
+    | ( Book_Type_Implied  , OrdBuy  ) -> V_MDEntryType_ImpliedBid
+    | ( Book_Type_Multi    , OrdBuy  ) -> V_MDEntryType_Bid
+    | ( Book_Type_Implied  , OrdSell ) -> V_MDEntryType_ImpliedOffer
+    | ( Book_Type_Multi    , OrdSell ) -> V_MDEntryType_Offer
 ;;
 
 let get_level ( state, security, book_type, order_side, nlevel  : exchange_state * sec_type * book_type * order_side * int ) =
