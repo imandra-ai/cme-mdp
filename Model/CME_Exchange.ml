@@ -75,6 +75,9 @@ type exchange_state = {
     pac_queue: packet list;
     last_inc_seq_num  : int;            (* Packet sequence number   *)
     last_snap_seq_num : int;            (* Packet sequence number   *)
+
+    (** Testgen-specific state-space restrictions                   *)
+    num_resets : int
 };;
 
 (** 1.3.1 State access/modfication utility functions *)
@@ -137,7 +140,8 @@ let reset_books_exchange state =
     let empty = { buy_orders = empty_book_side; sell_orders = empty_book_side } in
     { state with 
         sec_a = {state.sec_a with multi_book = empty; implied_book = empty } ;
-        sec_b = {state.sec_a with multi_book = empty; implied_book = empty } }
+        sec_b = {state.sec_a with multi_book = empty; implied_book = empty } ;
+        num_resets = state.num_resets + 1 }
 ;;
 
 
@@ -298,8 +302,11 @@ let sec_level_exists (state, sec_t, book_t, order_s, level_n : exchange_state * 
 (** 3.2 Define a valid transition of the exchange *)
 let is_trans_valid (state, trans) =
     match trans with
-    | ST_BookReset -> true (** We can generally reset the book *)
-    | ST_Add oa_data -> 
+      | ST_BookReset ->
+        (* For testgen, let's limit the number of resets to 2.
+           Note we start counting at 0. *)
+        state.num_resets < 2
+      | ST_Add oa_data ->
         not (sec_level_exists ( state, 
                                 oa_data.oa_sec_type, 
                                 oa_data.oa_book_type,
@@ -403,6 +410,7 @@ let init_ex_state = {
     inc_msg_queue = [];
     snap_msg_queue = [];
     pac_queue = [];
+    num_resets = 0
 };;
 
 (** simulate *)

@@ -71,6 +71,8 @@ let no_consec_resets_12 (m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12) =
 :max_region_time 5
 :adts on
 
+:break
+
 (* Finally, generate some tests, beginning with 8 transitions *)
 
 :testgen run_8 assuming no_consec_resets_8
