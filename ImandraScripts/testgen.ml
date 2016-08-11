@@ -1,4 +1,3 @@
-
 (**
 
   Script for generating test cases for the CME model.
@@ -7,233 +6,143 @@
 
 *)
 
-(** This is an indicator for Imandra that the following should not be processed. *)
+#use "topfind";;
+#require "yojson";;
 
-(* @meta[imandra_ignore] on @end *)
-open CME;;
-(* @meta[imandra_ignore] off @end *)
+:load Model/CME_Types.ml
+:load Model/CME_Exchange.ml
+:load Model/CME_Network.ml
+:load_ocaml Printers/CME_json.ml
 
-let books_are_not_empty (b : books) =
-    b.book_depth = 5 && 
-    b.multi.buys = [] &&
-    b.multi.sells = [] &&
-    b.implied.buys = [] && 
-    b.implied.sells = [] &&
-    b.combined.buys = [] &&
-    b.combined.sells = [] &&
-    b.b_status = Publishable
+:adts
+:p (in-theory (enable IML-ADT-EXECUTABLE-COUNTERPARTS-THEORY))
+
+
+type state = {
+    exchange_state : exchange_state ;
+     network_state :  network_state 
+};;
+
+type action =
+    | ExchangeAction of int_state_trans
+    | CopyPackets
+    | NetworkAction  of net_effect
 ;;
 
-let rec all_msgs_correct (msgs, depth : ref_packet list * int) =
-    match msgs with
-    | [] -> true
-    | x::xs ->
-        if not (correct_level(x.rp_msg, depth)) ||
-        x.rp_msg.rm_price_level < 0 ||  
-        97000 < x.rp_msg.rm_entry_px || 
-        x.rp_msg.rm_rep_seq_num <= 0 || 
-        x.rp_header.ph_packet_seq_num <= 0 ||
-        x.rp_header.ph_sending_time <= 0
-        then false
-        else
-            all_msgs_correct (xs, depth)
-;;
 
-let books_are_not_empty_1 (b : books) =  
-    b.multi = 
-    {buys =
-      [Level {side = BUY; qty = 100; price = 99500; num_orders = Some 100};
-       Level {side = BUY; qty = 100; price = 99000; num_orders = Some 100};
-       Level {side = BUY; qty = 100; price = 98500; num_orders = Some 100};
-       Level {side = BUY; qty = 100; price = 98000; num_orders = Some 100};
-       Level {side = BUY; qty = 100; price = 97500; num_orders = Some 100}];
-     sells =
-      [Level {side = SELL; qty = 100; price = 100000; num_orders = Some 100};
-       Level {side = SELL; qty = 100; price = 100500; num_orders = Some 100};
-       Level {side = SELL; qty = 100; price = 101000; num_orders = Some 100};
-       Level {side = SELL; qty = 100; price = 101500; num_orders = Some 100};
-       Level {side = SELL; qty = 100; price = 102000; num_orders = Some 100}]} &&
+(* A recursive run function.
+   Note how this implicitly includes transition validity.
 
-    b.implied =
-    {buys =
-      [];
-     sells =
-      []} && 
-
-    b.combined = 
-    {buys =
-      [Level {side = BUY; qty = 100; price = 99500; num_orders = Some 100};
-       Level {side = BUY; qty = 100; price = 99000; num_orders = Some 100};
-       Level {side = BUY; qty = 100; price = 98500; num_orders = Some 100};
-       Level {side = BUY; qty = 100; price = 98000; num_orders = Some 100};
-       Level {side = BUY; qty = 100; price = 97500; num_orders = Some 100}];
-     sells =
-      [Level {side = SELL; qty = 100; price = 100000; num_orders = Some 100};
-       Level {side = SELL; qty = 100; price = 100500; num_orders = Some 100};
-       Level {side = SELL; qty = 100; price = 101000; num_orders = Some 100};
-       Level {side = SELL; qty = 100; price = 101500; num_orders = Some 100};
-       Level {side = SELL; qty = 100; price = 102000; num_orders = Some 100}]}
-;;
-
-(** Make sure that the channels are consistent *)
-let channels_are_good ( ch, b : channels * books ) =
-  all_msgs_correct (ch.ref_a.r_unproc_packets, b.book_depth) && 
-  all_msgs_correct (ch.ref_b.r_unproc_packets, b.book_depth) && 
-  b.book_depth > 1 && 
-  ch.ref_a.r_proc_packets = [] &&
-  ch.ref_b.r_proc_packets = [] &&
-  ch.snap_a.s_proc_packets = [] &&
-  ch.snap_b.s_proc_packets = [] &&
-  ch.cache = [] &&
-  ch.cycle_hist_a.reference_sec_id = ch.cycle_hist_b.reference_sec_id &&
-  ch.cycle_hist_a.liq = LiqUnknown &&
-  ch.cycle_hist_b.liq = LiqUnknown &&
-  ch.cycle_hist_a.ref_sec_snap_received = false &&
-  ch.cycle_hist_b.ref_sec_snap_received = false
-;;
-
-(** Make sure the initial state is good *)
-let init_empty_state (s : feed_state) =
-  s.sec_type = FUTURES &&
-  s.channels.cycle_hist_a.reference_sec_id <> s.sec_id &&
-  s.channels.cycle_hist_a.self_sec_id = s.sec_id &&
-  s.channels.cycle_hist_b.self_sec_id = s.sec_id &&
-  s.sec_id > 0 && s.sec_id < 10 &&
-  s.internal_changes = [] &&
-  s.cur_time = 0 &&
-  s.feed_status = Normal
-;;
-
-:!disable 
-  get_next_packet
-  sort_book
-  is_cache_valid_since_seq_num
-  process_msg_recovery
-  attempt_recovery
-  recalc_combined
-  bk_delete_from
-  insert_level
-  books_are_not_empty_1
-  all_msgs_correct
-;;
-
-:!enable
-get_next_packet
-process_ch
-set_channel 
-clean_multi_depth_book
-trim_side
-add_levels 
-delete_level
-process_snap_ch
-process_ref_ch 
-set_snap_channel
-set_ref_channel
-msg_behind
-;;
-
-let side_cond (s: feed_state) =
-  books_are_not_empty_1 (s.books)
-  && s.books.book_depth = 5 
-  && s.books.b_status = Publishable
-  && init_empty_state (s)
-  && channels_are_good (s.channels, s.books)
-;;
-
-:unroll 6
-
-:load tsg_help.ml
-
-:load_ocaml CME_test_helper.ml
-:load_ocaml CME_printers.ml
-:load_ocaml CME_to_json_simple.ml
-:load_ocaml CME_test_printer_del.ml
-
-:tcs_per_region 5
-
-
-let large_call (s, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8) =
-  let s' = one_step(s) in 
-  let s' = one_step(s') in 
-  let s' = one_step(s') in 
-  let s' = one_step(s') in 
-  let s' = one_step(s') in 
-  let s' = one_step(s') in 
-  let s' = one_step(s') in 
-  one_step(s')
-;;
-
-let large_call' (s, msg1, msg2, msg3, msg4, msg5, msg6, msg7, msg8) =
-  let s' = {
-    s with
-      books = {
-        book_depth = 5;
-        multi = 
-        {buys =
-          [Level {side = BUY; qty = 100; price = 99500; num_orders = Some 100};
-           Level {side = BUY; qty = 100; price = 99000; num_orders = Some 100};
-           Level {side = BUY; qty = 100; price = 98500; num_orders = Some 100};
-           Level {side = BUY; qty = 100; price = 98000; num_orders = Some 100};
-           Level {side = BUY; qty = 100; price = 97500; num_orders = Some 100}];
-         sells =
-          [Level {side = SELL; qty = 100; price = 100000; num_orders = Some 100};
-           Level {side = SELL; qty = 100; price = 100500; num_orders = Some 100};
-           Level {side = SELL; qty = 100; price = 101000; num_orders = Some 100};
-           Level {side = SELL; qty = 100; price = 101500; num_orders = Some 100};
-           Level {side = SELL; qty = 100; price = 102000; num_orders = Some 100}]};
-
-        implied =
-        {buys =
-          [];
-         sells =
-          []};
-
-        combined = 
-        {buys =
-          [Level {side = BUY; qty = 100; price = 99500; num_orders = Some 100};
-           Level {side = BUY; qty = 100; price = 99000; num_orders = Some 100};
-           Level {side = BUY; qty = 100; price = 98500; num_orders = Some 100};
-           Level {side = BUY; qty = 100; price = 98000; num_orders = Some 100};
-           Level {side = BUY; qty = 100; price = 97500; num_orders = Some 100}];
-         sells =
-          [Level {side = SELL; qty = 100; price = 100000; num_orders = Some 100};
-           Level {side = SELL; qty = 100; price = 100500; num_orders = Some 100};
-           Level {side = SELL; qty = 100; price = 101000; num_orders = Some 100};
-           Level {side = SELL; qty = 100; price = 101500; num_orders = Some 100};
-           Level {side = SELL; qty = 100; price = 102000; num_orders = Some 100}]};
-
-        b_status = Publishable;
-      };
-
-      channels = { 
-        s.channels with ref_a = { s.channels.ref_a with r_unproc_packets = [msg1; msg2; msg3] };
-                        ref_b = { s.channels.ref_b with r_unproc_packets = [msg4; msg5] };
-                        snap_a = { s.channels.snap_a with s_unproc_packets = [msg6; msg7; msg8] };
-                        snap_b = { s.channels.snap_b with s_unproc_packets = [] };
-      };
-
-  } in
-
-  let s' = one_step(s') in 
-  let s' = one_step(s') in 
-  let s' = one_step(s') in 
-  let s' = one_step(s') in 
-  let s' = one_step(s') in 
-  let s' = one_step(s') in 
-  let s' = one_step(s') in 
-  one_step(s')
-;;
-
-(*
-
-:testgen large_call with_printer cme_test_printer_ext
-
-:testgen process_msg_normal assuming side_cond with_printer cme_test_printer
-:testgen process_msg_recovery 
-
-:testgen one_step assuming side_cond with_printer cme_test_printer
-
-:testgen one_step with_printer cme_test_printer
+   @meta[measure : run]
+     let measure_run (s, actions) = List.length actions
+   @end
 *)
+let rec run (state, acts) =
+    match state, acts with
+    |    _ , [] -> state
+    | None ,  _ -> state
+    | Some s, ExchangeAction act :: acts -> 
+        if is_trans_valid (s.exchange_state, act) then begin
+            let es = process_int_trans (s.exchange_state, act) in 
+            run (Some {s with exchange_state = es}, acts)  end 
+        else None
+    | Some s, NetworkAction  act :: acts -> 
+        if is_neteffect_valid (s.network_state, act) then begin
+            let ns = process_net_effect (s.network_state, act) in 
+            run (Some { s with network_state = ns } , acts ) end 
+        else None
+    | Some s, CopyPackets :: acts ->
+        let s = Some { s with network_state = 
+            { s.network_state with 
+                incoming = s.exchange_state.pac_queue
+            }
+        } in run ( s , acts)
+;;
+(* We set up run for staged symbolic execution *)
+:stage run
+
+type search_space = {
+    m1  : int_state_trans;
+    m2  : int_state_trans;
+    m3  : int_state_trans;
+    m4  : int_state_trans;
+    m5  : int_state_trans;
+    m6  : int_state_trans;
+    m7  : int_state_trans;
+    m8  : int_state_trans;
+    n1  : net_effect;
+    n2  : net_effect;
+    n3  : net_effect;
+    n4  : net_effect;
+    n5  : net_effect;
+    n6  : net_effect;
+};;
+
+
+let search_space_to_list m = [
+    ExchangeAction m.m1;
+    ExchangeAction m.m2;
+    ExchangeAction m.m3;
+    ExchangeAction m.m4;
+    ExchangeAction m.m5;
+    ExchangeAction m.m6;
+    ExchangeAction m.m7;
+    ExchangeAction m.m8;
+    CopyPackets;
+    NetworkAction  m.n1;
+    NetworkAction  m.n2;
+    NetworkAction  m.n3;
+    NetworkAction  m.n4;
+    NetworkAction  m.n5;
+    NetworkAction  m.n6
+];;
+
+
+let run_testgen m = 
+    let empty_state = Some {
+        exchange_state = init_ex_state;
+        network_state = empty_network_state  
+    } in
+    run ( empty_state, search_space_to_list m ) 
+;;
+
+
+let no_consec_resets_8 m =
+     (m.m1  = ST_BookReset ==> not(m.m2  = ST_BookReset))
+  && (m.m2  = ST_BookReset ==> not(m.m3  = ST_BookReset))
+  && (m.m3  = ST_BookReset ==> not(m.m4  = ST_BookReset))
+  && (m.m4  = ST_BookReset ==> not(m.m5  = ST_BookReset))
+  && (m.m5  = ST_BookReset ==> not(m.m6  = ST_BookReset))
+  && (m.m6  = ST_BookReset ==> not(m.m7  = ST_BookReset))
+  && (m.m7  = ST_BookReset ==> not(m.m8  = ST_BookReset))
+;;
+
+:shadow off
+let n = ref 0;;
+let write_jsons m =
+    let empty_state = Some {
+        exchange_state = init_ex_state;
+        network_state = empty_network_state  
+    } in
+    let final_state = run ( empty_state, search_space_to_list m ) in
+    match final_state with 
+    | None -> " **** Ignoring empty test case ***** " |> print_string
+    | Some final_state ->
+    let packets = final_state.network_state.outgoing @ final_state.network_state.incoming in
+    let () = n := !n + 1 in
+    packets |> packets_to_json
+            |> Yojson.Basic.pretty_to_string |> print_string
+            (* |> Yojson.Basic.to_file (Printf.sprintf "exchange_cases/test_%d.json" !n) *)
+;;
+:shadow on
+
+
+:adts on
+:testgen run_testgen assuming no_consec_resets_8  with_code write_jsons 
+
+
+
+
+
 
 

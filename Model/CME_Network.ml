@@ -14,18 +14,17 @@ type net_effect = NoEffect | PacketLoss | PacketMoveToCache | PacketMoveFromCach
 
 (** Module representing the *)
 type network_state = {
-
     incoming : packet list;
     outgoing : packet list;
     cache    : packet list;
-
-    (** changes *)
-    next_net_effect : net_effect option;
 };; 
 
+let empty_network_state = {
+    incoming = []; outgoing = []; cache = []
+};;
 
 (** Is the transition valid? *)
-let is_trans_valid (n, e : network_state * net_effect) =
+let is_neteffect_valid (n, e : network_state * net_effect) =
     let queue_not_empty = n.incoming <> [] in  
     match e with 
     | NoEffect              -> true
