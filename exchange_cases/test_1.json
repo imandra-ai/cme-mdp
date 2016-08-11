@@ -1,0 +1,76 @@
+{
+  "ExchangeTransitions": [
+    { "BookReset": {} },
+    {
+      "Add": {
+        "Qty": 0,
+        "Price": 1,
+        "LevelNum": 6,
+        "SecType": "SecA",
+        "BookType": "BookImplied",
+        "LevelSide": "Buy",
+        "NumOrders": 2
+      }
+    },
+    { "BookReset": {} },
+    {
+      "Add": {
+        "Qty": 10,
+        "Price": 11,
+        "LevelNum": 12,
+        "SecType": "SecA",
+        "BookType": "BookImplied",
+        "LevelSide": "Buy",
+        "NumOrders": 21
+      }
+    },
+    { "BookReset": {} },
+    {
+      "Add": {
+        "Qty": 7,
+        "Price": 8,
+        "LevelNum": 9,
+        "SecType": "SecA",
+        "BookType": "BookImplied",
+        "LevelSide": "Buy",
+        "NumOrders": 20
+      }
+    },
+    { "BookReset": {} },
+    {
+      "Add": {
+        "Qty": 3,
+        "Price": 4,
+        "LevelNum": 5,
+        "SecType": "SecA",
+        "BookType": "BookImplied",
+        "LevelSide": "Buy",
+        "NumOrders": 22
+      }
+    },
+    { "BookReset": {} },
+    {
+      "Add": {
+        "Qty": 16,
+        "Price": 17,
+        "LevelNum": 18,
+        "SecType": "SecA",
+        "BookType": "BookImplied",
+        "LevelSide": "Buy",
+        "NumOrders": 23
+      }
+    },
+    { "BookReset": {} },
+    {
+      "Add": {
+        "Qty": 13,
+        "Price": 14,
+        "LevelNum": 15,
+        "SecType": "SecA",
+        "BookType": "BookImplied",
+        "LevelSide": "Buy",
+        "NumOrders": 19
+      }
+    }
+  ]
+}
