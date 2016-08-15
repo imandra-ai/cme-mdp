@@ -251,6 +251,7 @@ let send_o_del (state, o_del) =
 ;;
 
 
+
 (** 2.4 Snapshot sending  *)
 
 (** 2.4.1 This creates a list of orders on a given side of a book *)
@@ -313,7 +314,10 @@ let is_trans_valid (state, trans) =
                                 oa_data.oa_level_side,
                                 oa_data.oa_level_num )) && 
         oa_data.oa_level_num > 0 &&
-        oa_data.oa_level_num < 6 
+        oa_data.oa_level_num < 6 &&
+        oa_data.oa_order_qty > 0 && 
+        oa_data.oa_price > 0
+
     | ST_Change oc_data ->
         sec_level_exists (  state, 
                             oc_data.oc_sec_type,
@@ -322,7 +326,8 @@ let is_trans_valid (state, trans) =
                             oc_data.oc_level_num) && 
         oc_data.oc_level_num > 0 && 
         oc_data.oc_level_num < 6 &&
-        oc_data.oc_new_qty > 0   
+        oc_data.oc_new_qty > 0
+
     | ST_Delete od_data -> 
         sec_level_exists (  state,
                             od_data.od_sec_type,
@@ -330,7 +335,6 @@ let is_trans_valid (state, trans) =
                             od_data.od_level_side,
                             od_data.od_level_num
                             )
-
     | ST_DataSendInc  -> state.inc_msg_queue  <> []
     | ST_DataSendSnap -> state.snap_msg_queue <> []
     | ST_Snapshot _ -> true

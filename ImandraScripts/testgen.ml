@@ -14,10 +14,6 @@
 :load Model/CME_Network.ml
 :load_ocaml Printers/CME_json.ml
 
-:adts
-:p (in-theory (enable IML-ADT-EXECUTABLE-COUNTERPARTS-THEORY))
-
-
 type state = {
     exchange_state : exchange_state ;
      network_state :  network_state 
@@ -135,9 +131,8 @@ let write_jsons m =
             (* |> Yojson.Basic.to_file (Printf.sprintf "exchange_cases/test_%d.json" !n) *)
 ;;
 :shadow on
-
-
 :adts on
+
 :testgen run_testgen assuming no_consec_resets_8  with_code write_jsons 
 
 
