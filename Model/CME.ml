@@ -170,17 +170,6 @@ let is_cache_valid_since_seq_num (cache, last_processed_seq, book_depth : ref_me
     cache <> [] && check_list (cache, last_processed_seq, book_depth)
 ;;
 
-(** ************************************************************** *)
-(** Book sorting information                                       *)
-(** ************************************************************** *)
-let order_higher_ranked (s, o1, o2 : order_side * order_level * order_level) =
-    match o1, o2 with
-    | Level d_1, Level d_2 -> if s = OrdBuy then d_1.price >= d_2.price else d_1.price <= d_2.price
-    | Level d_1, NoLevel -> true
-    | NoLevel, Level d_2 -> false
-    | NoLevel, NoLevel -> true
-;;
-
 (** Insert order into the book *)
 let rec insert_order (a, s, orders : order_level * order_side * order_level list) =
   match orders with

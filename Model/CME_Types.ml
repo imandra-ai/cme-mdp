@@ -25,6 +25,15 @@ type order_info = {
 
 type order_level = Level of order_info | NoLevel;;
 
+(** Book sorting information                                       *)
+let order_higher_ranked (s, o1, o2 : order_side * order_level * order_level) =
+    match o1, o2 with
+    | Level d_1, Level d_2 -> if s = OrdBuy then d_1.price >= d_2.price else d_1.price <= d_2.price
+    | Level d_1, NoLevel -> true
+    | NoLevel, Level d_2 -> false
+    | NoLevel, NoLevel -> true
+;;
+
 (** Generic book type (used for all three types of books) *)
 type book = {
     buys : order_level list;

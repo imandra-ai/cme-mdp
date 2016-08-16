@@ -27,8 +27,6 @@ type order_book = {
     sell_orders : book_side;
 };;
 
-
-
 (** 1.1.1 Book access function: get level  *)
 let get_obook_level (bs, level_num : book_side * int) = 
     match level_num with 
@@ -53,6 +51,24 @@ let set_obook_level (bs, level_num, level : book_side * int * order_level ) =
 let empty_book_side = { 
     one = NoLevel; two = NoLevel; three = NoLevel; four = NoLevel; five = NoLevel 
 };;
+
+(** 1.1.4 Checks that the two sides are sorted and that highest bid < lowest ask*)
+let is_book_sorted ( b : order_book ) =
+    order_higher_ranked ( OrdBuy,  b.buy_orders.one,    b.buy_orders.two    ) &&
+    order_higher_ranked ( OrdBuy,  b.buy_orders.two,    b.buy_orders.three  ) &&
+    order_higher_ranked ( OrdBuy,  b.buy_orders.three,  b.buy_orders.four   ) &&
+    order_higher_ranked ( OrdBuy,  b.buy_orders.four,   b.buy_orders.five   ) &&
+    order_higher_ranked ( OrdSell, b.sell_orders.one,   b.sell_orders.two   ) &&
+    order_higher_ranked ( OrdSell, b.sell_orders.two,   b.sell_orders.three ) &&
+    order_higher_ranked ( OrdSell, b.sell_orders.three, b.sell_orders.four  ) &&
+    order_higher_ranked ( OrdSell, b.sell_orders.four,  b.sell_orders.five  ) &&
+    begin match b.buy_orders.one, b.sell_orders.one with
+    | Level d_1, Level d_2 -> d_1.price <= d_2.price
+    | Level d_1, NoLevel -> true
+    | NoLevel, Level d_2 -> true
+    | NoLevel, NoLevel -> true
+    end
+;;
 
 (** 1.2 Security state including the order book.                    *)
 type security_state = {
@@ -316,7 +332,14 @@ let is_trans_valid (state, trans) =
         oa_data.oa_level_num > 0 &&
         oa_data.oa_level_num < 6 &&
         oa_data.oa_order_qty > 0 && 
-        oa_data.oa_price > 0
+        oa_data.oa_price > 0     && begin
+            let s = send_add_level( state, oa_data) in
+            match ( oa_data.oa_sec_type, oa_data.oa_book_type ) with
+            | SecA, Book_Type_Multi   -> is_book_sorted s.sec_a.multi_book
+            | SecA, Book_Type_Implied -> is_book_sorted s.sec_a.implied_book
+            | SecB, Book_Type_Multi   -> is_book_sorted s.sec_b.multi_book
+            | SecB, Book_Type_Implied -> is_book_sorted s.sec_b.implied_book
+        end
 
     | ST_Change oc_data ->
         sec_level_exists (  state, 
