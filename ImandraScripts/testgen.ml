@@ -127,8 +127,8 @@ let write_jsons m =
     let packets = final_state.network_state.outgoing @ final_state.network_state.incoming in
     let () = n := !n + 1 in
     packets |> packets_to_json
-            |> Yojson.Basic.pretty_to_string |> print_string
-            (* |> Yojson.Basic.to_file (Printf.sprintf "exchange_cases/test_%d.json" !n) *)
+            (* |> Yojson.Basic.pretty_to_string |> print_string *)
+            |> Yojson.Basic.to_file (Printf.sprintf "exchange_cases/test_%d.json" !n) 
 ;;
 :shadow on
 :adts on
