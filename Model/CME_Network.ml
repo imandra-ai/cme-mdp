@@ -27,7 +27,7 @@ let empty_network_state = {
 let is_neteffect_valid (n, e : network_state * net_effect) =
     let queue_not_empty = n.incoming <> [] in  
     match e with 
-    | NoEffect              -> true
+    | NoEffect              -> queue_not_empty
     | PacketLoss            -> queue_not_empty
     | PacketMoveToCache     -> queue_not_empty
     | PacketMoveFromCache x -> 0 <= x && x < List.length n.cache
@@ -54,7 +54,8 @@ let rec remove_nth ( packets, n, idx : packet list * int * int ) =
 (** Process network effect *)
 let process_net_effect (n, e : network_state * net_effect) =
     match e with 
-    | NoEffect              -> n
+    | NoEffect              -> { n with incoming = List.tl n.incoming;
+                                        outgoing = List.hd n.outgoing  }
     | PacketLoss            -> { n with incoming = List.tl n.incoming; }
     | PacketMoveToCache     -> begin
         match n.incoming with 
