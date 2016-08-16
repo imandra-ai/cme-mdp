@@ -34,41 +34,25 @@ let get_obook_level (bs, level_num : book_side * int) =
     | 2 -> bs.two
     | 3 -> bs.three
     | 4 -> bs.four
-    | _ -> bs.five
+    | 5 -> bs.five
+    | _ ->  NoLevel
 ;;
 
 (** 1.1.2 Book access function: set level  *)
 let set_obook_level (bs, level_num, level : book_side * int * order_level ) = 
     match level_num with 
-    | 1 -> { bs with one   = level }
+    | 1 -> { bs with one   = level } 
     | 2 -> { bs with two   = level }
     | 3 -> { bs with three = level }
-    | 4 -> { bs with four  = level }
-    | _ -> { bs with five  = level }
+    | 4 -> { bs with four  = level } 
+    | 5 -> { bs with five  = level }
+    | _ -> bs
 ;;
 
-(** 1.1.3 Empty book constant *)
-let empty_book_side = { 
-    one = NoLevel; two = NoLevel; three = NoLevel; four = NoLevel; five = NoLevel 
-};;
-
-(** 1.1.4 Checks that the two sides are sorted and that highest bid < lowest ask*)
-let is_book_sorted ( b : order_book ) =
-    order_higher_ranked ( OrdBuy,  b.buy_orders.one,    b.buy_orders.two    ) &&
-    order_higher_ranked ( OrdBuy,  b.buy_orders.two,    b.buy_orders.three  ) &&
-    order_higher_ranked ( OrdBuy,  b.buy_orders.three,  b.buy_orders.four   ) &&
-    order_higher_ranked ( OrdBuy,  b.buy_orders.four,   b.buy_orders.five   ) &&
-    order_higher_ranked ( OrdSell, b.sell_orders.one,   b.sell_orders.two   ) &&
-    order_higher_ranked ( OrdSell, b.sell_orders.two,   b.sell_orders.three ) &&
-    order_higher_ranked ( OrdSell, b.sell_orders.three, b.sell_orders.four  ) &&
-    order_higher_ranked ( OrdSell, b.sell_orders.four,  b.sell_orders.five  ) &&
-    begin match b.buy_orders.one, b.sell_orders.one with
-    | Level d_1, Level d_2 -> d_1.price <= d_2.price
-    | Level d_1, NoLevel -> true
-    | NoLevel, Level d_2 -> true
-    | NoLevel, NoLevel -> true
-    end
-;;
+(** 1.1.4 Empty book constant *)
+let empty_book_side =
+    let emptyL =  NoLevel in
+    { one = emptyL; two = emptyL; three = emptyL; four = emptyL; five = emptyL };;
 
 (** 1.2 Security state including the order book.                    *)
 type security_state = {
@@ -199,6 +183,29 @@ let send_add_level (state, o_add) =
     { state with inc_msg_queue = add_m :: state.inc_msg_queue }
 ;;
 
+(** 2.1.2 Check whether add keeps the sorted book *)
+let add_respects_order ( state, oa_data ) =
+    let stype      = oa_data.oa_sec_type   in
+    let btype      = oa_data.oa_book_type  in
+    let side       = oa_data.oa_level_side in
+    let price      = oa_data.oa_price      in
+    let qty        = oa_data.oa_order_qty  in
+    let num_orders = oa_data.oa_num_orders in
+    let prev_level = get_level ( state, stype, btype, side, oa_data.oa_level_num - 1 ) in
+    let  new_level = Level { side; price; qty; num_orders } in
+    let next_level = get_level ( state, stype, btype, side, oa_data.oa_level_num + 1 ) in
+    order_higher_ranked ( side, new_level, next_level ) &&
+    order_higher_ranked ( side, prev_level, new_level ) && 
+    if oa_data.oa_level_num <> 1 then true else begin
+        let top_buy  = if side = OrdBuy  then new_level else get_level ( state, stype, btype, OrdBuy,  1) in
+        let top_sell = if side = OrdSell then new_level else get_level ( state, stype, btype, OrdSell, 1) in
+        match (top_buy, top_sell) with 
+        | NoLevel , _       -> true
+        |       _ , NoLevel -> true
+        | Level b , Level s -> b.price <= s.price
+    end
+;;
+
 
 (** 2.2 Order Change internal event *)
 (**     - note that it can only change qty -- not num_orders or price... *)
@@ -234,6 +241,7 @@ let send_o_change (state, o_change) =
     let state = set_level ( state, o_change.oc_sec_type, o_change.oc_book_type, side, nlevel, Level level ) in 
     { state with inc_msg_queue = change_m :: state.inc_msg_queue }
 ;;
+
 
 (** 2.3 Order Delete internal event         *)
 (**     - TODO What goes into level delete? *)
@@ -272,11 +280,11 @@ let send_o_del (state, o_del) =
 
 (** 2.4.1 This creates a list of orders on a given side of a book *)
 let get_level_list (state, sec_type, book_type, side ) = [ 
-    get_level ( state, sec_type, book_type,  side, 1 ); 
-    get_level ( state, sec_type, book_type,  side, 2 ); 
-    get_level ( state, sec_type, book_type,  side, 3 ); 
-    get_level ( state, sec_type, book_type,  side, 4 ); 
-    get_level ( state, sec_type, book_type,  side, 5 ); 
+    get_level ( state, sec_type, book_type,  side, 1 ) ; 
+    get_level ( state, sec_type, book_type,  side, 2 ) ; 
+    get_level ( state, sec_type, book_type,  side, 3 ) ; 
+    get_level ( state, sec_type, book_type,  side, 4 ) ; 
+    get_level ( state, sec_type, book_type,  side, 5 ) ; 
 ];;
 
 (** 2.4.2 This generates a snapshot message for the whole book of one security *)
@@ -331,15 +339,8 @@ let is_trans_valid (state, trans) =
                                 oa_data.oa_level_num )) && 
         oa_data.oa_level_num > 0 &&
         oa_data.oa_level_num < 6 &&
-        oa_data.oa_order_qty > 0 && 
-        oa_data.oa_price > 0     && begin
-            let s = send_add_level( state, oa_data) in
-            match ( oa_data.oa_sec_type, oa_data.oa_book_type ) with
-            | SecA, Book_Type_Multi   -> is_book_sorted s.sec_a.multi_book
-            | SecA, Book_Type_Implied -> is_book_sorted s.sec_a.implied_book
-            | SecB, Book_Type_Multi   -> is_book_sorted s.sec_b.multi_book
-            | SecB, Book_Type_Implied -> is_book_sorted s.sec_b.implied_book
-        end
+        oa_data.oa_order_qty > 0 &&
+        add_respects_order ( state, oa_data )
 
     | ST_Change oc_data ->
         sec_level_exists (  state, 
