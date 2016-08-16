@@ -1,0 +1,94 @@
+{
+  "packets": [
+    {
+      "SeqNum": 1,
+      "Channel": "SnapshotA",
+      "Messages": [
+        {
+          "SecurityID": 1,
+          "RepSeqNum": 0,
+          "LastMsgSeqNumProcessed": 0,
+          "MultiBook": {
+            "Buys": [ {}, {}, {}, {}, {} ],
+            "Sells": [ {}, {}, {}, {}, {} ]
+          },
+          "ImpliedBook": {
+            "Buys": [ {}, {}, {}, {}, {} ],
+            "Sells": [ {}, {}, {}, {}, {} ]
+          }
+        }
+      ]
+    },
+    {
+      "SeqNum": 1,
+      "Channel": "SnapshotB",
+      "Messages": [
+        {
+          "SecurityID": 1,
+          "RepSeqNum": 0,
+          "LastMsgSeqNumProcessed": 0,
+          "MultiBook": {
+            "Buys": [ {}, {}, {}, {}, {} ],
+            "Sells": [ {}, {}, {}, {}, {} ]
+          },
+          "ImpliedBook": {
+            "Buys": [ {}, {}, {}, {}, {} ],
+            "Sells": [ {}, {}, {}, {}, {} ]
+          }
+        }
+      ]
+    },
+    {
+      "SeqNum": 1,
+      "Channel": "RefreshA",
+      "Messages": [
+        {
+          "SequrityID": 1,
+          "RepSeqNum": 0,
+          "PriceLevel": 1,
+          "EntrySize": 7720,
+          "EntryPrice": 2438,
+          "NumOrders": 3,
+          "MessageType": "New",
+          "EntryType": "Bid"
+        },
+        {
+          "SequrityID": 1,
+          "RepSeqNum": 0,
+          "PriceLevel": 1,
+          "EntrySize": 39,
+          "EntryPrice": 1237,
+          "NumOrders": 2,
+          "MessageType": "New",
+          "EntryType": "Bid"
+        }
+      ]
+    },
+    {
+      "SeqNum": 1,
+      "Channel": "RefreshB",
+      "Messages": [
+        {
+          "SequrityID": 1,
+          "RepSeqNum": 0,
+          "PriceLevel": 1,
+          "EntrySize": 7720,
+          "EntryPrice": 2438,
+          "NumOrders": 3,
+          "MessageType": "New",
+          "EntryType": "Bid"
+        },
+        {
+          "SequrityID": 1,
+          "RepSeqNum": 0,
+          "PriceLevel": 1,
+          "EntrySize": 39,
+          "EntryPrice": 1237,
+          "NumOrders": 2,
+          "MessageType": "New",
+          "EntryType": "Bid"
+        }
+      ]
+    }
+  ]
+}
