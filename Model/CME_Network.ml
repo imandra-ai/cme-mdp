@@ -55,7 +55,7 @@ let rec remove_nth ( packets, n, idx : packet list * int * int ) =
 let process_net_effect (n, e : network_state * net_effect) =
     match e with 
     | NoEffect              -> { n with incoming = List.tl n.incoming;
-                                        outgoing = List.hd n.outgoing :: n.outgoing }
+                                        outgoing = List.hd n.incoming :: n.outgoing }
     | PacketLoss            -> { n with incoming = List.tl n.incoming; }
     | PacketMoveToCache     -> begin
         match n.incoming with 
