@@ -1,0 +1,76 @@
+{
+  "packets": [
+    {
+      "SeqNum": 1,
+      "Channel": "RefreshA",
+      "Messages": [
+        {
+          "SequrityID": 1,
+          "RepSeqNum": 0,
+          "PriceLevel": 1,
+          "EntrySize": 1237,
+          "EntryPrice": 1797,
+          "NumOrders": 4,
+          "MessageType": "New",
+          "EntryType": "Bid"
+        },
+        {
+          "SequrityID": 1,
+          "RepSeqNum": 0,
+          "PriceLevel": 1,
+          "EntrySize": 7720,
+          "EntryPrice": 1542,
+          "NumOrders": 3,
+          "MessageType": "New",
+          "EntryType": "Bid"
+        },
+        {
+          "SequrityID": 1,
+          "RepSeqNum": 0,
+          "PriceLevel": 1,
+          "EntrySize": 39,
+          "EntryPrice": 2438,
+          "NumOrders": 2,
+          "MessageType": "New",
+          "EntryType": "Offer"
+        }
+      ]
+    },
+    {
+      "SeqNum": 1,
+      "Channel": "RefreshB",
+      "Messages": [
+        {
+          "SequrityID": 1,
+          "RepSeqNum": 0,
+          "PriceLevel": 1,
+          "EntrySize": 1237,
+          "EntryPrice": 1797,
+          "NumOrders": 4,
+          "MessageType": "New",
+          "EntryType": "Bid"
+        },
+        {
+          "SequrityID": 1,
+          "RepSeqNum": 0,
+          "PriceLevel": 1,
+          "EntrySize": 7720,
+          "EntryPrice": 1542,
+          "NumOrders": 3,
+          "MessageType": "New",
+          "EntryType": "Bid"
+        },
+        {
+          "SequrityID": 1,
+          "RepSeqNum": 0,
+          "PriceLevel": 1,
+          "EntrySize": 39,
+          "EntryPrice": 2438,
+          "NumOrders": 2,
+          "MessageType": "New",
+          "EntryType": "Offer"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "packets": [
+    {
+      "SeqNum": 1,
+      "Channel": "SnapshotA",
+      "Messages": [
+        {
+          "SecurityID": 1,
+          "RepSeqNum": 0,
+          "LastMsgSeqNumProcessed": 1,
+          "MultiBook": {
+            "Buys": [ {}, {}, {}, {}, {} ],
+            "Sells": [ {}, {}, {}, {}, {} ]
+          },
+          "ImpliedBook": {
+            "Buys": [ {}, {}, {}, {}, {} ],
+            "Sells": [ {}, {}, {}, {}, {} ]
+          }
+        }
+      ]
+    },
+    {
+      "SeqNum": 1,
+      "Channel": "SnapshotB",
+      "Messages": [
+        {
+          "SecurityID": 1,
+          "RepSeqNum": 0,
+          "LastMsgSeqNumProcessed": 1,
+          "MultiBook": {
+            "Buys": [ {}, {}, {}, {}, {} ],
+            "Sells": [ {}, {}, {}, {}, {} ]
+          },
+          "ImpliedBook": {
+            "Buys": [ {}, {}, {}, {}, {} ],
+            "Sells": [ {}, {}, {}, {}, {} ]
+          }
+        }
+      ]
+    },
+    {
+      "SeqNum": 1,
+      "Channel": "RefreshA",
+      "Messages": [
+        {
+          "SequrityID": 1,
+          "RepSeqNum": 0,
+          "PriceLevel": 1,
+          "EntrySize": 1237,
+          "EntryPrice": 1797,
+          "NumOrders": 4,
+          "MessageType": "New",
+          "EntryType": "Bid"
+        },
+        {
+          "SequrityID": 1,
+          "RepSeqNum": 0,
+          "PriceLevel": 1,
+          "EntrySize": 7720,
+          "EntryPrice": 8856,
+          "NumOrders": 3,
+          "MessageType": "New",
+          "EntryType": "Bid"
+        },
+        {
+          "SequrityID": 2,
+          "RepSeqNum": 0,
+          "PriceLevel": 1,
+          "EntrySize": 39,
+          "EntryPrice": 2438,
+          "NumOrders": 2,
+          "MessageType": "New",
+          "EntryType": "ImpliedOffer"
+        }
+      ]
+    },
+    {
+      "SeqNum": 1,
+      "Channel": "RefreshB",
+      "Messages": [
+        {
+          "SequrityID": 1,
+          "RepSeqNum": 0,
+          "PriceLevel": 1,
+          "EntrySize": 1237,
+          "EntryPrice": 1797,
+          "NumOrders": 4,
+          "MessageType": "New",
+          "EntryType": "Bid"
+        },
+        {
+          "SequrityID": 1,
+          "RepSeqNum": 0,
+          "PriceLevel": 1,
+          "EntrySize": 7720,
+          "EntryPrice": 8856,
+          "NumOrders": 3,
+          "MessageType": "New",
+          "EntryType": "Bid"
+        },
+        {
+          "SequrityID": 2,
+          "RepSeqNum": 0,
+          "PriceLevel": 1,
+          "EntrySize": 39,
+          "EntryPrice": 2438,
+          "NumOrders": 2,
+          "MessageType": "New",
+          "EntryType": "ImpliedOffer"
+        }
+      ]
+    }
+  ]
+}
