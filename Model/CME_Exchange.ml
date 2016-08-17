@@ -194,8 +194,8 @@ let add_respects_order ( state, oa_data ) =
     let prev_level = get_level ( state, stype, btype, side, oa_data.oa_level_num - 1 ) in
     let  new_level = Level { side; price; qty; num_orders } in
     let next_level = get_level ( state, stype, btype, side, oa_data.oa_level_num + 1 ) in
-    order_higher_ranked ( side, new_level, next_level ) &&
-    order_higher_ranked ( side, prev_level, new_level ) && 
+     order_higher_ranked (side, new_level, next_level) &&
+    (order_higher_ranked (side, prev_level, new_level) || (oa_data.oa_level_num = 1) ) &&
     if oa_data.oa_level_num <> 1 then true else begin
         let top_buy  = if side = OrdBuy  then new_level else get_level ( state, stype, btype, OrdBuy,  1) in
         let top_sell = if side = OrdSell then new_level else get_level ( state, stype, btype, OrdSell, 1) in
