@@ -13,13 +13,19 @@ open CME_Types;;
 (** 1. Internal state *)
 
 (** 1.1 Books. *)
+type exchange_level = {
+    level      : order_level;
+    next_level : order_level;
+    prev_level : order_level
+};;
+
 (** We will just hard-code the book levels here *)
 type book_side = {
-    one   : order_level;
-    two   : order_level;
-    three : order_level;
-    four  : order_level;
-    five  : order_level;
+    one   : exchange_level;
+    two   : exchange_level;
+    three : exchange_level;
+    four  : exchange_level;
+    five  : exchange_level;
 };;
 
 type order_book = {
@@ -35,23 +41,36 @@ let get_obook_level (bs, level_num : book_side * int) =
     | 3 -> bs.three
     | 4 -> bs.four
     | 5 -> bs.five
-    | _ ->  NoLevel
+    | _ -> { level = NoLevel; next_level = NoLevel; prev_level = NoLevel}
 ;;
 
 (** 1.1.2 Book access function: set level  *)
 let set_obook_level (bs, level_num, level : book_side * int * order_level ) = 
     match level_num with 
-    | 1 -> { bs with one   = level } 
-    | 2 -> { bs with two   = level }
-    | 3 -> { bs with three = level }
-    | 4 -> { bs with four  = level } 
-    | 5 -> { bs with five  = level }
+    | 1 -> { bs with one   = { bs.one   with level      = level }; 
+                     two   = { bs.two   with prev_level = level } 
+           }
+    | 2 -> { bs with one   = { bs.one   with next_level = level };
+                     two   = { bs.two   with level      = level }; 
+                     three = { bs.three with prev_level = level }
+           }
+    | 3 -> { bs with two   = { bs.two   with next_level = level };
+                     three = { bs.three with level      = level }; 
+                     four  = { bs.four  with prev_level = level }
+           }
+    | 4 -> { bs with three = { bs.three with next_level = level };
+                     four  = { bs.four  with level      = level }; 
+                     five  = { bs.five  with prev_level = level }
+           }
+    | 5 -> { bs with four  = { bs.four  with next_level = level }; 
+                     five  = { bs.five  with level      = level }
+           }
     | _ -> bs
 ;;
 
 (** 1.1.4 Empty book constant *)
 let empty_book_side =
-    let emptyL =  NoLevel in
+    let emptyL = { level = NoLevel; next_level = NoLevel; prev_level = NoLevel } in
     { one = emptyL; two = emptyL; three = emptyL; four = emptyL; five = emptyL };;
 
 (** 1.2 Security state including the order book.                    *)
@@ -185,26 +204,13 @@ let send_add_level (state, o_add) =
 
 (** 2.1.2 Check whether add keeps the sorted book *)
 let add_respects_order ( state, oa_data ) =
-    let stype      = oa_data.oa_sec_type   in
-    let btype      = oa_data.oa_book_type  in
-    let side       = oa_data.oa_level_side in
-    let price      = oa_data.oa_price      in
-    let qty        = oa_data.oa_order_qty  in
-    let num_orders = oa_data.oa_num_orders in
+    let stype = oa_data.oa_sec_type   in
+    let btype = oa_data.oa_book_type  in
+    let side  = oa_data.oa_level_side in
     let prev_level = get_level ( state, stype, btype, side, oa_data.oa_level_num - 1 ) in
-    let  new_level = Level { side; price; qty; num_orders } in
     let next_level = get_level ( state, stype, btype, side, oa_data.oa_level_num + 1 ) in
-     order_higher_ranked (side, new_level, next_level) &&
-    (order_higher_ranked (side, prev_level, new_level) || (oa_data.oa_level_num = 1) ) &&
-    if oa_data.oa_level_num <> 1 then true else begin
-        let top_buy  = if side = OrdBuy  then new_level else get_level ( state, stype, btype, OrdBuy,  1) in
-        let top_sell = if side = OrdSell then new_level else get_level ( state, stype, btype, OrdSell, 1) in
-        match (top_buy, top_sell) with 
-        | NoLevel , _       -> true
-        |       _ , NoLevel -> true
-        | Level b , Level s -> b.price <= s.price
-    end
-;;
+
+
 
 
 (** 2.2 Order Change internal event *)
@@ -225,7 +231,7 @@ let send_o_change (state, o_change) =
     let side   = o_change.oc_level_side in
     let nlevel = o_change.oc_level_num  in
     let level  = get_level (state , o_change.oc_sec_type, o_change.oc_book_type, side, nlevel) in
-    match level with NoLevel -> state | Level level -> 
+    match level.level with NoLevel -> state | Level level -> 
     let level = { level with qty =  o_change.oc_new_qty } in
     let change_m = RefreshMessage {
         rm_security_id = get_security_id ( state, o_change.oc_sec_type ) ;
@@ -258,7 +264,7 @@ let send_o_del (state, o_del) =
     let side   = o_del.od_level_side in
     let nlevel = o_del.od_level_num  in
     let level = get_level (state , o_del.od_sec_type, o_del.od_book_type, side, nlevel ) in
-    match level with NoLevel -> state | Level level -> 
+    match level.level with NoLevel -> state | Level level -> 
     let del_m = RefreshMessage {
         rm_security_id = get_security_id ( state, o_del.od_sec_type ) ;
         rm_rep_seq_num = get_rep_seq_num ( state, o_del.od_sec_type ) ;
@@ -280,11 +286,11 @@ let send_o_del (state, o_del) =
 
 (** 2.4.1 This creates a list of orders on a given side of a book *)
 let get_level_list (state, sec_type, book_type, side ) = [ 
-    get_level ( state, sec_type, book_type,  side, 1 ) ; 
-    get_level ( state, sec_type, book_type,  side, 2 ) ; 
-    get_level ( state, sec_type, book_type,  side, 3 ) ; 
-    get_level ( state, sec_type, book_type,  side, 4 ) ; 
-    get_level ( state, sec_type, book_type,  side, 5 ) ; 
+    ( get_level ( state, sec_type, book_type,  side, 1 ) ).level; 
+    ( get_level ( state, sec_type, book_type,  side, 2 ) ).level; 
+    ( get_level ( state, sec_type, book_type,  side, 3 ) ).level; 
+    ( get_level ( state, sec_type, book_type,  side, 4 ) ).level; 
+    ( get_level ( state, sec_type, book_type,  side, 5 ) ).level; 
 ];;
 
 (** 2.4.2 This generates a snapshot message for the whole book of one security *)
@@ -321,7 +327,8 @@ type int_state_trans =
 
 (** 3.1 Check that the level exists for the whole security *)
 let sec_level_exists (state, sec_t, book_t, order_s, level_n : exchange_state * sec_type * book_type * order_side * int ) = 
-    match get_level  (state, sec_t, book_t, order_s, level_n ) with NoLevel -> false | Level _ -> true 
+    let elevel = get_level  (state, sec_t, book_t, order_s, level_n ) in
+    match elevel.level  with NoLevel -> false | Level _ -> true 
 ;;
 
 (** 3.2 Define a valid transition of the exchange *)
@@ -339,9 +346,7 @@ let is_trans_valid (state, trans) =
                                 oa_data.oa_level_num )) && 
         oa_data.oa_level_num > 0 &&
         oa_data.oa_level_num < 6 &&
-        oa_data.oa_order_qty > 0 &&
-        add_respects_order ( state, oa_data )
-
+        oa_data.oa_order_qty > 0 && 
     | ST_Change oc_data ->
         sec_level_exists (  state, 
                             oc_data.oc_sec_type,

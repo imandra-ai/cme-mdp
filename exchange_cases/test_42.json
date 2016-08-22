@@ -7,7 +7,7 @@
         {
           "SecurityID": 1,
           "RepSeqNum": 0,
-          "LastMsgSeqNumProcessed": 0,
+          "LastMsgSeqNumProcessed": 1,
           "MultiBook": {
             "Buys": [ {}, {}, {}, {}, {} ],
             "Sells": [ {}, {}, {}, {}, {} ]
@@ -20,13 +20,89 @@
       ]
     },
     {
-      "SeqNum": 2,
+      "SeqNum": 3,
       "Channel": "SnapshotA",
       "Messages": [
         {
           "SecurityID": 1,
           "RepSeqNum": 0,
-          "LastMsgSeqNumProcessed": 0,
+          "LastMsgSeqNumProcessed": 1,
+          "MultiBook": {
+            "Buys": [ {}, {}, {}, {}, {} ],
+            "Sells": [ {}, {}, {}, {}, {} ]
+          },
+          "ImpliedBook": {
+            "Buys": [ {}, {}, {}, {}, {} ],
+            "Sells": [ {}, {}, {}, {}, {} ]
+          }
+        }
+      ]
+    },
+    {
+      "SeqNum": 4,
+      "Channel": "SnapshotB",
+      "Messages": [
+        {
+          "SecurityID": 1,
+          "RepSeqNum": 0,
+          "LastMsgSeqNumProcessed": 1,
+          "MultiBook": {
+            "Buys": [ {}, {}, {}, {}, {} ],
+            "Sells": [ {}, {}, {}, {}, {} ]
+          },
+          "ImpliedBook": {
+            "Buys": [ {}, {}, {}, {}, {} ],
+            "Sells": [ {}, {}, {}, {}, {} ]
+          }
+        }
+      ]
+    },
+    {
+      "SeqNum": 4,
+      "Channel": "SnapshotA",
+      "Messages": [
+        {
+          "SecurityID": 1,
+          "RepSeqNum": 0,
+          "LastMsgSeqNumProcessed": 1,
+          "MultiBook": {
+            "Buys": [ {}, {}, {}, {}, {} ],
+            "Sells": [ {}, {}, {}, {}, {} ]
+          },
+          "ImpliedBook": {
+            "Buys": [ {}, {}, {}, {}, {} ],
+            "Sells": [ {}, {}, {}, {}, {} ]
+          }
+        }
+      ]
+    },
+    {
+      "SeqNum": 5,
+      "Channel": "SnapshotB",
+      "Messages": [
+        {
+          "SecurityID": 1,
+          "RepSeqNum": 0,
+          "LastMsgSeqNumProcessed": 1,
+          "MultiBook": {
+            "Buys": [ {}, {}, {}, {}, {} ],
+            "Sells": [ {}, {}, {}, {}, {} ]
+          },
+          "ImpliedBook": {
+            "Buys": [ {}, {}, {}, {}, {} ],
+            "Sells": [ {}, {}, {}, {}, {} ]
+          }
+        }
+      ]
+    },
+    {
+      "SeqNum": 5,
+      "Channel": "SnapshotA",
+      "Messages": [
+        {
+          "SecurityID": 1,
+          "RepSeqNum": 0,
+          "LastMsgSeqNumProcessed": 1,
           "MultiBook": {
             "Buys": [ {}, {}, {}, {}, {} ],
             "Sells": [ {}, {}, {}, {}, {} ]
@@ -45,7 +121,7 @@
         {
           "SecurityID": 1,
           "RepSeqNum": 0,
-          "LastMsgSeqNumProcessed": 0,
+          "LastMsgSeqNumProcessed": 1,
           "MultiBook": {
             "Buys": [ {}, {}, {}, {}, {} ],
             "Sells": [ {}, {}, {}, {}, {} ]
@@ -64,7 +140,7 @@
         {
           "SecurityID": 1,
           "RepSeqNum": 0,
-          "LastMsgSeqNumProcessed": 0,
+          "LastMsgSeqNumProcessed": 1,
           "MultiBook": {
             "Buys": [ {}, {}, {}, {}, {} ],
             "Sells": [ {}, {}, {}, {}, {} ]
@@ -83,7 +159,7 @@
         {
           "SecurityID": 1,
           "RepSeqNum": 0,
-          "LastMsgSeqNumProcessed": 0,
+          "LastMsgSeqNumProcessed": 1,
           "MultiBook": {
             "Buys": [ {}, {}, {}, {}, {} ],
             "Sells": [ {}, {}, {}, {}, {} ]
@@ -92,6 +168,38 @@
             "Buys": [ {}, {}, {}, {}, {} ],
             "Sells": [ {}, {}, {}, {}, {} ]
           }
+        }
+      ]
+    },
+    {
+      "SeqNum": 1,
+      "Channel": "RefreshA",
+      "Messages": [
+        {
+          "SequrityID": 1,
+          "RepSeqNum": 0,
+          "PriceLevel": 1,
+          "EntrySize": 39,
+          "EntryPrice": 0,
+          "NumOrders": 2,
+          "MessageType": "New",
+          "EntryType": "Offer"
+        }
+      ]
+    },
+    {
+      "SeqNum": 1,
+      "Channel": "RefreshB",
+      "Messages": [
+        {
+          "SequrityID": 1,
+          "RepSeqNum": 0,
+          "PriceLevel": 1,
+          "EntrySize": 39,
+          "EntryPrice": 0,
+          "NumOrders": 2,
+          "MessageType": "New",
+          "EntryType": "Offer"
         }
       ]
     }
