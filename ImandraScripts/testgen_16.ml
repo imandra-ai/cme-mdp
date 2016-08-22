@@ -65,6 +65,7 @@ type search_space = {
     m5  : int_state_trans;
     m6  : int_state_trans;
     m7  : int_state_trans;
+    m8  : int_state_trans;
     m9  : int_state_trans;
     m10 : int_state_trans;
     m11 : int_state_trans;
@@ -91,6 +92,7 @@ let search_space_to_list m = [
     ExchangeAction m.m5 ;
     ExchangeAction m.m6 ;
     ExchangeAction m.m7 ;
+    ExchangeAction m.m8 ;
     ExchangeAction m.m9 ;
     ExchangeAction m.m10;
     ExchangeAction m.m11;
@@ -118,22 +120,29 @@ let run_testgen m =
     run ( empty_state, search_space_to_list m ) 
 ;;
 
-
-let no_consec_resets_8 m =
-     (m.m1   = ST_BookReset ==> not(m.m2   = ST_BookReset))
-  && (m.m2   = ST_BookReset ==> not(m.m3   = ST_BookReset))
-  && (m.m3   = ST_BookReset ==> not(m.m4   = ST_BookReset))
-  && (m.m4   = ST_BookReset ==> not(m.m5   = ST_BookReset))
-  && (m.m5   = ST_BookReset ==> not(m.m6   = ST_BookReset))
-  && (m.m6   = ST_BookReset ==> not(m.m7   = ST_BookReset))
-  && (m.m7   = ST_BookReset ==> not(m.m9   = ST_BookReset))
-  && (m.m9   = ST_BookReset ==> not(m.m10  = ST_BookReset))
-  && (m.m10  = ST_BookReset ==> not(m.m11  = ST_BookReset))
-  && (m.m11  = ST_BookReset ==> not(m.m12  = ST_BookReset))
-  && (m.m12  = ST_BookReset ==> not(m.m13  = ST_BookReset))
-  && (m.m13  = ST_BookReset ==> not(m.m14  = ST_BookReset))
-  && (m.m14  = ST_BookReset ==> not(m.m15  = ST_BookReset))
-  && (m.m15  = ST_BookReset ==> not(m.m16  = ST_BookReset))
+let is_add  t = match t with ST_Add _ -> true | _ -> false;;
+let is_send t = match t with ST_DataSendInc -> true | ST_DataSendSnap -> true | _ -> false;;
+let kostyly m =
+       (is_add m.m1) (* First 5 events are Add only*)
+    && (is_add m.m2) 
+    && (is_add m.m3) 
+    && (is_add m.m4) 
+    && (is_add m.m5) 
+    && (m.m6  <> ST_BookReset) (* Book reset allowed only at 9 and 15*)
+    && (m.m7  <> ST_BookReset) 
+    && (m.m8  <> ST_BookReset) 
+    && (m.m10 <> ST_BookReset) 
+    && (m.m11 <> ST_BookReset) 
+    && (m.m12 <> ST_BookReset) 
+    && (m.m13 <> ST_BookReset) 
+    && (m.m14 <> ST_BookReset) 
+    && (not (is_send m.m6  )) (* Sending allowed only at the end *)
+    && (not (is_send m.m7  )) 
+    && (not (is_send m.m8  )) 
+    && (not (is_send m.m9  )) 
+    && (not (is_send m.m10 )) 
+    && (not (is_send m.m11 )) 
+    && (is_send m.m16 ) (* last event is Send*)
 ;;
 
 :shadow off
@@ -156,7 +165,7 @@ let write_jsons m =
 :shadow on
 :adts on
 
-:testgen run_testgen assuming no_consec_resets_8  with_code write_jsons 
+:testgen run_testgen assuming kostyly  with_code write_jsons 
 
 
 
