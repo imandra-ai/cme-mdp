@@ -1,7 +1,7 @@
 {
   "packets": [
     {
-      "SeqNum": 2,
+      "SeqNum": 1,
       "Channel": "SnapshotA",
       "Messages": [
         {
@@ -14,14 +14,14 @@
                 "Side": "BUY",
                 "Quantity": 8856,
                 "Price": 0,
-                "NumOrders": 14
+                "NumOrders": 11
               },
-              { "Side": "BUY", "Quantity": 450, "Price": 0, "NumOrders": 12 },
+              { "Side": "BUY", "Quantity": 450, "Price": 0, "NumOrders": 16 },
               {
                 "Side": "BUY",
                 "Quantity": 610,
                 "Price": -1236,
-                "NumOrders": 17
+                "NumOrders": 13
               },
               {},
               {}
@@ -31,7 +31,7 @@
                 "Side": "SELL",
                 "Quantity": 2283,
                 "Price": 0,
-                "NumOrders": 16
+                "NumOrders": 14
               },
               {},
               {},
@@ -45,13 +45,13 @@
                 "Side": "BUY",
                 "Quantity": 1797,
                 "Price": 36,
-                "NumOrders": 11
+                "NumOrders": 15
               },
               {
                 "Side": "BUY",
                 "Quantity": 5854,
                 "Price": -2401,
-                "NumOrders": 10
+                "NumOrders": 17
               },
               {},
               {},
@@ -62,7 +62,7 @@
                 "Side": "SELL",
                 "Quantity": 8366,
                 "Price": 38,
-                "NumOrders": 13
+                "NumOrders": 12
               },
               {},
               {},
@@ -81,14 +81,14 @@
                 "Side": "BUY",
                 "Quantity": 8856,
                 "Price": 0,
-                "NumOrders": 14
+                "NumOrders": 11
               },
-              { "Side": "BUY", "Quantity": 450, "Price": 0, "NumOrders": 12 },
+              { "Side": "BUY", "Quantity": 450, "Price": 0, "NumOrders": 16 },
               {
                 "Side": "BUY",
                 "Quantity": 610,
                 "Price": -1236,
-                "NumOrders": 17
+                "NumOrders": 13
               },
               {},
               {}
@@ -98,7 +98,7 @@
                 "Side": "SELL",
                 "Quantity": 2283,
                 "Price": 0,
-                "NumOrders": 16
+                "NumOrders": 14
               },
               {},
               {},
@@ -112,13 +112,13 @@
                 "Side": "BUY",
                 "Quantity": 1797,
                 "Price": 36,
-                "NumOrders": 11
+                "NumOrders": 15
               },
               {
                 "Side": "BUY",
                 "Quantity": 5854,
                 "Price": -2401,
-                "NumOrders": 10
+                "NumOrders": 17
               },
               {},
               {},
@@ -129,7 +129,7 @@
                 "Side": "SELL",
                 "Quantity": 8366,
                 "Price": 38,
-                "NumOrders": 13
+                "NumOrders": 12
               },
               {},
               {},
@@ -141,7 +141,7 @@
       ]
     },
     {
-      "SeqNum": 2,
+      "SeqNum": 1,
       "Channel": "SnapshotB",
       "Messages": [
         {
@@ -154,14 +154,14 @@
                 "Side": "BUY",
                 "Quantity": 8856,
                 "Price": 0,
-                "NumOrders": 14
+                "NumOrders": 11
               },
-              { "Side": "BUY", "Quantity": 450, "Price": 0, "NumOrders": 12 },
+              { "Side": "BUY", "Quantity": 450, "Price": 0, "NumOrders": 16 },
               {
                 "Side": "BUY",
                 "Quantity": 610,
                 "Price": -1236,
-                "NumOrders": 17
+                "NumOrders": 13
               },
               {},
               {}
@@ -171,7 +171,7 @@
                 "Side": "SELL",
                 "Quantity": 2283,
                 "Price": 0,
-                "NumOrders": 16
+                "NumOrders": 14
               },
               {},
               {},
@@ -185,13 +185,13 @@
                 "Side": "BUY",
                 "Quantity": 1797,
                 "Price": 36,
-                "NumOrders": 11
+                "NumOrders": 15
               },
               {
                 "Side": "BUY",
                 "Quantity": 5854,
                 "Price": -2401,
-                "NumOrders": 10
+                "NumOrders": 17
               },
               {},
               {},
@@ -202,7 +202,7 @@
                 "Side": "SELL",
                 "Quantity": 8366,
                 "Price": 38,
-                "NumOrders": 13
+                "NumOrders": 12
               },
               {},
               {},
@@ -221,14 +221,14 @@
                 "Side": "BUY",
                 "Quantity": 8856,
                 "Price": 0,
-                "NumOrders": 14
+                "NumOrders": 11
               },
-              { "Side": "BUY", "Quantity": 450, "Price": 0, "NumOrders": 12 },
+              { "Side": "BUY", "Quantity": 450, "Price": 0, "NumOrders": 16 },
               {
                 "Side": "BUY",
                 "Quantity": 610,
                 "Price": -1236,
-                "NumOrders": 17
+                "NumOrders": 13
               },
               {},
               {}
@@ -238,7 +238,7 @@
                 "Side": "SELL",
                 "Quantity": 2283,
                 "Price": 0,
-                "NumOrders": 16
+                "NumOrders": 14
               },
               {},
               {},
@@ -252,13 +252,13 @@
                 "Side": "BUY",
                 "Quantity": 1797,
                 "Price": 36,
-                "NumOrders": 11
+                "NumOrders": 15
               },
               {
                 "Side": "BUY",
                 "Quantity": 5854,
                 "Price": -2401,
-                "NumOrders": 10
+                "NumOrders": 17
               },
               {},
               {},
@@ -269,7 +269,7 @@
                 "Side": "SELL",
                 "Quantity": 8366,
                 "Price": 38,
-                "NumOrders": 13
+                "NumOrders": 12
               },
               {},
               {},
@@ -290,7 +290,7 @@
           "PriceLevel": 1,
           "EntrySize": 8099,
           "EntryPrice": 4,
-          "NumOrders": 15,
+          "NumOrders": 10,
           "MessageType": "New",
           "EntryType": "ImpliedBid"
         },
@@ -300,7 +300,7 @@
           "PriceLevel": 2,
           "EntrySize": 5854,
           "EntryPrice": -2401,
-          "NumOrders": 10,
+          "NumOrders": 17,
           "MessageType": "New",
           "EntryType": "ImpliedBid"
         },
@@ -310,7 +310,7 @@
           "PriceLevel": 3,
           "EntrySize": 610,
           "EntryPrice": -1236,
-          "NumOrders": 17,
+          "NumOrders": 13,
           "MessageType": "New",
           "EntryType": "Bid"
         },
@@ -320,7 +320,7 @@
           "PriceLevel": 2,
           "EntrySize": 450,
           "EntryPrice": 0,
-          "NumOrders": 12,
+          "NumOrders": 16,
           "MessageType": "New",
           "EntryType": "Bid"
         },
@@ -330,7 +330,7 @@
           "PriceLevel": 1,
           "EntrySize": 2283,
           "EntryPrice": 0,
-          "NumOrders": 16,
+          "NumOrders": 14,
           "MessageType": "New",
           "EntryType": "Offer"
         },
@@ -340,7 +340,7 @@
           "PriceLevel": 1,
           "EntrySize": 8366,
           "EntryPrice": 38,
-          "NumOrders": 13,
+          "NumOrders": 12,
           "MessageType": "New",
           "EntryType": "ImpliedOffer"
         },
@@ -350,7 +350,7 @@
           "PriceLevel": 1,
           "EntrySize": 1797,
           "EntryPrice": 36,
-          "NumOrders": 11,
+          "NumOrders": 15,
           "MessageType": "New",
           "EntryType": "ImpliedBid"
         },
@@ -360,7 +360,7 @@
           "PriceLevel": 1,
           "EntrySize": 8856,
           "EntryPrice": 0,
-          "NumOrders": 14,
+          "NumOrders": 11,
           "MessageType": "New",
           "EntryType": "Bid"
         }
@@ -376,7 +376,7 @@
           "PriceLevel": 1,
           "EntrySize": 8099,
           "EntryPrice": 4,
-          "NumOrders": 15,
+          "NumOrders": 10,
           "MessageType": "New",
           "EntryType": "ImpliedBid"
         },
@@ -386,7 +386,7 @@
           "PriceLevel": 2,
           "EntrySize": 5854,
           "EntryPrice": -2401,
-          "NumOrders": 10,
+          "NumOrders": 17,
           "MessageType": "New",
           "EntryType": "ImpliedBid"
         },
@@ -396,7 +396,7 @@
           "PriceLevel": 3,
           "EntrySize": 610,
           "EntryPrice": -1236,
-          "NumOrders": 17,
+          "NumOrders": 13,
           "MessageType": "New",
           "EntryType": "Bid"
         },
@@ -406,7 +406,7 @@
           "PriceLevel": 2,
           "EntrySize": 450,
           "EntryPrice": 0,
-          "NumOrders": 12,
+          "NumOrders": 16,
           "MessageType": "New",
           "EntryType": "Bid"
         },
@@ -416,7 +416,7 @@
           "PriceLevel": 1,
           "EntrySize": 2283,
           "EntryPrice": 0,
-          "NumOrders": 16,
+          "NumOrders": 14,
           "MessageType": "New",
           "EntryType": "Offer"
         },
@@ -426,7 +426,7 @@
           "PriceLevel": 1,
           "EntrySize": 8366,
           "EntryPrice": 38,
-          "NumOrders": 13,
+          "NumOrders": 12,
           "MessageType": "New",
           "EntryType": "ImpliedOffer"
         },
@@ -436,7 +436,7 @@
           "PriceLevel": 1,
           "EntrySize": 1797,
           "EntryPrice": 36,
-          "NumOrders": 11,
+          "NumOrders": 15,
           "MessageType": "New",
           "EntryType": "ImpliedBid"
         },
@@ -446,155 +446,9 @@
           "PriceLevel": 1,
           "EntrySize": 8856,
           "EntryPrice": 0,
-          "NumOrders": 14,
+          "NumOrders": 11,
           "MessageType": "New",
           "EntryType": "Bid"
-        }
-      ]
-    },
-    {
-      "SeqNum": 1,
-      "Channel": "SnapshotA",
-      "Messages": [
-        {
-          "SecurityID": 1,
-          "RepSeqNum": 0,
-          "LastMsgSeqNumProcessed": 0,
-          "MultiBook": {
-            "Buys": [
-              {
-                "Side": "BUY",
-                "Quantity": 8856,
-                "Price": 0,
-                "NumOrders": 14
-              },
-              { "Side": "BUY", "Quantity": 450, "Price": 0, "NumOrders": 12 },
-              {
-                "Side": "BUY",
-                "Quantity": 610,
-                "Price": -1236,
-                "NumOrders": 17
-              },
-              {},
-              {}
-            ],
-            "Sells": [
-              {
-                "Side": "SELL",
-                "Quantity": 2283,
-                "Price": 0,
-                "NumOrders": 16
-              },
-              {},
-              {},
-              {},
-              {}
-            ]
-          },
-          "ImpliedBook": {
-            "Buys": [
-              {
-                "Side": "BUY",
-                "Quantity": 1797,
-                "Price": 36,
-                "NumOrders": 11
-              },
-              {
-                "Side": "BUY",
-                "Quantity": 5854,
-                "Price": -2401,
-                "NumOrders": 10
-              },
-              {},
-              {},
-              {}
-            ],
-            "Sells": [
-              {
-                "Side": "SELL",
-                "Quantity": 8366,
-                "Price": 38,
-                "NumOrders": 13
-              },
-              {},
-              {},
-              {},
-              {}
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "SeqNum": 1,
-      "Channel": "SnapshotB",
-      "Messages": [
-        {
-          "SecurityID": 1,
-          "RepSeqNum": 0,
-          "LastMsgSeqNumProcessed": 0,
-          "MultiBook": {
-            "Buys": [
-              {
-                "Side": "BUY",
-                "Quantity": 8856,
-                "Price": 0,
-                "NumOrders": 14
-              },
-              { "Side": "BUY", "Quantity": 450, "Price": 0, "NumOrders": 12 },
-              {
-                "Side": "BUY",
-                "Quantity": 610,
-                "Price": -1236,
-                "NumOrders": 17
-              },
-              {},
-              {}
-            ],
-            "Sells": [
-              {
-                "Side": "SELL",
-                "Quantity": 2283,
-                "Price": 0,
-                "NumOrders": 16
-              },
-              {},
-              {},
-              {},
-              {}
-            ]
-          },
-          "ImpliedBook": {
-            "Buys": [
-              {
-                "Side": "BUY",
-                "Quantity": 1797,
-                "Price": 36,
-                "NumOrders": 11
-              },
-              {
-                "Side": "BUY",
-                "Quantity": 5854,
-                "Price": -2401,
-                "NumOrders": 10
-              },
-              {},
-              {},
-              {}
-            ],
-            "Sells": [
-              {
-                "Side": "SELL",
-                "Quantity": 8366,
-                "Price": 38,
-                "NumOrders": 13
-              },
-              {},
-              {},
-              {},
-              {}
-            ]
-          }
         }
       ]
     }

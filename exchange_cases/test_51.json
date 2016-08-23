@@ -7,6 +7,152 @@
         {
           "SecurityID": 1,
           "RepSeqNum": 0,
+          "LastMsgSeqNumProcessed": 1,
+          "MultiBook": {
+            "Buys": [
+              {
+                "Side": "BUY",
+                "Quantity": 8856,
+                "Price": 0,
+                "NumOrders": 14
+              },
+              { "Side": "BUY", "Quantity": 450, "Price": 0, "NumOrders": 12 },
+              {
+                "Side": "BUY",
+                "Quantity": 610,
+                "Price": -1236,
+                "NumOrders": 17
+              },
+              {},
+              {}
+            ],
+            "Sells": [
+              {
+                "Side": "SELL",
+                "Quantity": 2283,
+                "Price": 0,
+                "NumOrders": 16
+              },
+              {},
+              {},
+              {},
+              {}
+            ]
+          },
+          "ImpliedBook": {
+            "Buys": [
+              {
+                "Side": "BUY",
+                "Quantity": 1797,
+                "Price": 36,
+                "NumOrders": 11
+              },
+              {
+                "Side": "BUY",
+                "Quantity": 5854,
+                "Price": -2401,
+                "NumOrders": 10
+              },
+              {},
+              {},
+              {}
+            ],
+            "Sells": [
+              {
+                "Side": "SELL",
+                "Quantity": 8366,
+                "Price": 38,
+                "NumOrders": 13
+              },
+              {},
+              {},
+              {},
+              {}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "SeqNum": 2,
+      "Channel": "SnapshotB",
+      "Messages": [
+        {
+          "SecurityID": 1,
+          "RepSeqNum": 0,
+          "LastMsgSeqNumProcessed": 1,
+          "MultiBook": {
+            "Buys": [
+              {
+                "Side": "BUY",
+                "Quantity": 8856,
+                "Price": 0,
+                "NumOrders": 14
+              },
+              { "Side": "BUY", "Quantity": 450, "Price": 0, "NumOrders": 12 },
+              {
+                "Side": "BUY",
+                "Quantity": 610,
+                "Price": -1236,
+                "NumOrders": 17
+              },
+              {},
+              {}
+            ],
+            "Sells": [
+              {
+                "Side": "SELL",
+                "Quantity": 2283,
+                "Price": 0,
+                "NumOrders": 16
+              },
+              {},
+              {},
+              {},
+              {}
+            ]
+          },
+          "ImpliedBook": {
+            "Buys": [
+              {
+                "Side": "BUY",
+                "Quantity": 1797,
+                "Price": 36,
+                "NumOrders": 11
+              },
+              {
+                "Side": "BUY",
+                "Quantity": 5854,
+                "Price": -2401,
+                "NumOrders": 10
+              },
+              {},
+              {},
+              {}
+            ],
+            "Sells": [
+              {
+                "Side": "SELL",
+                "Quantity": 8366,
+                "Price": 38,
+                "NumOrders": 13
+              },
+              {},
+              {},
+              {},
+              {}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "SeqNum": 1,
+      "Channel": "SnapshotA",
+      "Messages": [
+        {
+          "SecurityID": 1,
+          "RepSeqNum": 0,
           "LastMsgSeqNumProcessed": 0,
           "MultiBook": {
             "Buys": [
@@ -141,7 +287,7 @@
       ]
     },
     {
-      "SeqNum": 2,
+      "SeqNum": 1,
       "Channel": "SnapshotB",
       "Messages": [
         {
@@ -449,152 +595,6 @@
           "NumOrders": 14,
           "MessageType": "New",
           "EntryType": "Bid"
-        }
-      ]
-    },
-    {
-      "SeqNum": 1,
-      "Channel": "SnapshotA",
-      "Messages": [
-        {
-          "SecurityID": 1,
-          "RepSeqNum": 0,
-          "LastMsgSeqNumProcessed": 0,
-          "MultiBook": {
-            "Buys": [
-              {
-                "Side": "BUY",
-                "Quantity": 8856,
-                "Price": 0,
-                "NumOrders": 14
-              },
-              { "Side": "BUY", "Quantity": 450, "Price": 0, "NumOrders": 12 },
-              {
-                "Side": "BUY",
-                "Quantity": 610,
-                "Price": -1236,
-                "NumOrders": 17
-              },
-              {},
-              {}
-            ],
-            "Sells": [
-              {
-                "Side": "SELL",
-                "Quantity": 2283,
-                "Price": 0,
-                "NumOrders": 16
-              },
-              {},
-              {},
-              {},
-              {}
-            ]
-          },
-          "ImpliedBook": {
-            "Buys": [
-              {
-                "Side": "BUY",
-                "Quantity": 1797,
-                "Price": 36,
-                "NumOrders": 11
-              },
-              {
-                "Side": "BUY",
-                "Quantity": 5854,
-                "Price": -2401,
-                "NumOrders": 10
-              },
-              {},
-              {},
-              {}
-            ],
-            "Sells": [
-              {
-                "Side": "SELL",
-                "Quantity": 8366,
-                "Price": 38,
-                "NumOrders": 13
-              },
-              {},
-              {},
-              {},
-              {}
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "SeqNum": 1,
-      "Channel": "SnapshotB",
-      "Messages": [
-        {
-          "SecurityID": 1,
-          "RepSeqNum": 0,
-          "LastMsgSeqNumProcessed": 0,
-          "MultiBook": {
-            "Buys": [
-              {
-                "Side": "BUY",
-                "Quantity": 8856,
-                "Price": 0,
-                "NumOrders": 14
-              },
-              { "Side": "BUY", "Quantity": 450, "Price": 0, "NumOrders": 12 },
-              {
-                "Side": "BUY",
-                "Quantity": 610,
-                "Price": -1236,
-                "NumOrders": 17
-              },
-              {},
-              {}
-            ],
-            "Sells": [
-              {
-                "Side": "SELL",
-                "Quantity": 2283,
-                "Price": 0,
-                "NumOrders": 16
-              },
-              {},
-              {},
-              {},
-              {}
-            ]
-          },
-          "ImpliedBook": {
-            "Buys": [
-              {
-                "Side": "BUY",
-                "Quantity": 1797,
-                "Price": 36,
-                "NumOrders": 11
-              },
-              {
-                "Side": "BUY",
-                "Quantity": 5854,
-                "Price": -2401,
-                "NumOrders": 10
-              },
-              {},
-              {},
-              {}
-            ],
-            "Sells": [
-              {
-                "Side": "SELL",
-                "Quantity": 8366,
-                "Price": 38,
-                "NumOrders": 13
-              },
-              {},
-              {},
-              {},
-              {}
-            ]
-          }
         }
       ]
     }
