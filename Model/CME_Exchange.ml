@@ -342,6 +342,7 @@ let is_book_trans_valid (state, trans) =
         oa_data.oa_level_num > 0 &&
         oa_data.oa_level_num < 6 &&
         oa_data.oa_order_qty > 0 &&
+        oa_data.oa_price     > 0 &&
         add_respects_order ( state, oa_data )
 
     | ST_Change oc_data ->
