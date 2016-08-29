@@ -30,9 +30,11 @@ sendSnap  = SearchSpaceEvent( constructors=['ExchangeAction', 'ST_DataSendSnap']
 
 cppck   = SearchSpaceEvent( constructors=['CopyPackets'])
         
+
+prefill_events = []
+prefill_events += precreateBook("Book_Type_Multi", "SecA") 
+prefill_events += precreateBook("Book_Type_Multi", "SecB")
 events = []
-events += precreateBook("Book_Type_Multi", "SecA") 
-events += precreateBook("Book_Type_Multi", "SecB")
 events += [ 
     sendInc,
     ordChange,
@@ -61,4 +63,8 @@ outdir = "generated"
 if not os.path.exists(outdir):
     os.mkdir(outdir)
 
-print template.render(events=list(enumerate(events)), outdir=outdir)
+print template.render(
+    preparation=prefill_events,
+    events=list(enumerate(events)), 
+    outdir=outdir
+)
