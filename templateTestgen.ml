@@ -80,6 +80,16 @@ let rec valid (s, acts) =
 ;;
 
 
+let mk_add_data (px,lvl,side,book,sec) = {
+    oa_order_qty  = 1;
+    oa_price      = px;
+    oa_sec_type   = sec;
+    oa_book_type  = book;
+    oa_level_num  = lvl;
+    oa_level_side = side;
+    oa_num_orders = Some 1
+};;
+
 type search_space = { {% for n,e in events %}
     {% if e.type 
         %} x{{n}} : {{e.type}}; {% 
@@ -92,31 +102,18 @@ let search_space_to_list x = [{% for n,e in events %}
     endfor %}
 ];;
 
-let run_all m = 
-    let empty_state = Some {
-        exchange_state = init_ex_state;
-        network_state = empty_network_state  
-    } in
-    run ( empty_state, search_space_to_list m ) 
-;;
+let empty_state = Some {
+    exchange_state = init_ex_state;
+    network_state = empty_network_state  
+};;
 
+let run_all m = run ( empty_state, search_space_to_list m ) ;;
 
-let valid_all m = 
-    let empty_state = Some {
-        exchange_state = init_ex_state;
-        network_state = empty_network_state  
-    } in
-    valid ( empty_state, search_space_to_list m ) 
-;;
-
+let valid_all m = valid ( empty_state, search_space_to_list m ) ;;
 
 :shadow off
 let n = ref 0;;
 let write_jsons m =
-    let empty_state = Some {
-        exchange_state = init_ex_state;
-        network_state = empty_network_state  
-    } in
     let final_state = run ( empty_state, search_space_to_list m ) in
     match final_state with 
     | None -> " **** Ignoring empty test case ***** " |> print_string
