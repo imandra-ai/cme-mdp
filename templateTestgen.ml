@@ -90,6 +90,11 @@ let mk_add_data (px,lvl,side,book,sec) = {
     oa_num_orders = Some 1
 };;
 
+let preparation = [ {% for pe in preparation %}
+    {% for c in pe.constructors %}({{c}}{% endfor %}{% for c in pe.constructors %}){% endfor %};{% 
+    endfor %}
+];;
+
 type search_space = { {% for n,e in events %}
     {% if e.type 
         %} x{{n}} : {{e.type}}; {% 
@@ -107,9 +112,11 @@ let empty_state = Some {
     network_state = empty_network_state  
 };;
 
-let run_all m = run ( empty_state, search_space_to_list m ) ;;
+let prepared_state = run (empty_state, preparation);;
 
-let valid_all m = valid ( empty_state, search_space_to_list m ) ;;
+let run_all m = run ( prepared_state, search_space_to_list m ) ;;
+
+let valid_all m = valid ( prepared_state, search_space_to_list m ) ;;
 
 :shadow off
 let n = ref 0;;
