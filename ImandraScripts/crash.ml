@@ -98,12 +98,17 @@ type search_space = {
     oa8 : ord_add_data;
     oa9 : ord_add_data;
 
+    ex1 : exchange_transition;
+    ex2 : exchange_transition;
+
     oc1 : ord_change_data;
     oc2 : ord_change_data;
     oc3 : ord_change_data;
-(*    oc4 : ord_change_data;
-    oc5 : ord_change_data;
-    oc6 : ord_change_data; *)
+    oc4 : ord_change_data;
+    oc5 : ord_change_data; 
+
+(*    ex4 : exchange_transition;
+    ex5 : exchange_transition; *)
 };;
 
 
@@ -117,24 +122,15 @@ let search_space_to_list x = [
     BookAction ( ST_Add x.oa7 );
     BookAction ( ST_Add x.oa8 );
     BookAction ( ST_Add x.oa9 );
-    ExchangeAction ( ST_DataSendInc );
-    ExchangeAction ( ST_Snapshot SecA );
-    ExchangeAction ( ST_Snapshot SecB );
-    ExchangeAction ( ST_DataSendSnap );
+    ExchangeAction ( x.ex1 );
+    ExchangeAction ( x.ex2 );
     BookAction ( ST_Change x.oc1 );
     BookAction ( ST_Change x.oc2 );
     BookAction ( ST_Change x.oc3 );
-    ExchangeAction ( ST_DataSendInc );
-    ExchangeAction ( ST_Snapshot SecA );
-    ExchangeAction ( ST_DataSendSnap );
-(*
     BookAction ( ST_Change x.oc4 );
     BookAction ( ST_Change x.oc5 );
-    BookAction ( ST_Change x.oc6 );
-    ExchangeAction ( ST_DataSendInc );
-    ExchangeAction ( ST_Snapshot SecA );
-    ExchangeAction ( ST_DataSendSnap ); *)
-    CopyPackets
+(*    ExchangeAction ( x.ex4 );
+    ExchangeAction ( x.ex5 );*)
 ];; 
 
 let run_all m = 
@@ -169,8 +165,8 @@ let write_jsons m =
     let packets = final_state.network_state.outgoing @ final_state.network_state.incoming in
     let () = n := !n + 1 in
     packets |> packets_to_json
-            (*|> Yojson.Basic.pretty_to_string |> print_string *)
-            |> Yojson.Basic.to_file (Printf.sprintf "exchange_cases/test_%d.json" !n) 
+            |> Yojson.Basic.pretty_to_string |> print_string 
+            (* |> Yojson.Basic.to_file (Printf.sprintf "exchange_cases/test_%d.json" !n) *) 
 ;;
 :shadow on
 :adts on

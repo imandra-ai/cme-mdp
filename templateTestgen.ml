@@ -1,11 +1,3 @@
-(**
-
-  Script for generating test cases for the CME model.
-
-  testgen.ml
-
-*)
-
 #use "topfind";;
 #require "yojson";;
 
@@ -87,81 +79,48 @@ let rec valid (s, acts) =
         } in valid ( s , acts)
 ;;
 
-type search_space = {
-    oa1 : ord_add_data;
-    oa2 : ord_add_data;
-    oa3 : ord_add_data;
-    oa4 : ord_add_data;
-    oa5 : ord_add_data;
-    oa6 : ord_add_data;
-    oa7 : ord_add_data;
-    oa8 : ord_add_data;
-    oa9 : ord_add_data;
 
-    oc1 : ord_change_data;
-    oc2 : ord_change_data;
-    oc3 : ord_change_data;
-(*    oc4 : ord_change_data;
-    oc5 : ord_change_data;
-    oc6 : ord_change_data; *)
+let mk_add_data (px,lvl,side,book,sec) = {
+    oa_order_qty  = 1;
+    oa_price      = px;
+    oa_sec_type   = sec;
+    oa_book_type  = book;
+    oa_level_num  = lvl;
+    oa_level_side = side;
+    oa_num_orders = Some 1
 };;
 
+let preparation = [ {% for pe in preparation %}
+    {% for c in pe.constructors %}({{c}}{% endfor %}{% for c in pe.constructors %}){% endfor %};{% 
+    endfor %}
+];;
 
-let search_space_to_list x = [
-    BookAction ( ST_Add x.oa1 );
-    BookAction ( ST_Add x.oa2 );
-    BookAction ( ST_Add x.oa3 );
-    BookAction ( ST_Add x.oa4 );
-    BookAction ( ST_Add x.oa5 );
-    BookAction ( ST_Add x.oa6 );
-    BookAction ( ST_Add x.oa7 );
-    BookAction ( ST_Add x.oa8 );
-    BookAction ( ST_Add x.oa9 );
-    ExchangeAction ( ST_DataSendInc );
-    ExchangeAction ( ST_Snapshot SecA );
-    ExchangeAction ( ST_Snapshot SecB );
-    ExchangeAction ( ST_DataSendSnap );
-    BookAction ( ST_Change x.oc1 );
-    BookAction ( ST_Change x.oc2 );
-    BookAction ( ST_Change x.oc3 );
-    ExchangeAction ( ST_DataSendInc );
-    ExchangeAction ( ST_Snapshot SecA );
-    ExchangeAction ( ST_DataSendSnap );
-(*
-    BookAction ( ST_Change x.oc4 );
-    BookAction ( ST_Change x.oc5 );
-    BookAction ( ST_Change x.oc6 );
-    ExchangeAction ( ST_DataSendInc );
-    ExchangeAction ( ST_Snapshot SecA );
-    ExchangeAction ( ST_DataSendSnap ); *)
-    CopyPackets
-];; 
+type search_space = { {% for n,e in events %}
+    {% if e.type 
+        %} x{{n}} : {{e.type}}; {% 
+    endif %}{% endfor %}
+};;
 
-let run_all m = 
-    let empty_state = Some {
-        exchange_state = init_ex_state;
-        network_state = empty_network_state  
-    } in
-    run ( empty_state, search_space_to_list m ) 
-;;
+let search_space_to_list x = [{% for n,e in events %}
+    {% for c in e.constructors %}({{c}}{% endfor %} {% 
+        if e.type %}x.x{{n}}{% endif %}{% for c in e.constructors %}){% endfor %};{% 
+    endfor %}
+];;
 
+let empty_state = Some {
+    exchange_state = init_ex_state;
+    network_state = empty_network_state  
+};;
 
-let valid_all m = 
-    let empty_state = Some {
-        exchange_state = init_ex_state;
-        network_state = empty_network_state  
-    } in
-    valid ( empty_state, search_space_to_list m ) 
-;;
+let prepared_state = run (empty_state, preparation);;
 
+let run_all m = run ( prepared_state, search_space_to_list m ) ;;
+
+let valid_all m = valid ( prepared_state, search_space_to_list m ) ;;
 
 :shadow off
 let n = ref 0;;
 let write_jsons m =
-    let empty_state = Some {
-        exchange_state = init_ex_state;
-        network_state = empty_network_state  
-    } in
     let final_state = run ( empty_state, search_space_to_list m ) in
     match final_state with 
     | None -> " **** Ignoring empty test case ***** " |> print_string
@@ -170,17 +129,12 @@ let write_jsons m =
     let () = n := !n + 1 in
     packets |> packets_to_json
             (*|> Yojson.Basic.pretty_to_string |> print_string *)
-            |> Yojson.Basic.to_file (Printf.sprintf "exchange_cases/test_%d.json" !n) 
+            |> Yojson.Basic.to_file (Printf.sprintf "{{outdir}}/test_%d.json" !n) 
 ;;
 :shadow on
 :adts on
 
 :max_region_time 120
 :testgen run_all assuming valid_all with_code write_jsons 
-
-
-
-
-
 
 
