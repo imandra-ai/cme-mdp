@@ -91,41 +91,51 @@ let mk_add_data (px,lvl,side,book,sec) = {
 };;
 
 let preparation = [ 
-    (BookAction(ST_Add((mk_add_data (90,1,OrdBuy,Book_Type_Multi,SecA)))));
-    (BookAction(ST_Add((mk_add_data (110,1,OrdSell,Book_Type_Multi,SecA)))));
-    (BookAction(ST_Add((mk_add_data (80,2,OrdBuy,Book_Type_Multi,SecA)))));
-    (BookAction(ST_Add((mk_add_data (120,2,OrdSell,Book_Type_Multi,SecA)))));
-    (BookAction(ST_Add((mk_add_data (70,3,OrdBuy,Book_Type_Multi,SecA)))));
-    (BookAction(ST_Add((mk_add_data (130,3,OrdSell,Book_Type_Multi,SecA)))));
-    (BookAction(ST_Add((mk_add_data (60,4,OrdBuy,Book_Type_Multi,SecA)))));
-    (BookAction(ST_Add((mk_add_data (140,4,OrdSell,Book_Type_Multi,SecA)))));
-    (BookAction(ST_Add((mk_add_data (50,5,OrdBuy,Book_Type_Multi,SecA)))));
-    (BookAction(ST_Add((mk_add_data (150,5,OrdSell,Book_Type_Multi,SecA)))));
-    (BookAction(ST_Add((mk_add_data (90,1,OrdBuy,Book_Type_Multi,SecB)))));
-    (BookAction(ST_Add((mk_add_data (110,1,OrdSell,Book_Type_Multi,SecB)))));
-    (BookAction(ST_Add((mk_add_data (80,2,OrdBuy,Book_Type_Multi,SecB)))));
-    (BookAction(ST_Add((mk_add_data (120,2,OrdSell,Book_Type_Multi,SecB)))));
-    (BookAction(ST_Add((mk_add_data (70,3,OrdBuy,Book_Type_Multi,SecB)))));
-    (BookAction(ST_Add((mk_add_data (130,3,OrdSell,Book_Type_Multi,SecB)))));
-    (BookAction(ST_Add((mk_add_data (60,4,OrdBuy,Book_Type_Multi,SecB)))));
-    (BookAction(ST_Add((mk_add_data (140,4,OrdSell,Book_Type_Multi,SecB)))));
-    (BookAction(ST_Add((mk_add_data (50,5,OrdBuy,Book_Type_Multi,SecB)))));
-    (BookAction(ST_Add((mk_add_data (150,5,OrdSell,Book_Type_Multi,SecB)))));
 ];;
 
 type search_space = { 
+     x0 : ord_add_data; 
+     x1 : ord_add_data; 
+     x2 : ord_add_data; 
+     x3 : ord_add_data; 
+     x4 : ord_add_data; 
+     x5 : ord_add_data; 
+     x6 : ord_add_data; 
+     x7 : ord_add_data; 
+     x8 : ord_add_data; 
+     x9 : ord_add_data; 
+     x10 : ord_add_data; 
+     x11 : ord_add_data; 
+     x12 : ord_add_data; 
+     x13 : ord_add_data; 
+     x14 : ord_add_data; 
     
-     x1 : ord_change_data; 
-     x2 : ord_change_data; 
-     x3 : ord_change_data; 
+     x16 : ord_change_data; 
+     x17 : ord_change_data; 
+     x18 : ord_change_data; 
     
 };;
 
 let search_space_to_list x = [
+    (BookAction(ST_Add x.x0));
+    (BookAction(ST_Add x.x1));
+    (BookAction(ST_Add x.x2));
+    (BookAction(ST_Add x.x3));
+    (BookAction(ST_Add x.x4));
+    (BookAction(ST_Add x.x5));
+    (BookAction(ST_Add x.x6));
+    (BookAction(ST_Add x.x7));
+    (BookAction(ST_Add x.x8));
+    (BookAction(ST_Add x.x9));
+    (BookAction(ST_Add x.x10));
+    (BookAction(ST_Add x.x11));
+    (BookAction(ST_Add x.x12));
+    (BookAction(ST_Add x.x13));
+    (BookAction(ST_Add x.x14));
     (ExchangeAction(ST_DataSendInc ));
-    (BookAction(ST_Change x.x1));
-    (BookAction(ST_Change x.x2));
-    (BookAction(ST_Change x.x3));
+    (BookAction(ST_Change x.x16));
+    (BookAction(ST_Change x.x17));
+    (BookAction(ST_Change x.x18));
     (CopyPackets );
 ];;
 
