@@ -112,6 +112,10 @@ type search_space = {
     i_a_sell3 : int; i_b_sell3 : int;
     i_a_sell4 : int; i_b_sell4 : int;
     i_a_sell5 : int; i_b_sell5 : int;
+
+    ch1 : ord_change_data;
+    ch2 : ord_change_data;
+    ch3 : ord_change_data
 };;
 
 let search_space_to_list x = [
@@ -139,7 +143,7 @@ let search_space_to_list x = [
     (BookAction(ST_Add((mk_add_data (x.m_b_sell5,5,OrdSell,Book_Type_Multi,SecB)) )));
     (ExchangeAction(ST_DataSendInc ));
 
-    (BookAction(ST_Add((mk_add_data (x.i_a_buy1 ,1,OrdBuy, Book_Type_Implied,SecB)) )));
+    (BookAction(ST_Add((mk_add_data (x.i_a_buy1 ,1,OrdBuy, Book_Type_Implied,SecA)) )));
     (BookAction(ST_Add((mk_add_data (x.i_a_buy2 ,2,OrdBuy, Book_Type_Implied,SecA)) )));
     (BookAction(ST_Add((mk_add_data (x.i_a_buy3 ,3,OrdBuy, Book_Type_Implied,SecA)) )));
     (BookAction(ST_Add((mk_add_data (x.i_a_buy4 ,4,OrdBuy, Book_Type_Implied,SecA)) )));
@@ -150,6 +154,7 @@ let search_space_to_list x = [
     (BookAction(ST_Add((mk_add_data (x.i_a_sell4,4,OrdSell,Book_Type_Implied,SecA)) )));
     (BookAction(ST_Add((mk_add_data (x.i_a_sell5,5,OrdSell,Book_Type_Implied,SecA)) )));
     (ExchangeAction(ST_DataSendInc ));
+
     (BookAction(ST_Add((mk_add_data (x.i_b_buy1 ,1,OrdBuy, Book_Type_Implied,SecB)) )));
     (BookAction(ST_Add((mk_add_data (x.i_b_buy2 ,2,OrdBuy, Book_Type_Implied,SecB)) )));
     (BookAction(ST_Add((mk_add_data (x.i_b_buy3 ,3,OrdBuy, Book_Type_Implied,SecB)) )));
@@ -161,6 +166,16 @@ let search_space_to_list x = [
     (BookAction(ST_Add((mk_add_data (x.i_b_sell4,4,OrdSell,Book_Type_Implied,SecB)) )));
     (BookAction(ST_Add((mk_add_data (x.i_b_sell5,5,OrdSell,Book_Type_Implied,SecB)) )));
     (ExchangeAction(ST_DataSendInc ));
+    (ExchangeAction(ST_Snapshot SecA));
+    (ExchangeAction(ST_Snapshot SecB));
+    (ExchangeAction(ST_DataSendSnap ));
+    (BookAction(ST_Change(x.ch1)));
+    (BookAction(ST_Change(x.ch2)));
+    (BookAction(ST_Change(x.ch3)));
+    (ExchangeAction(ST_DataSendInc ));
+    (ExchangeAction(ST_Snapshot SecA));
+    (ExchangeAction(ST_Snapshot SecB));
+    (ExchangeAction(ST_DataSendSnap ));
     (CopyPackets)
 ];;
 
