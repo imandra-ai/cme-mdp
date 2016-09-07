@@ -60,7 +60,7 @@ def create_search_space(jsonData, ssname="x"):
                 if "variants" not in record:
                     n += 1
                     ss_record = record["record"] + "_" + str(n)
-                    search_space_code.append( ss_record + ":" + record["type"])
+                    search_space_code.append( ss_record + ":" + record["type"] + ";")
                     mkparams.append(ssname + "." + ss_record)
 
             constr, closing = "",""
