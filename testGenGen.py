@@ -1,13 +1,25 @@
 import json
 import itertools
+import random
+
+# Generates a random subsample from an input list preserves ordering of 
+# the entries if shuffle=False. 
+def randomSample(lst, N, shuffle=False):
+    indices = random.sample(range(len(lst)), N)
+    if not shuffle:
+        indices = sorted(indices)
+    return [lst[i] for i in indices]
+
 
 # This makes "let make_type" fuction declarations -- those are very useful 
 # to in reducing the size fo the generated code. Also they oranize the "combinatorial"
 # and the "seach space" declaraions into subsets going a 
 # The code itself is placed in the "recordMakers" dictionary.
-def  create_makers(jsonData, vsname="x"):
-    recordMakers = {}
+def create_makers(jsonData,  recordMakers, vsname="x"):
     for entry in jsonData:
+        if "entries" in entry:
+            recordMakers = create_makers(entry["entries"], recordMakers, vsname)
+            continue
         if "records" not in entry: 
             continue
         if "type" not in entry:
@@ -33,34 +45,36 @@ def  create_makers(jsonData, vsname="x"):
         recordMakers[entry["type"]] = "\n    ".join(code)
     return recordMakers
 
-# Simultanteously generates the "search_space" type declaration  
-# and a "list of lists" for the cartesian-product-expanded entries in 
+
+# The following two mutually recursive functions simultanteously generate
+# the entries in the "search_space" type declaration and 
 # the "search_space_to_list" function 
-def create_search_space(jsonData, ssname="x"):
-    n = 0
-    search_space_code = []
-    to_list_entries = []
-
-    search_space_code.append("type search_space = {")
-
-    for entry in jsonData:
+ssname="x"
+def product(entries):
+    for entry in entries:
+        if "entries" in entry:
+            for e in expand_block(entry):
+                yield e
+            continue
+            
         if "records" not in entry:
             cs = entry["constructors"]
-            to_list_entries.append(["(".join(cs) + ")"*(len(cs)-1)])        
+            yield (None, "(".join(cs) + ")"*(len(cs)-1))
             continue
+            
         variants = []
         for record in entry["records"]:
             if "variants" in record:
                 variants.append(map(str, record["variants"]))
 
-        to_list_entry = []
         for case in itertools.product(*variants):
+            search_space_code = None
             mkparams = list(case)
             for record in entry["records"]:
                 if "variants" not in record:
-                    n += 1
-                    ss_record = record["record"] + "_" + str(n)
-                    search_space_code.append( ss_record + ":" + record["type"])
+                    product.varCounter += 1
+                    ss_record = record["record"] + "_" + str(product.varCounter)
+                    search_space_code = ss_record + ":" + record["type"]
                     mkparams.append(ssname + "." + ss_record)
 
             constr, closing = "",""
@@ -70,12 +84,20 @@ def create_search_space(jsonData, ssname="x"):
             constr = constr + "make_" + entry["type"] + "("
             closing = closing + ")" 
 
-            to_list_entry.append( constr + ",".join(mkparams) + closing )
-        to_list_entries.append(to_list_entry)
+            yield ( search_space_code, constr + ",".join(mkparams) + closing )
 
-    search_space_code.append("}")
-    search_space_code = "\n   ".join(search_space_code)
-    return to_list_entries, search_space_code 
+    raise StopIteration
+product.varCounter = 0
+
+    
+def expand_block(block):
+    codeEntries = list(product(block["entries"]))
+    if ("sample" not in block) and ("shuffle" not in block):
+        return codeEntries
+    shuffle = block.get("shuffle", False)
+    size    = block.get("sample",  len(codeEntries))
+    return randomSample(codeEntries, size, shuffle=shuffle)
+
 
 header = '''
 #use "topfind";;
@@ -193,20 +215,29 @@ let write_jsons m =
 
 def generate_code(jsonFile):
     code = ""
-    jsonDict = json.load(open("test.json", "r"))
-    jsonData = jsonDict["testgen"]
+    jsonData = json.load(open(jsonFile, "r"))
+    if "testgen" not in jsonData:
+        raise KeyError("A top-level key 'testgen' is required in the JSON.")
+    jsonData = jsonData["testgen"]
     
-    for m in create_makers(jsonData).itervalues():
+    for m in create_makers(jsonData, {}).itervalues():
         code += m + "\n"
-    
-    expanded_entries, search_space_code = create_search_space(jsonData)
-    code += search_space_code + ";;\n\n"
-    
-    code += "let search_space_to_list x = [\n    "
-    code += ";\n    ".join([";\n    ".join(e) for e in expanded_entries])
-    code += "\n];;\n\n"
+   
+    product.varCounter = 0
+    search_space_code = ["type search_space = {"]
+    to_list_code = [ "let search_space_to_list x = [" ] # TODO replace x
+
+    for ss, tl in product(jsonData):
+        if ss is not None:
+            search_space_code.append(ss + ";")
+        to_list_code.append(tl + ";")
+
+    search_space_code.append("};;\n\n")
+    to_list_code.append("];;\n\n")
+
     print header
-    print code
+    print "\n    ".join(search_space_code)
+    print "\n    ".join(to_list_code)
     print footer
 
-generate_code("")    
+generate_code("test.json")    
