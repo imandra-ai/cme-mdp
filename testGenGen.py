@@ -1,4 +1,5 @@
 import json
+import hashlib
 import itertools
 import random
 
@@ -183,10 +184,10 @@ let rec valid (s, acts) =
 '''
 
 footer =''' 
-let empty_state = Some {
+let empty_state = Some {{
     exchange_state = init_ex_state;
     network_state = empty_network_state  
-};;
+}};;
 
 let run_all m = run ( empty_state, search_space_to_list m ) ;;
 
@@ -203,7 +204,7 @@ let write_jsons m =
     let () = n := !n + 1 in
     packets |> packets_to_json
             (*|> Yojson.Basic.pretty_to_string |> print_string *)
-            |> Yojson.Basic.to_file (Printf.sprintf "generated/test_%d.json" !n) 
+            |> Yojson.Basic.to_file (Printf.sprintf "generated/test_{0}_%d.json" !n) 
 ;;
 :shadow on
 :adts on
@@ -235,9 +236,13 @@ def generate_code(jsonFile):
     search_space_code.append("};;\n\n")
     to_list_code.append("];;\n\n")
 
+    code += "\n"
+    code += "\n    ".join(search_space_code)
+    code += "\n"
+    code += "\n    ".join(to_list_code)
+
     print header
-    print "\n    ".join(search_space_code)
-    print "\n    ".join(to_list_code)
-    print footer
+    print code
+    print footer.format(hashlib.md5(code).hexdigest())
 
 generate_code("test.json")    
