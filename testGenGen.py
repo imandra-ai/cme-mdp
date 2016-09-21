@@ -2,6 +2,7 @@ import json
 import hashlib
 import itertools
 import random
+import argparse
 
 # Generates a random subsample from an input list preserves ordering of 
 # the entries if shuffle=False. 
@@ -60,7 +61,7 @@ def product(entries):
             
         if "records" not in entry:
             cs = entry["constructors"]
-            yield (None, "(".join(cs) + ")"*(len(cs)-1))
+            yield ([], "(".join(cs) + ")"*(len(cs)-1))
             continue
             
         variants = []
@@ -69,13 +70,13 @@ def product(entries):
                 variants.append(map(str, record["variants"]))
 
         for case in itertools.product(*variants):
-            search_space_code = None
+            search_space_code = []
             mkparams = list(case)
             for record in entry["records"]:
                 if "variants" not in record:
                     product.varCounter += 1
                     ss_record = record["record"] + "_" + str(product.varCounter)
-                    search_space_code = ss_record + ":" + record["type"]
+                    search_space_code.append(ss_record + ":" + record["type"])
                     mkparams.append(ssname + "." + ss_record)
 
             constr, closing = "",""
@@ -229,8 +230,8 @@ def generate_code(jsonFile):
     to_list_code = [ "let search_space_to_list x = [" ] # TODO replace x
 
     for ss, tl in product(jsonData):
-        if ss is not None:
-            search_space_code.append(ss + ";")
+        if ss != []:
+            search_space_code.append(";".join(ss) + ";")
         to_list_code.append(tl + ";")
 
     search_space_code.append("};;\n\n")
@@ -245,4 +246,9 @@ def generate_code(jsonFile):
     print code
     print footer.format(hashlib.md5(code).hexdigest())
 
-generate_code("test.json")    
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Imandra test-generator-generator')
+    parser.add_argument('jobFile', nargs=1)
+    args = parser.parse_args()
+    generate_code(args.jobFile[0])    

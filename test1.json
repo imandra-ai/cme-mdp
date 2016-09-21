@@ -1,0 +1,25 @@
+{ "testgen": [
+    {
+          "constructors": [ "BookAction" , "ST_Add" ],
+          "type"        : "ord_add_data" ,
+          "records"     : [
+             { "record" : "oa_order_qty"  , "type"    : "int"              },
+             { "record" : "oa_sec_type"   , "variants": [ "SecA", "SecB" ] },
+             { "record" : "oa_book_type"  , "variants": [ "Book_Type_Implied", "Book_Type_Multi" ] },
+             { "record" : "oa_level_num"  , "variants": [ 1, 2, 3, 4, 5 ]  },
+             { "record" : "oa_level_side" , "variants": [ "OrdBuy", "OrdSell" ] },
+             { "record" : "oa_num_orders" , "variants": [ "Some 1" ]       },
+             { "record" : "oa_price"      , "type"    :   "int"            }
+          ]
+    },
+    { 
+        "entries": [    
+            { "constructors" : ["ExchangeAction", "ST_DataSendInc"      ] },
+            { "constructors" : ["ExchangeAction", "ST_Snapshot", "SecA" ] },
+            { "constructors" : ["ExchangeAction", "ST_DataSendSnap"     ] },
+            { "constructors" : ["ExchangeAction", "ST_Snapshot", "SecB" ] },
+            { "constructors" : ["ExchangeAction", "ST_DataSendSnap"     ] }
+        ]
+    },
+    { "constructors" : ["CopyPackets"] }
+]}                
