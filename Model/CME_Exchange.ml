@@ -132,8 +132,8 @@ let set_level ( state, security, book_type, order_side, nlevel, level  : exchang
 
 let advance_rep_seq_num ( state, sec_type ) =
     match sec_type with 
-    | SecA -> { state with sec_a = {state.sec_a with last_rep_seq_num = state.sec_a.last_rep_seq_num } }
-    | SecB -> { state with sec_b = {state.sec_b with last_rep_seq_num = state.sec_b.last_rep_seq_num } }
+    | SecA -> { state with sec_a = {state.sec_a with last_rep_seq_num = state.sec_a.last_rep_seq_num + 1} }
+    | SecB -> { state with sec_b = {state.sec_b with last_rep_seq_num = state.sec_b.last_rep_seq_num + 1} }
 ;;
 
 let reset_books_exchange state = 
@@ -180,7 +180,7 @@ let send_add_level (state, o_add) =
     } in 
     let newlevel = Level { side; price; qty; num_orders } in
     let state = set_level ( state, o_add.oa_sec_type, o_add.oa_book_type, side, nlevel, newlevel ) in 
-    { state with inc_msg_queue = add_m :: state.inc_msg_queue }
+    { state with inc_msg_queue = state.inc_msg_queue @ [add_m]}
 ;;
 
 (** 2.1.2 Check whether add keeps the sorted book *)
@@ -239,7 +239,7 @@ let send_o_change (state, o_change) =
         rm_num_orders  = level.num_orders
     } in 
     let state = set_level ( state, o_change.oc_sec_type, o_change.oc_book_type, side, nlevel, Level level ) in 
-    { state with inc_msg_queue = change_m :: state.inc_msg_queue }
+    { state with inc_msg_queue = state.inc_msg_queue @ [change_m]}
 ;;
 
 
@@ -271,7 +271,7 @@ let send_o_del (state, o_del) =
         rm_num_orders  = level.num_orders
     } in 
     let state = set_level ( state, o_del.od_sec_type, o_del.od_book_type, side, nlevel, NoLevel ) in 
-    { state with inc_msg_queue = del_m :: state.inc_msg_queue }
+    { state with inc_msg_queue = state.inc_msg_queue @ [del_m]}
 ;;
 
 
@@ -305,7 +305,7 @@ let send_snapshot ( state, sec_type ) =
             snap_last_msg_seq_num_processed = state.last_inc_seq_num;
         };
     } in     
-    { state with snap_msg_queue = m_snap::state.snap_msg_queue; }
+    { state with snap_msg_queue = state.snap_msg_queue @ [m_snap]; }
 ;;
 
 (** 3. Possible events at the exchange *)

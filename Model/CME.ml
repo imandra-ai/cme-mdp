@@ -130,7 +130,6 @@ type internal_msg =
 
 (** Contains full definition of the state of the exchange *)
 type feed_state = {
-    (* Keeping a record of the security that we're maintaining *)
     feed_sec_type : sec_type;
     feed_sec_id   : int;
 
@@ -460,12 +459,12 @@ let process_md_update_action (books, msg : books * ref_message) =
         match msg.rm_entry_type with
         | V_MDEntryType_Bid -> 
             let buys' = bk_new (m.buys, OrdBuy, msg.rm_price_level, msg.rm_entry_size,
-                            msg.rm_entry_px, msg.rm_num_orders) in
+                                    msg.rm_entry_px, msg.rm_num_orders) in
             let books' = { books with multi = { m with buys = buys'; }} in
             clean_multi_depth_book (books')
         | V_MDEntryType_Offer ->
             let sells' = bk_new (m.sells, OrdSell, msg.rm_price_level, msg.rm_entry_size,
-                                 msg.rm_entry_px, msg.rm_num_orders) in
+                                      msg.rm_entry_px, msg.rm_num_orders) in
             let books' = { books with multi = { m with sells = sells'; }} in
             clean_multi_depth_book (books')
         | V_MDEntryType_ImpliedBid ->
