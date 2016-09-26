@@ -119,7 +119,7 @@ let message_to_json (message : message) : Yojson.Basic.json  =
 let message_of_json ( json : Yojson.Basic.json) : message =
     let open Yojson.Basic.Util in
     (* NOTE : Cutting ALL negative integers across the board *)
-    let to_int j = to_int j |> fun x -> max (0,x) in 
+    let to_int j = to_int j |> fun x -> max (0,x) in  
     let cap255 j = min (j, 255) in 
     let read_inc j = {
             rm_security_id = j |> member "SequrityID"  |> to_int;
@@ -140,10 +140,17 @@ let message_of_json ( json : Yojson.Basic.json) : message =
                 snap_i_book  = j |> member "ImpliedBook" |> book_of_json
             }
         } in
+    if member "MultiBook" json != `Null then 
+        SnapshotMessage  (read_snap json )
+    else
+        RefreshMessage   (read_inc  json )
+(*
+    Update with that for the next run
     match json with
         | `Assoc [ ( "SnapshotMessage" , m ) ] -> SnapshotMessage  (read_snap m )
         | `Assoc [ ( "RefreshMessage"  , m ) ] -> RefreshMessage   (read_inc  m )
         | _ -> failwith "Unrecognized message entry."              
+*)
 ;;
         
         
