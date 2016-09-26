@@ -789,10 +789,10 @@ let move_to_next_packet ( s, current_packet, rest_packets : feed_state * packet 
     let c = s.channels in
     let processed = { current_packet with packet_messages = List.rev c.processed_messages } in
     let c = match current_packet.packet_channel with
-        | Ch_Ref_A  -> { c with processed_ref_a  = processed::c.processed_ref_a  }
-        | Ch_Ref_B  -> { c with processed_ref_b  = processed::c.processed_ref_b  }
-        | Ch_Snap_A -> { c with processed_snap_a = processed::c.processed_snap_a }
-        | Ch_Snap_B -> { c with processed_snap_b = processed::c.processed_snap_b }
+        | Ch_Ref_A  -> { c with processed_ref_a  = c.processed_ref_a  @ [processed] }
+        | Ch_Ref_B  -> { c with processed_ref_b  = c.processed_ref_b  @ [processed] }
+        | Ch_Snap_A -> { c with processed_snap_a = c.processed_snap_a @ [processed] }
+        | Ch_Snap_B -> { c with processed_snap_b = c.processed_snap_b @ [processed] }
         in
     let c = { c with unprocessed_packets = rest_packets; processed_messages = [] } in
     { s with channels = c }

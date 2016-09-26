@@ -1,18 +1,11 @@
+(* *** order_book *** *)
 let order_book_to_json book : Yojson.Basic.json = 
-    let convert_order_level : (order_level -> Yojson.Basic.json) = function 
-        | NoLevel -> `Assoc []
-        | Level o -> `Assoc [
-            ("Side",      match o.side with OrdBuy -> `String "BUY" | OrdSell -> `String "SELL");
-            ("Quantity", `Int o.qty   );
-            ("Price",    `Int o.price  );
-            ("NumOrders", match o.num_orders with None -> `Assoc [] | Some n -> `Int n )
-        ] in 
     let book_side_to_json side = `Assoc [
-        ( "One"   , side.one   |> convert_order_level ) ;
-        ( "Two"   , side.two   |> convert_order_level ) ;
-        ( "Three" , side.three |> convert_order_level ) ;
-        ( "Four"  , side.four  |> convert_order_level ) ;
-        ( "Five"  , side.five  |> convert_order_level ) 
+        ( "One"   , side.one   |> order_level_to_json ) ;
+        ( "Two"   , side.two   |> order_level_to_json ) ;
+        ( "Three" , side.three |> order_level_to_json ) ;
+        ( "Four"  , side.four  |> order_level_to_json ) ;
+        ( "Five"  , side.five  |> order_level_to_json ) 
     ] in `Assoc [
         (  "BuyOrders" , book.buy_orders  |> book_side_to_json );
         ( "SellOrders" , book.sell_orders |> book_side_to_json )
@@ -21,30 +14,33 @@ let order_book_to_json book : Yojson.Basic.json =
 
 let order_book_of_json ( json : Yojson.Basic.json ) : order_book = 
     let open Yojson.Basic.Util in 
-    let read_order_level : ( Yojson.Basic.json -> order_level ) = function 
-        | `Assoc [] -> NoLevel
-        | j -> Level { 
-            qty        = j |> member "Quantity"  |> to_int;
-            price      = j |> member "Price"     |> to_int;
-            num_orders = j |> member "NumOrders" |> to_int_option;
-            side       = j |> member "Side"      |>  (function 
-                | `String "BUY"  -> OrdBuy 
-                | `String "SELL" -> OrdSell
-                | _ -> failwith "Side should be either BUY or SELL" )
-        } in 
     let book_side_of_json json = {
-        one   = json |> member "One"   |> read_order_level;
-        two   = json |> member "Two"   |> read_order_level;
-        three = json |> member "Three" |> read_order_level;
-        four  = json |> member "Four"  |> read_order_level;
-        five  = json |> member "Five"  |> read_order_level
+        one   = json |> member "One"   |> order_level_of_json;
+        two   = json |> member "Two"   |> order_level_of_json;
+        three = json |> member "Three" |> order_level_of_json;
+        four  = json |> member "Four"  |> order_level_of_json;
+        five  = json |> member "Five"  |> order_level_of_json
     } in {
         buy_orders  = json |> member  "BuyOrders" |> book_side_of_json;
         sell_orders = json |> member "SellOrders" |> book_side_of_json
     }
 ;;
 
+let order_book_to_ocaml book : string = 
+    let book_side_to_json side = "{" ^ String.concat ";" [ 
+        Printf.sprintf   "one=%s" ( side.one   |> order_level_to_ocaml ) ;
+        Printf.sprintf   "two=%s" ( side.two   |> order_level_to_ocaml ) ;
+        Printf.sprintf "three=%s" ( side.three |> order_level_to_ocaml ) ;
+        Printf.sprintf  "four=%s" ( side.four  |> order_level_to_ocaml ) ;
+        Printf.sprintf  "five=%s" ( side.five  |> order_level_to_ocaml ) 
+    ] ^ "}" in 
+    Printf.sprintf "{ buy_orders=%s; sell_orders=%s }"        
+        ( book.buy_orders  |> book_side_to_json )
+        ( book.sell_orders |> book_side_to_json )
+;;
 
+
+(* **** Serializing security state **** *)
 let security_state_to_json (st : security_state ) : Yojson.Basic.json = `Assoc [
     ( "LastRepSeqNumber" , `Int st.last_rep_seq_num );
     ( "SecurityID"       , `Int st.sec_id           );
@@ -60,8 +56,15 @@ let security_state_of_json (json : Yojson.Basic.json) : security_state =
     implied_book = json |> member "ImpliedBook" |> order_book_of_json 
 };;
 
+let security_state_to_ocaml (st : security_state ) : string = 
+    "{" ^ String.concat ";" [ 
+        Printf.sprintf "last_rep_seq_num=%d" st.last_rep_seq_num;
+        Printf.sprintf "sec_id=%d" st.sec_id;
+        Printf.sprintf "multi_book=%s"   ( st.multi_book   |> order_book_to_ocaml );
+        Printf.sprintf "implied_book=%s" ( st.implied_book |> order_book_to_ocaml )
+] ^ "}";;
 
-
+(* **** Serailizer for exchange state ****  *)
 let exchange_state_to_json state : Yojson.Basic.json = `Assoc [
     ( "SecurityStateA" , state.sec_a     |> security_state_to_json );
     ( "SecurityStateB" , state.sec_b     |> security_state_to_json );
@@ -69,7 +72,6 @@ let exchange_state_to_json state : Yojson.Basic.json = `Assoc [
     ( "LastIncSequenceNumber"  , `Int state.last_inc_seq_num       );
     ( "LastSnapSequenceNumber" , `Int state.last_snap_seq_num      );
 ];;
-
 
 let exchange_state_of_json (json : Yojson.Basic.json) : exchange_state = 
     let open Yojson.Basic.Util in {
@@ -83,7 +85,14 @@ let exchange_state_of_json (json : Yojson.Basic.json) : exchange_state =
     num_resets = 0
 };;
 
-
+let exchange_state_to_ocaml state  = "{" ^ String.concat ";" [
+    Printf.sprintf "sec_a=%s"     ( state.sec_a |> security_state_to_ocaml );
+    Printf.sprintf "sec_b=%s"     ( state.sec_b |> security_state_to_ocaml );
+    Printf.sprintf "pac_queue=%s" ( state.pac_queue |> packets_to_ocaml    );
+    Printf.sprintf "last_inc_seq_num=%d"   state.last_inc_seq_num ;
+    Printf.sprintf "last_snap_seq_num=%d"  state.last_snap_seq_num;
+     "inc_msg_queue=[]"; "snap_msg_queue=[]"; "num_resets=0"
+] ^ "}";;
 
 
 

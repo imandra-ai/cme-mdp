@@ -1,10 +1,12 @@
 #use "topfind";;
+#require "str";;
 #require "unix";;
 #require "yojson";;
 
 :load Model/CME_Types.ml
 :load Model/CME.ml
 :load_ocaml Printers/CME_json.ml
+:load_ocaml Printers/CME_Internal_json.ml
 
 :shadow off
 
@@ -57,7 +59,22 @@ let scandir dirname  =
     while true do
         match Unix.readdir dirhandle with
         | "." | ".." -> ()
-        | file -> Printf.printf "Json file %s\n" file
+        | file -> begin 
+            let file = dirname ^ "/" ^ file in
+            let re = Str.regexp ".*/test_\(.*\)\.json$" in
+            Printf.printf "Json file %s ... " file;
+            if Str.string_match re file 0 then
+                let code  = Str.matched_group 1 file in
+                let state = process_json file |> simulate in
+                let ch = state.channels in 
+                ch.processed_ref_a  |> packets_to_json |> Yojson.Basic.to_file ("generated/channel_ref_a_"  ^ code ^ ".json");
+                ch.processed_ref_b  |> packets_to_json |> Yojson.Basic.to_file ("generated/channel_ref_b_"  ^ code ^ ".json");
+                ch.processed_snap_a |> packets_to_json |> Yojson.Basic.to_file ("generated/channel_snap_a_" ^ code ^ ".json");
+                ch.processed_snap_b |> packets_to_json |> Yojson.Basic.to_file ("generated/channel_snap_b_" ^ code ^ ".json");
+                state.internal_changes |> itransitions_to_json |> Yojson.Basic.to_file ("generated/internal_" ^ code ^ ".json");
+                Printf.printf "done\n"
+            else Printf.printf "skipped\n";
+        end
     done
     with
     | End_of_file -> ()
@@ -65,24 +82,4 @@ let scandir dirname  =
     Unix.closedir dirhandle
 ;;
 
-let s = process_json "generated/test_b1611ca24dd3749cc4852784eb2d3692_1.json";;
-
-let rec nsim (s, n) = match n with
-    | 0 -> s | n -> nsim (one_step s, n - 1)
-;;
-
-let getmsg nn = 
-    match List.hd (List.hd (nsim (s,nn)).channels.unprocessed_packets).packet_messages 
-    with RefreshMessage x -> x | _ -> failwith "" 
-;;
-
-(*    let msg = getmsg 1 in *)
-let bks msg = 
-    let m = s.books.implied in
-    let sells = bk_new (m.sells, OrdSell, msg.rm_price_level, msg.rm_entry_size, msg.rm_entry_px, msg.rm_num_orders) in
-    let books = { s.books with implied = { m with sells = sells; }} in
-    books
-;;
-          (*  clean_multi_depth_book (books') *)
-    
 :shadow on
