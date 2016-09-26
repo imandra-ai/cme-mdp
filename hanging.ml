@@ -6,25 +6,13 @@
 :load_ocaml Printers/CME_json.ml
 :load_ocaml Printers/CME_Exchange_json.ml
 
-let loaded_state =
+:shadow on
+
+let () =
     let filename = "hanging.json" in
-    Yojson.Basic.from_file filename |> exchange_state_of_json
+    let s = Yojson.Basic.from_file filename |> exchange_state_of_json in
+    s |> itransitions_to_json |> print_string
 ;;
 
-let g x =
-  if x > 22 then 9
-  else 100 + x;;
 
-let f x =
-  if x > 99 then
-    100
-  else if x < 70 && x > 23
-  then 89 + x
-  else if x > 20
-  then g x + 20
-  else if x > -2 then
-    103
-  else 99;;
-
-:web on
-:decompose f
+:shadow off

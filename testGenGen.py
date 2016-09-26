@@ -109,17 +109,11 @@ header = '''
 :load Model/CME_Exchange.ml
 :load Model/CME_Network.ml
 :load_ocaml Printers/CME_json.ml
-
-type state = {
-    exchange_state : exchange_state ;
-     network_state :  network_state 
-};;
+:load_ocaml Printers/CME_Exchange_json.ml
 
 type action =
     | BookAction     of book_transition
     | ExchangeAction of exchange_transition
-    | CopyPackets
-    | NetworkAction  of net_effect
 ;;
 
 
@@ -135,20 +129,11 @@ let rec run (state, acts) =
     |    _ , [] -> state
     | None ,  _ -> state
     | Some s, BookAction act :: acts -> 
-        let es = process_book_trans (s.exchange_state, act) in 
-        run (Some {s with exchange_state = es}, acts)  
+        let es = process_book_trans (s, act) in 
+        run (Some es, acts)  
     | Some s, ExchangeAction act :: acts -> 
-        let es = process_exchange_trans (s.exchange_state, act) in 
-        run (Some {s with exchange_state = es}, acts)
-    | Some s, NetworkAction  act :: acts -> 
-        let ns = process_net_effect (s.network_state, act) in 
-        run (Some { s with network_state = ns } , acts ) 
-    | Some s, CopyPackets :: acts ->
-        let s = Some { s with network_state = 
-            { s.network_state with 
-                incoming = s.exchange_state.pac_queue
-            }
-        } in run ( s , acts)
+        let es = process_exchange_trans (s, act) in 
+        run (Some es, acts)
 ;;
 
 (* We set up run for staged symbolic execution *)
@@ -164,48 +149,31 @@ let rec valid (s, acts) =
     | None   , _  -> false 
     | Some _ , [] -> true
     | Some s, BookAction act :: acts ->  
-        is_book_trans_valid (s.exchange_state, act) && (
-        let es = process_book_trans (s.exchange_state, act) in 
-        valid (Some {s with exchange_state = es}, acts) )
+        is_book_trans_valid (s, act) && (
+        let es = process_book_trans (s, act) in 
+        valid (Some es, acts) )
     | Some s, ExchangeAction act :: acts -> 
-        is_exchange_trans_valid (s.exchange_state, act) && (
-        let es = process_exchange_trans (s.exchange_state, act) in 
-        valid (Some {s with exchange_state = es}, acts) )
-    | Some s,  NetworkAction  act :: acts -> 
-        is_neteffect_valid (s.network_state, act) && (
-        let ns = process_net_effect (s.network_state, act) in 
-        valid (Some {s with network_state = ns}, acts) )
-    | Some s, CopyPackets :: acts ->
-        let s = Some { s with network_state = 
-            { s.network_state with 
-                incoming = s.exchange_state.pac_queue
-            }
-        } in valid ( s , acts)
+        is_exchange_trans_valid (s, act) && (
+        let es = process_exchange_trans (s, act) in 
+        valid (Some es, acts) )
 ;;
 '''
 
 footer =''' 
-let empty_state = Some {{
-    exchange_state = init_ex_state;
-    network_state = empty_network_state  
-}};;
+let run_all m = run ( Some init_ex_state, search_space_to_list m ) ;;
 
-let run_all m = run ( empty_state, search_space_to_list m ) ;;
-
-let valid_all m = valid ( empty_state, search_space_to_list m ) ;;
+let valid_all m = valid ( Some init_ex_state, search_space_to_list m ) ;;
 
 :shadow off
 let n = ref 0;;
 let write_jsons m =
-    let final_state = run ( empty_state, search_space_to_list m ) in
+    let final_state = run ( Some init_ex_state, search_space_to_list m ) in
     match final_state with 
     | None -> " **** Ignoring empty test case ***** " |> print_string
     | Some final_state ->
-    let packets = final_state.network_state.outgoing @ final_state.network_state.incoming in
     let () = n := !n + 1 in
-    packets |> packets_to_json
-            (*|> Yojson.Basic.pretty_to_string |> print_string *)
-            |> Yojson.Basic.to_file (Printf.sprintf "generated/test_{0}_%d.json" !n) 
+    final_state |> exchange_state_to_json
+                |> Yojson.Basic.to_file (Printf.sprintf "generated/test_{0}_%d.json" !n) 
 ;;
 :shadow on
 :adts on
