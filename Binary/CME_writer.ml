@@ -82,8 +82,8 @@ let snap_refresh time msg =
         } in
     let convert etype lst = 
         let rec scan level = function
-            | None   :: tl -> scan level tl
-            | Some l :: tl ->
+            | NoLevel   :: tl -> scan level tl
+            | Level   l :: tl ->
                 let l = make_entry etype (Some level) l in
                 l :: scan (level + 1) tl
             | [] -> [] in

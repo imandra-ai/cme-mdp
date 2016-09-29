@@ -55,6 +55,8 @@ let rec valid (s, acts) =
 ;;
 
 
+:load state.ml
+
 type search_space = {
     b1 : book_transition;
     b2 : book_transition;
@@ -73,23 +75,14 @@ let search_space_to_list x = [
     ExchangeAction x.e3;
 ];;
 
-:shadow off 
+let run_all m = run ( Some starting_state, search_space_to_list m ) ;;
 
-let loaded_state =
-    let filename = "test_1.json" in
-    Yojson.Basic.from_file filename |> exchange_state_of_json
-;;
-
-:shadow on 
-
-let run_all m = run ( Some loaded_state, search_space_to_list m ) ;;
-
-let valid_all m = valid ( Some loaded_state, search_space_to_list m ) ;;
+let valid_all m = valid ( Some starting_state, search_space_to_list m ) ;;
 
 :shadow off
 let n = ref 0;;
 let write_jsons m =
-    let final_state = run ( Some loaded_state, search_space_to_list m ) in
+    let final_state = run ( Some starting_state, search_space_to_list m ) in
     match final_state with 
     | None -> " **** Ignoring empty test case ***** " |> print_string
     | Some final_state ->

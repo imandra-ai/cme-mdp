@@ -1,6 +1,6 @@
 <Codegenerator> or <Model> or <Utils> or <Binary> or <Printers> or <out_types> : include
-<Codegenerator/*.ml> : package(xml-light)
+<Codegenerator/*.ml> : package(xml-light),package(bitstring)
 <Binary/*.ml> or <Binary/*.native>: package(yojson)
 <Printers/*.ml> or <Printers/*.native>: package(yojson)
-<**/*.ml> or <Binary/*.mli> :package(bitstring), package(bitstring.syntax)
-<**/*.native> :package(bitstring), package(bitstring.syntax), package(xml-light)
+<**/*.ml> or <Binary/*.mli> :package(bitstring)
+<**/*.native> :package(bitstring), package(xml-light)
