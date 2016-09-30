@@ -52,6 +52,5 @@
             { "constructors" : ["ExchangeAction", "ST_Snapshot", "SecB" ] },
             { "constructors" : ["ExchangeAction", "ST_DataSendSnap"     ] }
         ]
-    },
-    { "constructors" : ["CopyPackets"] }
+    }
 ]}                

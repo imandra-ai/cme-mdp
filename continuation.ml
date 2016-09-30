@@ -88,7 +88,7 @@ let write_jsons m =
     | Some final_state ->
     let () = n := !n + 1 in
     final_state |> exchange_state_to_json
-                |> Yojson.Basic.to_file (Printf.sprintf "test_cont_%d.json" !n)  
+                |> Yojson.Basic.to_file (Printf.sprintf "generatedNext/%s_%d.json" fcode (!n) )  
 ;;
 :shadow on
 :adts on

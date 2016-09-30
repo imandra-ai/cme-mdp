@@ -1,3 +1,11 @@
+
+(* @meta[imandra_ignore] on @end *)
+open CME_json;;
+open CME_Types;;
+open CME_Exchange;;
+(* @meta[imandra_ignore] off @end *)
+
+
 (* *** order_book *** *)
 let order_book_to_json book : Yojson.Basic.json = 
     let book_side_to_json side = `Assoc [

@@ -8,10 +8,12 @@
 *)
 
 (* @meta[imandra_ignore] on @end *)
-open CME_Types;;
+    open CME_Types;;
 
-let max (a,b) = max a b;;
-let min (a,b) = min a b;;
+    (* The next two lines redefine OCaml's curried max and min  
+       to Imandra's tuple-based max and min*)
+    let max (a,b) = max a b;;
+    let min (a,b) = min a b;;
 (* @meta[imandra_ignore] off @end *)
 
 let intopt_to_json : ( int option -> Yojson.Basic.json ) = 
