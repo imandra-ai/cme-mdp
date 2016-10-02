@@ -5,13 +5,16 @@
 
 :load Model/CME_Types.ml
 :load Model/CME.ml
+:load Model/CME_Exchange.ml
 :load_ocaml Printers/CME_json.ml
+:load_ocaml Printers/CME_Exchange_json.ml
 :load_ocaml Printers/CME_Internal_json.ml
 
 :shadow off
 
 let process_json filename = 
-    let packets = Yojson.Basic.from_file filename |> packets_of_json in
+    let estate = Yojson.Basic.from_file filename |> exchange_state_of_json  in
+    let packets = estate.pac_queue in
     let state = {
         feed_sec_type = SecA;
         feed_sec_id   = 1; (* TODO Fix the secid shizm*)
@@ -67,11 +70,11 @@ let scandir dirname  =
                 let code  = Str.matched_group 1 file in
                 let state = process_json file |> simulate in
                 let ch = state.channels in 
-                ch.processed_ref_a  |> packets_to_json |> Yojson.Basic.to_file ("generated/channel_ref_a_"  ^ code ^ ".json");
-                ch.processed_ref_b  |> packets_to_json |> Yojson.Basic.to_file ("generated/channel_ref_b_"  ^ code ^ ".json");
-                ch.processed_snap_a |> packets_to_json |> Yojson.Basic.to_file ("generated/channel_snap_a_" ^ code ^ ".json");
-                ch.processed_snap_b |> packets_to_json |> Yojson.Basic.to_file ("generated/channel_snap_b_" ^ code ^ ".json");
-                state.internal_changes |> itransitions_to_json |> Yojson.Basic.to_file ("generated/internal_" ^ code ^ ".json");
+                ch.processed_ref_a  |> packets_to_json |> Yojson.Basic.to_file ("newGenerated/channel_ref_a_"  ^ code ^ ".json");
+                ch.processed_ref_b  |> packets_to_json |> Yojson.Basic.to_file ("newGenerated/channel_ref_b_"  ^ code ^ ".json");
+                ch.processed_snap_a |> packets_to_json |> Yojson.Basic.to_file ("newGenerated/channel_snap_a_" ^ code ^ ".json");
+                ch.processed_snap_b |> packets_to_json |> Yojson.Basic.to_file ("newGenerated/channel_snap_b_" ^ code ^ ".json");
+                state.internal_changes |> itransitions_to_json |> Yojson.Basic.to_file ("newGenerated/internal_" ^ code ^ ".json");
                 Printf.printf "done\n"
             else Printf.printf "skipped\n";
         end
