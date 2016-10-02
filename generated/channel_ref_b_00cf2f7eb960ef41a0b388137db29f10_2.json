@@ -1,0 +1,496 @@
+{
+    "packets": [
+        {
+            "Channel": "RefreshB",
+            "Messages": [
+                {
+                    "EntryPrice": 25435,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 1,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 27872,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 2,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 16489,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 3,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 36728,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 4,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 10568,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 5,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 38969,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 6,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 842,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 7,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 41245,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 8,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 841,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 9,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 41836,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 10,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 8960,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 11,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 8998,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 12,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 1240,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 13,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 8999,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 14,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 1239,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 15,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 9000,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 16,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 1238,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 17,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 9001,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 18,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 1237,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 19,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 9002,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 20,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 9124,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 1,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 10920,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 2,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 8674,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 3,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 19286,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 4,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 6391,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 5,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 19896,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 6,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 537,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 7,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 27995,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 8,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 536,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 9,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 28277,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 10,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 16190,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 11,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 22473,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 12,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 15215,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 13,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 25471,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 14,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 10535,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 15,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 27360,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 16,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 8881,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 17,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 33265,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 18,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 8880,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 19,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 34589,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 20,
+                    "SequrityID": 2
+                }
+            ],
+            "SeqNum": 1
+        },
+        {
+            "Channel": "RefreshB",
+            "Messages": [
+                {
+                    "EntryPrice": 1240,
+                    "EntrySize": 1236,
+                    "EntryType": "Bid",
+                    "MessageType": "Change",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 22,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 33265,
+                    "EntrySize": 2456,
+                    "EntryType": "Offer",
+                    "MessageType": "Change",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 22,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 9002,
+                    "EntrySize": 3610,
+                    "EntryType": "Offer",
+                    "MessageType": "Change",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 23,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 8881,
+                    "EntrySize": 2617,
+                    "EntryType": "Bid",
+                    "MessageType": "Change",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 23,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 41836,
+                    "EntrySize": 6907,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "Change",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 24,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 38969,
+                    "EntrySize": 8587,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "Change",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 25,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 22473,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "Delete",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 24,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 1237,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "Delete",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 26,
+                    "SequrityID": 1
+                }
+            ],
+            "SeqNum": 2
+        }
+    ]
+}

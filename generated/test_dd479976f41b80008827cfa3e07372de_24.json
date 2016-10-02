@@ -1,0 +1,2092 @@
+{
+    "packets": [
+        {
+            "Channel": "SnapshotA",
+            "Messages": [
+                {
+                    "ImpliedBook": {
+                        "Buys": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 15081,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {},
+                            {
+                                "NumOrders": 1,
+                                "Price": 14021,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 5922,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 5921,
+                                "Quantity": 2617,
+                                "Side": "BUY"
+                            }
+                        ],
+                        "Sells": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 23446,
+                                "Quantity": 3610,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 25729,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 31583,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 32726,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 33262,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            }
+                        ]
+                    },
+                    "LastMsgSeqNumProcessed": 2,
+                    "MultiBook": {
+                        "Buys": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 11011,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 9122,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 8147,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2242,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {}
+                        ],
+                        "Sells": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 14008,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 18688,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 20342,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 28799,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 37679,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            }
+                        ]
+                    },
+                    "RepSeqNum": 26,
+                    "SecurityID": 2
+                }
+            ],
+            "SeqNum": 4
+        },
+        {
+            "Channel": "SnapshotB",
+            "Messages": [
+                {
+                    "ImpliedBook": {
+                        "Buys": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 15081,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {},
+                            {
+                                "NumOrders": 1,
+                                "Price": 14021,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 5922,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 5921,
+                                "Quantity": 2617,
+                                "Side": "BUY"
+                            }
+                        ],
+                        "Sells": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 23446,
+                                "Quantity": 3610,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 25729,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 31583,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 32726,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 33262,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            }
+                        ]
+                    },
+                    "LastMsgSeqNumProcessed": 2,
+                    "MultiBook": {
+                        "Buys": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 11011,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 9122,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 8147,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2242,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {}
+                        ],
+                        "Sells": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 14008,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 18688,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 20342,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 28799,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 37679,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            }
+                        ]
+                    },
+                    "RepSeqNum": 26,
+                    "SecurityID": 2
+                }
+            ],
+            "SeqNum": 4
+        },
+        {
+            "Channel": "SnapshotA",
+            "Messages": [
+                {
+                    "ImpliedBook": {
+                        "Buys": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 26094,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 19810,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 10864,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 8588,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 8587,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            }
+                        ],
+                        "Sells": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 34949,
+                                "Quantity": 6907,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 36746,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 46472,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 48919,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 49760,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            }
+                        ]
+                    },
+                    "LastMsgSeqNumProcessed": 2,
+                    "MultiBook": {
+                        "Buys": [
+                            {},
+                            {
+                                "NumOrders": 1,
+                                "Price": 2441,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2440,
+                                "Quantity": 1236,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2439,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2438,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            }
+                        ],
+                        "Sells": [
+                            {},
+                            {
+                                "NumOrders": 1,
+                                "Price": 10200,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 10201,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 10202,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 10203,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            }
+                        ]
+                    },
+                    "RepSeqNum": 26,
+                    "SecurityID": 1
+                }
+            ],
+            "SeqNum": 3
+        },
+        {
+            "Channel": "SnapshotB",
+            "Messages": [
+                {
+                    "ImpliedBook": {
+                        "Buys": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 26094,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 19810,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 10864,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 8588,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 8587,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            }
+                        ],
+                        "Sells": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 34949,
+                                "Quantity": 6907,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 36746,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 46472,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 48919,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 49760,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            }
+                        ]
+                    },
+                    "LastMsgSeqNumProcessed": 2,
+                    "MultiBook": {
+                        "Buys": [
+                            {},
+                            {
+                                "NumOrders": 1,
+                                "Price": 2441,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2440,
+                                "Quantity": 1236,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2439,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2438,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            }
+                        ],
+                        "Sells": [
+                            {},
+                            {
+                                "NumOrders": 1,
+                                "Price": 10200,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 10201,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 10202,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 10203,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            }
+                        ]
+                    },
+                    "RepSeqNum": 26,
+                    "SecurityID": 1
+                }
+            ],
+            "SeqNum": 3
+        },
+        {
+            "Channel": "RefreshA",
+            "Messages": [
+                {
+                    "EntryPrice": 10199,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "Delete",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 22,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 34949,
+                    "EntrySize": 6907,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "Change",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 23,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 14471,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "Delete",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 22,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 23446,
+                    "EntrySize": 3610,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "Change",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 23,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 10161,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "Delete",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 24,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 2241,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "Delete",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 24,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 2440,
+                    "EntrySize": 1236,
+                    "EntryType": "Bid",
+                    "MessageType": "Change",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 25,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 5921,
+                    "EntrySize": 2617,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "Change",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 25,
+                    "SequrityID": 2
+                }
+            ],
+            "SeqNum": 2
+        },
+        {
+            "Channel": "RefreshB",
+            "Messages": [
+                {
+                    "EntryPrice": 10199,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "Delete",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 22,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 34949,
+                    "EntrySize": 6907,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "Change",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 23,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 14471,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "Delete",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 22,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 23446,
+                    "EntrySize": 3610,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "Change",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 23,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 10161,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "Delete",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 24,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 2241,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "Delete",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 24,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 2440,
+                    "EntrySize": 1236,
+                    "EntryType": "Bid",
+                    "MessageType": "Change",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 25,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 5921,
+                    "EntrySize": 2617,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "Change",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 25,
+                    "SequrityID": 2
+                }
+            ],
+            "SeqNum": 2
+        },
+        {
+            "Channel": "SnapshotA",
+            "Messages": [
+                {
+                    "ImpliedBook": {
+                        "Buys": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 15081,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 14471,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 14021,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 5922,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 5921,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            }
+                        ],
+                        "Sells": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 23446,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 25729,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 31583,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 32726,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 33262,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            }
+                        ]
+                    },
+                    "LastMsgSeqNumProcessed": 1,
+                    "MultiBook": {
+                        "Buys": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 11011,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 9122,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 8147,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2242,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2241,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            }
+                        ],
+                        "Sells": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 14008,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 18688,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 20342,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 28799,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 37679,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            }
+                        ]
+                    },
+                    "RepSeqNum": 21,
+                    "SecurityID": 2
+                }
+            ],
+            "SeqNum": 2
+        },
+        {
+            "Channel": "SnapshotB",
+            "Messages": [
+                {
+                    "ImpliedBook": {
+                        "Buys": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 15081,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 14471,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 14021,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 5922,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 5921,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            }
+                        ],
+                        "Sells": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 23446,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 25729,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 31583,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 32726,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 33262,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            }
+                        ]
+                    },
+                    "LastMsgSeqNumProcessed": 1,
+                    "MultiBook": {
+                        "Buys": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 11011,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 9122,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 8147,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2242,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2241,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            }
+                        ],
+                        "Sells": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 14008,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 18688,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 20342,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 28799,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 37679,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            }
+                        ]
+                    },
+                    "RepSeqNum": 21,
+                    "SecurityID": 2
+                }
+            ],
+            "SeqNum": 2
+        },
+        {
+            "Channel": "SnapshotA",
+            "Messages": [
+                {
+                    "ImpliedBook": {
+                        "Buys": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 26094,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 19810,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 10864,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 8588,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 8587,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            }
+                        ],
+                        "Sells": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 34949,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 36746,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 46472,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 48919,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 49760,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            }
+                        ]
+                    },
+                    "LastMsgSeqNumProcessed": 1,
+                    "MultiBook": {
+                        "Buys": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 10161,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2441,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2440,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2439,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2438,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            }
+                        ],
+                        "Sells": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 10199,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 10200,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 10201,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 10202,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 10203,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            }
+                        ]
+                    },
+                    "RepSeqNum": 21,
+                    "SecurityID": 1
+                }
+            ],
+            "SeqNum": 1
+        },
+        {
+            "Channel": "SnapshotB",
+            "Messages": [
+                {
+                    "ImpliedBook": {
+                        "Buys": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 26094,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 19810,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 10864,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 8588,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 8587,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            }
+                        ],
+                        "Sells": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 34949,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 36746,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 46472,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 48919,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 49760,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            }
+                        ]
+                    },
+                    "LastMsgSeqNumProcessed": 1,
+                    "MultiBook": {
+                        "Buys": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 10161,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2441,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2440,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2439,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 2438,
+                                "Quantity": 1,
+                                "Side": "BUY"
+                            }
+                        ],
+                        "Sells": [
+                            {
+                                "NumOrders": 1,
+                                "Price": 10199,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 10200,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 10201,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 10202,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            },
+                            {
+                                "NumOrders": 1,
+                                "Price": 10203,
+                                "Quantity": 1,
+                                "Side": "SELL"
+                            }
+                        ]
+                    },
+                    "RepSeqNum": 21,
+                    "SecurityID": 1
+                }
+            ],
+            "SeqNum": 1
+        },
+        {
+            "Channel": "RefreshA",
+            "Messages": [
+                {
+                    "EntryPrice": 26094,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 1,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 34949,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 2,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 19810,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 3,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 36746,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 4,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 10864,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 5,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 46472,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 6,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 8588,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 7,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 48919,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 8,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 8587,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 9,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 49760,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 10,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 10161,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 11,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 10199,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 12,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 2441,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 13,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 10200,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 14,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 2440,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 15,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 10201,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 16,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 2439,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 17,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 10202,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 18,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 2438,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 19,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 10203,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 20,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 15081,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 1,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 23446,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 2,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 14471,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 3,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 25729,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 4,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 14021,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 5,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 31583,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 6,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 5922,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 7,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 32726,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 8,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 5921,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 9,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 33262,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 10,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 11011,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 11,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 14008,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 12,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 9122,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 13,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 18688,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 14,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 8147,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 15,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 20342,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 16,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 2242,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 17,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 28799,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 18,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 2241,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 19,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 37679,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 20,
+                    "SequrityID": 2
+                }
+            ],
+            "SeqNum": 1
+        },
+        {
+            "Channel": "RefreshB",
+            "Messages": [
+                {
+                    "EntryPrice": 26094,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 1,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 34949,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 2,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 19810,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 3,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 36746,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 4,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 10864,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 5,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 46472,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 6,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 8588,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 7,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 48919,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 8,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 8587,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 9,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 49760,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 10,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 10161,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 11,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 10199,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 12,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 2441,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 13,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 10200,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 14,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 2440,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 15,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 10201,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 16,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 2439,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 17,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 10202,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 18,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 2438,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 19,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 10203,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 20,
+                    "SequrityID": 1
+                },
+                {
+                    "EntryPrice": 15081,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 1,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 23446,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 2,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 14471,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 3,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 25729,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 4,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 14021,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 5,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 31583,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 6,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 5922,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 7,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 32726,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 8,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 5921,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedBid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 9,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 33262,
+                    "EntrySize": 1,
+                    "EntryType": "ImpliedOffer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 10,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 11011,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 11,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 14008,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 1,
+                    "RepSeqNum": 12,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 9122,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 13,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 18688,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 2,
+                    "RepSeqNum": 14,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 8147,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 15,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 20342,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 3,
+                    "RepSeqNum": 16,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 2242,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 17,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 28799,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 4,
+                    "RepSeqNum": 18,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 2241,
+                    "EntrySize": 1,
+                    "EntryType": "Bid",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 19,
+                    "SequrityID": 2
+                },
+                {
+                    "EntryPrice": 37679,
+                    "EntrySize": 1,
+                    "EntryType": "Offer",
+                    "MessageType": "New",
+                    "NumOrders": 1,
+                    "PriceLevel": 5,
+                    "RepSeqNum": 20,
+                    "SequrityID": 2
+                }
+            ],
+            "SeqNum": 1
+        }
+    ]
+}
