@@ -146,7 +146,7 @@ let book_to_ocaml ( b : book ) : string =
 
 (* ****  Serializers for inc_refresh   **** *)
 let inc_refresh_to_json : ref_message -> Yojson.Basic.json = fun p -> `Assoc [
-    ( "SequrityID", `Int p.rm_security_id );
+    ( "SecurityID", `Int p.rm_security_id );
     ( "RepSeqNum",  `Int p.rm_rep_seq_num );
     ( "PriceLevel", `Int p.rm_price_level );
     ( "EntrySize",  `Int p.rm_entry_size  );
