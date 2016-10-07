@@ -289,7 +289,6 @@ let get_level_list (state, sec_type, book_type, side ) = [
 
 (** 2.4.2 This generates a snapshot message for the whole book of one security *)
 let send_snapshot ( state, sec_type ) = 
-    let state = advance_rep_seq_num  ( state, sec_type )        in
     let m_snap  = SnapshotMessage {
         sm_security_id = get_security_id ( state, sec_type ) ;
         sm_rep_seq_num = get_rep_seq_num ( state, sec_type ) ;
