@@ -159,7 +159,7 @@ let inc_refresh_of_json (j : Yojson.Basic.json) : ref_message =
     let open Yojson.Basic.Util in
     let to_int j = to_int j |> fun x -> max (0,x) in  
     let cap255 j = min (j, 255) in {
-        rm_security_id = j |> member "SequrityID"  |> to_int;
+        rm_security_id = j |> member "SecurityID"  |> to_int;
         rm_rep_seq_num = j |> member "RepSeqNum"   |> to_int;
         rm_price_level = j |> member "PriceLevel"  |> to_int |> cap255 ;  (* NOTE: fix for pricelevel above 255*)
         rm_entry_size  = j |> member "EntrySize"   |> to_int;
