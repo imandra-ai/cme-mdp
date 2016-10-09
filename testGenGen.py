@@ -173,7 +173,7 @@ let write_jsons m =
     | Some final_state ->
     let () = n := !n + 1 in
     final_state |> exchange_state_to_json
-                |> Yojson.Basic.to_file (Printf.sprintf "generatedStates/test_{0}_%d.json" !n) 
+                |> Yojson.Basic.to_file (Printf.sprintf "{1}/test_{0}_%d.json" !n) 
 ;;
 :shadow on
 :adts on
@@ -183,7 +183,7 @@ let write_jsons m =
 '''
 
 
-def generate_code(jsonFile):
+def generate_code(jsonFile, outDir=""):
     code = ""
     jsonData = json.load(open(jsonFile, "r"))
     if "testgen" not in jsonData:
@@ -212,11 +212,12 @@ def generate_code(jsonFile):
 
     print header
     print code
-    print footer.format(hashlib.md5(code).hexdigest())
+    print footer.format(hashlib.md5(code).hexdigest(), outDir)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Imandra test-generator-generator')
     parser.add_argument('jobFile', nargs=1)
+    parser.add_argument('--outDir', default="generatedStates")
     args = parser.parse_args()
-    generate_code(args.jobFile[0])    
+    generate_code(args.jobFile[0], outDir=args.outDir)    

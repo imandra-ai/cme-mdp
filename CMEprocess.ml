@@ -70,11 +70,11 @@ let scandir dirname  =
                 let code  = Str.matched_group 1 file in
                 let state = process_json file |> simulate in
                 let ch = state.channels in 
-                ch.processed_ref_a  |> packets_to_json |> Yojson.Basic.to_file ("newGenerated/channel_ref_a_"  ^ code ^ ".json");
-                ch.processed_ref_b  |> packets_to_json |> Yojson.Basic.to_file ("newGenerated/channel_ref_b_"  ^ code ^ ".json");
-                ch.processed_snap_a |> packets_to_json |> Yojson.Basic.to_file ("newGenerated/channel_snap_a_" ^ code ^ ".json");
-                ch.processed_snap_b |> packets_to_json |> Yojson.Basic.to_file ("newGenerated/channel_snap_b_" ^ code ^ ".json");
-                state.internal_changes |> itransitions_to_json |> Yojson.Basic.to_file ("newGenerated/internal_" ^ code ^ ".json");
+                ch.processed_ref_a     |>      packets_to_json |> Yojson.Basic.to_file ("newGenerated/channel_ref_a_"  ^ code ^ ".json");
+                ch.processed_ref_b     |>      packets_to_json |> Yojson.Basic.to_file ("newGenerated/channel_ref_b_"  ^ code ^ ".json");
+                ch.processed_snap_a    |>      packets_to_json |> Yojson.Basic.to_file ("newGenerated/channel_snap_a_" ^ code ^ ".json");
+                ch.processed_snap_b    |>      packets_to_json |> Yojson.Basic.to_file ("newGenerated/channel_snap_b_" ^ code ^ ".json");
+                state.internal_changes |> itransitions_to_json |> Yojson.Basic.to_file ("newGenerated/internal_"       ^ code ^ ".json");
                 Printf.printf "done\n"
             else Printf.printf "skipped\n";
         end

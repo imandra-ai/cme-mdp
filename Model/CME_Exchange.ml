@@ -316,7 +316,7 @@ type book_transition =
 ;;
 
 type exchange_transition =
-(*  | ST_BookReset                     We reset the whole book *)
+    | ST_BookReset                    (* We reset the whole book *)
     | ST_DataSendInc                  (* Indicates that we need to send out the collected incremental refresh messages *)
     | ST_DataSendSnap                 (* Indicates that we need to send out the collected snapshot refresh messages *)
     | ST_Snapshot of sec_type         (* Indicates the need to send a snapshot message *)
@@ -330,8 +330,6 @@ let sec_level_exists (state, sec_t, book_t, order_s, level_n : exchange_state * 
 (** 3.2 Define a valid transition of the exchange *)
 let is_book_trans_valid (state, trans) =
     match trans with
-(*      | ST_BookReset -> (* For testgen, let's limit the number of resets to 2.  Note we start counting at 0. *)
-        state.num_resets < 2 *)
       | ST_Add oa_data ->
         not (sec_level_exists ( state, 
                                 oa_data.oa_sec_type, 
@@ -367,6 +365,7 @@ let is_exchange_trans_valid (state, trans) =
     match trans with
     | ST_DataSendInc  -> state.inc_msg_queue  <> []
     | ST_DataSendSnap -> state.snap_msg_queue <> []
+    | ST_BookReset    -> true
     | ST_Snapshot _ -> true
 ;;
 
@@ -404,7 +403,6 @@ let send_inc_packet (state) =
 (** Here we actually maintain the order book and its states *)
 let process_book_trans (state, trans) =
     match trans with 
-(*    | ST_BookReset         -> reset_books_exchange state *)
     | ST_Add o_add         -> send_add_level (state, o_add)
     | ST_Change o_change   -> send_o_change (state, o_change)
     | ST_Delete o_del      -> send_o_del (state, o_del)
@@ -412,6 +410,7 @@ let process_book_trans (state, trans) =
 
 let process_exchange_trans (state, trans) =
     match trans with 
+    | ST_BookReset         -> reset_books_exchange state 
     | ST_DataSendInc       -> send_inc_packet  (state)
     | ST_DataSendSnap      -> send_snap_packet (state)
     | ST_Snapshot sec_type -> send_snapshot (state, sec_type)
