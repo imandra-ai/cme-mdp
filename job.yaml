@@ -1,0 +1,71 @@
+##
+##  
+##  Aesthetic Integration Ltd.
+##  Copyright (c) 2016
+##
+##
+## 
+
+## 
+## Setup the model state (that's used in between the steps) and 
+## 
+model_setup:
+    description: |
+        We start with an empty state of the CME exchange.
+    model:
+        source: Model/CME_Testgen_Template.ml ## we should be able to source models from MMR as well
+        state: 
+            empty:      init_ex_state
+            save_json:  exchange_state_to_json
+            save_ocaml: exchange_state_to_ocaml
+      
+        run: run     # (state option * action) -> state
+        valid: valid   # (state option * action) -> bool
+        
+    workdir: cmegenerated
+        
+
+## Generate the test suite
+gen_test_suite:
+    description: |
+        Create CME model use cases with different approaches (random, combinatorial, imandra-decomp)
+
+    steps:
+#    - description: |
+#          Generate random 
+#      type: outside
+#      script: scripts/gen_random.py
+
+#    - description: |
+#          Use c
+#      type: combinatorial
+#      use-types: []
+
+    - description: |
+          Use Imandra to explore full state space 
+      type: imandra
+      num_steps: 4
+      action_type: action
+
+#    - description: |
+#          Apply 'network' effects by shuffling and losing some packets
+#      type: combinatorial
+        
+    after-step:
+        description: |
+            Convert the resulting 
+
+##
+## After test cases are generated, let's print them in the CME binary format
+## 
+after-step:
+    ## 
+    step:
+        type: printer
+        name: CME-Binary-Printer
+        destination: outdata/
+    
+    ## We can use the 
+    step:
+        type: report
+        name: Simple-text
