@@ -50,7 +50,7 @@ let process_json filename =
         internal_changes = [];
         cur_time = 0;
     } in
-    (*let state = simulate state in*)
+    let state = simulate state in
     state
 ;;
 
@@ -64,7 +64,7 @@ let scandir dirname  =
         | "." | ".." -> ()
         | file -> begin 
             let file = dirname ^ "/" ^ file in
-            let re = Str.regexp ".*/test_\(.*\)\.json$" in
+            let re = Str.regexp ".*/state_\(.*\)\.json$" in
             Printf.printf "Json file %s ... " file;
             if Str.string_match re file 0 then
                 let code  = Str.matched_group 1 file in

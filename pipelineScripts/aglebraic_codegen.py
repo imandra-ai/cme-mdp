@@ -11,8 +11,8 @@ class Sequence(object):
             ret.seq = self.seq + other.seq 
             return ret
         if hasattr(other, "alt"):
-            ret = Alternative(0,0)
-            ret.alt = self.seq + [other]
+            ret = Sequence()
+            ret.seq = self.seq + [other]
             return ret        
     
     def __or__(self, other):
@@ -38,16 +38,17 @@ class Alternative(object):
             ret.alt = self.alt + other.alt 
             return ret
         if hasattr(other, "seq"):
-            ret.alt = self.alt + [other] 
+            ret.alt = self.alt + [other]
             return ret
         
     def __rshift__(self, other):
+        ret = Sequence()
         if hasattr(other, "seq"):
-            ret = Sequence()
             ret.seq = [self] + other.seq
             return ret
         if hasattr(other, "alt"):
-            return Alternative(self,other)
+            ret.seq = [self, other]
+            return ret
 
     def __mul__(self, a):
         other = Sequence()
@@ -56,7 +57,7 @@ class Alternative(object):
     __rmul__ = __mul__
     
     
-def expand_sequence(to_expand, append=None, **args):
+def expand_sequence(to_expand, append=None, t=False, **args):
     ret = None
     keys = list(to_expand.iterkeys())
     for vals in itertools.product(*list(to_expand.itervalues())):
@@ -65,11 +66,14 @@ def expand_sequence(to_expand, append=None, **args):
             **args
         )
         if append is not None:
-            s = s >> append
+            if not t:
+                s = s >> append
+            else:
+                s = s >> append | s 
         ret = s if ret is None else ret >> s 
     return ret
 
-def expand_alternative(to_expand, append=None, **args):
+def expand_alternative(to_expand, append=None, t=False, **args):
     ret = None
     keys = list(to_expand.iterkeys())
     for vals in itertools.product(*list(to_expand.itervalues())):
@@ -78,7 +82,10 @@ def expand_alternative(to_expand, append=None, **args):
             **args
         )
         if append is not None:
-            s = s >> append
+            if not t:
+                s = s >> append
+            else:
+                s = s >> append | s 
         ret = s if ret is None else ret | s 
     return ret
 
