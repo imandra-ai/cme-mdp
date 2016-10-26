@@ -152,22 +152,30 @@ let correct_level (msg, depth : ref_message * int) =
     0 <= msg.rm_price_level && msg.rm_price_level <= depth 
 ;;
 
+(* gets the sequence number of the last message in the list *)
+let rec get_msgs_last_seqnum ( msgs, min_num : ref_message list * int) =
+    match msgs with
+    | []    -> min_num
+    | x::[] -> max(min_num, x.rm_rep_seq_num) 
+    | x::xs -> get_msgs_last_seqnum (xs, min_num)
+;;
+
 (*  Check whether the cache is complete: that we have all of the packets
     in the sequence starting with the last processed *)
-let rec check_list (msgs, last_idx, book_depth : ref_message list * int * int) =
+let rec check_list (msgs, last_idx : ref_message list * int ) =
     match msgs with
     | [] -> true
     | x::xs ->
-        if x.rm_rep_seq_num <= last_idx then check_list (xs, last_idx, book_depth)
-        else if (x.rm_rep_seq_num = last_idx + 1) && correct_level(x, book_depth) then 
-            check_list (xs, last_idx + 1, book_depth)
-        else 
-            false
+        if x.rm_rep_seq_num <= last_idx then 
+            check_list (xs, last_idx)
+        else if (x.rm_rep_seq_num = last_idx + 1) then 
+            check_list (xs, last_idx + 1)
+        else false
 ;;
 
 (* Check to see whether the cache we're maintaining is correct since the valid sequence number *)
-let is_cache_valid_since_seq_num (cache, last_processed_seq, book_depth : ref_message list * int * int) =
-    cache <> [] && check_list (cache, last_processed_seq, book_depth)
+let is_cache_valid_since_seq_num (cache, last_processed_seq : ref_message list * int) =
+    check_list (cache, last_processed_seq)
 ;;
 
 
@@ -593,33 +601,40 @@ let attempt_recovery (s : feed_state) =
         let s' = { s with feed_status = Normal; books = books'; } in 
         add_int_message (s', Book_Changed_to_Normal)
     else (
-        if is_cache_valid_since_seq_num (channels.cache, channels.last_seq_processed, s.books.book_depth) then (
+        let last_num = channels.last_seq_processed in
+        let cache_valid = is_cache_valid_since_seq_num (channels.cache, last_num) in
+        if channels.cache<>[] && cache_valid then (
             let books' = apply_cache (books, channels, channels.last_seq_processed) in
             let books'' = recalc_combined (books') in 
+            let new_seq_num = get_msgs_last_seqnum (channels.cache, last_num) in
             let s' = { s with
-                        feed_status = Normal;
-                        books = books'';
-                        channels = { 
-                            channels with cache = [] 
-                        }
-                    } in 
+                feed_status = Normal;
+                books = books'';
+                channels = { channels with 
+                    last_seq_processed = new_seq_num; 
+                    cache = []
+                }
+            } in 
             add_int_message (s', Book_Changed_to_Normal)
         )
 
         else match channels.last_snapshot with
             | None -> s
             | Some snap ->
-                let lastS = snap.snap_last_msg_seq_num_processed in
-                if is_cache_valid_since_seq_num ( channels.cache, lastS, s.books.book_depth) then
+                let last_num = snap.snap_last_msg_seq_num_processed in
+                if is_cache_valid_since_seq_num ( channels.cache, last_num) then
                     let books' = apply_snapshot (books, snap) in
-                    let books'' = apply_cache (books', channels, lastS) in
+                    let books'' = apply_cache (books', channels, last_num) in
                     let books''' = recalc_combined (books'') in 
+                    let new_seq_num = get_msgs_last_seqnum (channels.cache, last_num) in
                     let s'= { s with 
                         books = books''';
                         feed_status = Normal;
                         channels = { channels with 
-                            cache = [] ;
-                        }} in 
+                            last_seq_processed = new_seq_num;   
+                            cache = []
+                        }
+                    } in 
                     add_int_message (s', Book_Changed_to_Normal)
                 else
                     s
@@ -702,21 +717,6 @@ let rec is_cache_sorted (cache : ref_message list) =
             is_cache_sorted(y::xs)
 ;;
 
-
-let process_msg_recovery (s, next_message, channel_type  : feed_state * message * channel_type) =
-    match next_message with
-    | SnapshotMessage sm ->        
-        let s = process_rec_snapshot ( s, sm, channel_type) in 
-        add_int_message  (s, Book_Proc_Snap)
-    | RefreshMessage rm ->
-        if rm.rm_security_id <> s.feed_sec_id then
-            add_int_message (s, Book_Proc_NotRelevant)
-        else
-            let cache = add_to_cache (rm , s.channels.cache) in
-            let s = { s with channels = { s.channels with cache = cache} } in 
-            add_int_message (s, Book_Proc_Cache_Add)
-;;
-
 (** This will indicate that we need to reset the book and change to InRecovery *)
 let is_msg_reset (msg : ref_message) =
     msg.rm_entry_type = V_MDEntryType_EmptyBook
@@ -737,6 +737,22 @@ let is_msg_relevant (msg, s : ref_message * feed_state) =
     else true
 ;;
 
+
+
+
+let process_msg_recovery (s, next_message, channel_type  : feed_state * message * channel_type) =
+    match next_message with
+    | SnapshotMessage sm ->        
+        let s = process_rec_snapshot ( s, sm, channel_type) in 
+        add_int_message  (s, Book_Proc_Snap)
+    | RefreshMessage rm ->
+        if not (is_msg_relevant (rm, s)) then 
+            add_int_message (s, Book_Proc_NotRelevant)
+        else
+            let cache = add_to_cache (rm , s.channels.cache) in
+            let s = { s with channels = { s.channels with cache = cache} } in 
+            add_int_message (s, Book_Proc_Cache_Add)
+;;
 
 (** *************************************************************** *)
 (** Process the next packet when book state is NORMAL               *)
