@@ -37,8 +37,8 @@ let process_json filename =
             processed_snap_a = [];
             processed_snap_b = [];
 
-            cycle_hist_a = clean_cycle_hist;      
-            cycle_hist_b = clean_cycle_hist;
+            cycle_hist_a = clean_cycle_hist (1,2);      
+            cycle_hist_b = clean_cycle_hist (1,2);
 
             last_seq_processed = 0;
             cache = [];       

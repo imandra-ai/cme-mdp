@@ -16,6 +16,7 @@ def print_internal_transitions(filename):
         jsonDict = json.load(f)
 
     transitions = jsonDict['InternalTransitions']
+    transitions = [t for t in transitions if 'Books' in t]
     print("N {0}".format(len(transitions)))
     for t in transitions:
 	books = t['Books']

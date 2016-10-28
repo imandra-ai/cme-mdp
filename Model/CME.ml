@@ -83,9 +83,9 @@ type cycle_hist = {
 };;
 
 (** Structure with clean history *)
-let clean_cycle_hist = {
-   reference_sec_id = -1;
-   self_sec_id = -1;
+let clean_cycle_hist (self, ref) = {
+   reference_sec_id = ref;
+   self_sec_id = self;
    ref_sec_snap_received = false;
    liq = LiqUnknown;
 };;
@@ -373,18 +373,12 @@ let update_cycle_hist (ch, snap : cycle_hist * snap_message) =
         if second_ref_sec then Illiquid
             else if is_this_sec then Liquid
             else ch.liq
-        ) else ch.liq in {
-        ch with
+        ) else ch.liq 
+    in { ch with
             ref_sec_snap_received = first_ref_sec;
             liq = liq';
     }
 ;;
-
-(** We reset the cycle history if we transition out of Recovery state *)
-let reset_cycle_hist ( ch : cycle_hist ) = {
-    clean_cycle_hist with reference_sec_id = ch.reference_sec_id
-};;
-
 
 (** *************************************************************** *)
 (** Here we need to figure out what we're doing, etc.               *)
@@ -598,7 +592,16 @@ let attempt_recovery (s : feed_state) =
     let channels = s.channels in
     if channels.cycle_hist_a.liq = Illiquid && channels.cycle_hist_b.liq = Illiquid then
         let books' = apply_cache (books, channels, 0) in
-        let s' = { s with feed_status = Normal; books = books'; } in 
+        let last_num = channels.last_seq_processed in
+        let new_seq_num = get_msgs_last_seqnum (channels.cache, last_num) in
+        let s' = { s with 
+            feed_status = Normal; 
+            books = books'; 
+            channels = { channels with 
+                last_seq_processed = new_seq_num; 
+                cache = []
+            }
+        } in 
         add_int_message (s', Book_Changed_to_Normal)
     else (
         let last_num = channels.last_seq_processed in
@@ -667,9 +670,9 @@ let process_rec_snapshot (s, snap, src : feed_state * snap_message * channel_typ
 
     (* We now need to update the cycle history *)
     let cycle_hist = get_cycle_hist (s.channels.cycle_hist_a, s.channels.cycle_hist_b, src) in
+    
     let cycle_hist' = update_cycle_hist (cycle_hist, snap ) in
 
-    (* We now need to update the cycle history *)
 
     (** We're returning the exchange_state variable with updated channel info *)
     {
@@ -677,7 +680,9 @@ let process_rec_snapshot (s, snap, src : feed_state * snap_message * channel_typ
         channels = { s.channels with
             cycle_hist_a = if src = Ch_Snap_A then cycle_hist' else s.channels.cycle_hist_a;
             cycle_hist_b = if src = Ch_Snap_B then cycle_hist' else s.channels.cycle_hist_b;
-            last_snapshot = new_snap;
+            last_snapshot = if snap.sm_security_id = s.feed_sec_id 
+                then new_snap 
+                else s.channels.last_snapshot;
         }
     }
 ;;
