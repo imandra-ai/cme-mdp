@@ -21,15 +21,14 @@ type action =
    @end
 *)
 let rec run (state, acts) =
-    match state, acts with
-    |    _ , [] -> state
-    | None ,  _ -> state
-    | Some s, BookAction act :: acts -> 
-        let es = process_book_trans (s, act) in 
-        run (Some es, acts)  
-    | Some s, ExchangeAction act :: acts -> 
-        let es = process_exchange_trans (s, act) in 
-        run (Some es, acts)
+    match acts with
+    | [] -> state
+    | BookAction act :: acts ->
+        let es = process_book_trans (state, act) in
+        run (es, acts)
+    | ExchangeAction act :: acts ->
+        let es = process_exchange_trans (state, act) in
+        run (es, acts)
 ;;
 
 (* We set up run for staged symbolic execution *)
@@ -41,15 +40,14 @@ let rec run (state, acts) =
 *)
 
 let rec valid (s, acts) =
-    match (s, acts) with 
-    | None   , _  -> false 
-    | Some _ , [] -> true
-    | Some s, BookAction act :: acts ->  
+    match acts with
+    | [] -> true
+    | BookAction act :: acts ->
         is_book_trans_valid (s, act) && (
-        let es = process_book_trans (s, act) in 
-        valid (Some es, acts) )
-    | Some s, ExchangeAction act :: acts -> 
+        let es = process_book_trans (s, act) in
+        valid (es, acts) )
+    | ExchangeAction act :: acts ->
         is_exchange_trans_valid (s, act) && (
-        let es = process_exchange_trans (s, act) in 
-        valid (Some es, acts) )
+        let es = process_exchange_trans (s, act) in
+        valid (es, acts) )
 ;;

@@ -6,16 +6,13 @@ ocamlTemplate = """:load {model}
 
 {space_defs}
 
-let   run_all actions = run   ( Some init_ex_state, search_space_to_list actions);;
-let valid_all actions = valid ( Some init_ex_state, search_space_to_list actions);;
+let   run_all actions = run   ( init_ex_state, search_space_to_list actions);;
+let valid_all actions = valid ( init_ex_state, search_space_to_list actions);;
 
 :shadow off
 let n = ref 0;;
 let write_ocaml actions =
     let final_state = run_all actions in
-    match final_state with 
-    | None -> " **** Ignoring empty test case ***** " |> print_string
-    | Some final_state ->
     let () = n := !n + 1 in
     let filename = Printf.sprintf "{outDir}/state_{filename}_%d.ml" !n in
     final_state |> exchange_state_to_ocaml
