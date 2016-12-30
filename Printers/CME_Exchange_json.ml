@@ -107,6 +107,22 @@ let exchange_state_to_ocaml state  =
        ])
 ;;
 
+let network_state_ocaml_of_exchange_state state =
+  Printf.sprintf "{ %s }"
+    (String.concat "; "
+       [ Printf.sprintf "incoming=List.rev ( %s )" ( state.pac_queue |> packets_to_ocaml )
+       ; "outgoing=[]"
+       ; "cache=[]"
+       ])
+;;
+
+let json_string_of_network_state state =
+  `Assoc
+    [ ( "PacketQueue"    , state.outgoing |> packets_to_json        );
+    ]
+  |> Yojson.Basic.to_string
+;;
+
 
 
 
