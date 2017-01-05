@@ -116,13 +116,6 @@ let network_state_ocaml_of_exchange_state state =
        ])
 ;;
 
-let json_string_of_network_state state =
-  `Assoc
-    [ ( "PacketQueue"    , state.outgoing |> packets_to_json        );
-    ]
-  |> Yojson.Basic.to_string
-;;
-
 
 
 
