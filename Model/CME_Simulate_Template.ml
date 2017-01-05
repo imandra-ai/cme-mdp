@@ -23,8 +23,14 @@ let run (packet_list : packet list) : string =
         }
     } in
   let end_state = simulate init_state in
-  let json = itransitions_to_json end_state.internal_changes in
-  Yojson.Basic.to_string json
+  let transitions_json = itransitions_to_json end_state.internal_changes in
+  let packets_json = packets_to_json packet_list in
+  let open Yojson.Basic in
+  `Assoc
+    [ ("input", packets_json)
+    ; ("output", transitions_json)
+    ]
+  |> to_string
 ;;
 
 :shadow on
