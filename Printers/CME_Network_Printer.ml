@@ -12,7 +12,7 @@ let ocaml_string_of_network_state state =
        ])
 
 let outgoing_packets_ocaml_string_of_network_state state =
-  state.outgoing |> packets_to_ocaml
+  state.outgoing |> List.rev |> packets_to_ocaml
 
 let json_string_of_network_state state =
   `Assoc
