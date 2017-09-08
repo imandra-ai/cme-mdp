@@ -104,14 +104,14 @@ let metadata_to_string md = [
 (******************************************)
 
 let read_pcap_file_info ?(vrb=false) bits =
-    bitmatch bits with 
-    { magic        : 32 : unsigned, int, littleendian;  
-      major_verion : 16 : unsigned, int, littleendian;
-      minor_verion : 16 : unsigned, int, littleendian;
-      timezone     : 32 : unsigned, int, littleendian;
-      ts_accuracy  : 32 : unsigned, int, littleendian;
-      max_length   : 32 : unsigned, int, littleendian;
-      link_layer   : 32 : unsigned, int, littleendian } ->
+    match%bitstring bits with 
+    {| magic        : 32 : unsigned, int, littleendian;  
+       major_verion : 16 : unsigned, int, littleendian;
+       minor_verion : 16 : unsigned, int, littleendian;
+       timezone     : 32 : unsigned, int, littleendian;
+       ts_accuracy  : 32 : unsigned, int, littleendian;
+       max_length   : 32 : unsigned, int, littleendian;
+       link_layer   : 32 : unsigned, int, littleendian |} ->
     begin
         if vrb then ([
             "Read a PCAP header:" ;
@@ -128,7 +128,7 @@ let read_pcap_file_info ?(vrb=false) bits =
     end
 
 let write_pcap_file_info () = 
-    let pcapinfo = BITSTRING { 
+    let%bitstring pcapinfo = {|
         0xa1b2c3d4l  : 32 : unsigned, int, littleendian;  (* Magic *)
         2  : 16 : unsigned, int, littleendian;  (* Major version *)
         4  : 16 : unsigned, int, littleendian;  (* Minor version *)
@@ -136,28 +136,28 @@ let write_pcap_file_info () =
         0l : 32 : unsigned, int, littleendian;
         0x0000ffffl  : 32 : unsigned, int, littleendian;
         0x00000001l  : 32 : unsigned, int, littleendian 
-    } in 
+    |} in 
     [pcapinfo];;
    
 
 let get_pcap_message ?(vrb=false) bits =
-    bitmatch bits with 
-    { receive_ts   : 32 : unsigned, int, littleendian;  
-      receive_ns   : 32 : unsigned, int, littleendian;  
-      size         : 32 : unsigned, int, littleendian;
-      othersize    : 32 : unsigned, int, littleendian;
-      stuffA       : 64 : unsigned, int, littleendian;
-      stuffB       : 64 : unsigned, int, littleendian;
-      stuffC       : 64 : unsigned, int, littleendian;
-      stuffD       : 64 : unsigned, int, littleendian;
-      stuffE       : 64 : unsigned, int, littleendian;
-      stuffF       : 48 : unsigned, int, littleendian;
-      seqence_num  : 32 : unsigned, int, littleendian;
-      sent_ts      : 64 : unsigned, int, littleendian;
-      msg_size     : 16 : unsigned, int, littleendian;
-      block_length : 16 : unsigned, int, littleendian;
-      template_id  : 16 : unsigned, int, littleendian;
-      schema_id    : 16 : unsigned, int, littleendian } ->
+    match%bitstring bits with 
+    {| receive_ts   : 32 : unsigned, int, littleendian;  
+       receive_ns   : 32 : unsigned, int, littleendian;  
+       size         : 32 : unsigned, int, littleendian;
+       othersize    : 32 : unsigned, int, littleendian;
+       stuffA       : 64 : unsigned, int, littleendian;
+       stuffB       : 64 : unsigned, int, littleendian;
+       stuffC       : 64 : unsigned, int, littleendian;
+       stuffD       : 64 : unsigned, int, littleendian;
+       stuffE       : 64 : unsigned, int, littleendian;
+       stuffF       : 48 : unsigned, int, littleendian;
+       seqence_num  : 32 : unsigned, int, littleendian;
+       sent_ts      : 64 : unsigned, int, littleendian;
+       msg_size     : 16 : unsigned, int, littleendian;
+       block_length : 16 : unsigned, int, littleendian;
+       template_id  : 16 : unsigned, int, littleendian;
+       schema_id    : 16 : unsigned, int, littleendian |} ->
     let receive_ts = Int64.of_int32 receive_ts in
     let size = Int32.to_int size in
     let md = { receive_ts; size; seqence_num; sent_ts;     
@@ -182,27 +182,27 @@ type pcap_info = {
 
 let pcap_header ts size = 
     let size, ts = Int32.of_int size, Int32.of_int ts in 
-    BITSTRING {
+    [%bitstring {|
         ts   : 32 : unsigned, int, littleendian;
         0l   : 32 : unsigned, int, littleendian;
         size : 32 : unsigned, int, littleendian;
-        size : 32 : unsigned, int, littleendian 
-    }
+        size : 32 : unsigned, int, littleendian |} 
+    ]
 
 let eth_header smac dmac = 
-    let pack a b c d e f = BITSTRING {
+    let pack a b c d e f = [%bitstring {|
         a : 8 : unsigned, int, bigendian;
         b : 8 : unsigned, int, bigendian;
         c : 8 : unsigned, int, bigendian;
         d : 8 : unsigned, int, bigendian;
         e : 8 : unsigned, int, bigendian;
         f : 8 : unsigned, int, bigendian
-    } in 
-    let x801     = BITSTRING {     0x8100 : 16 : unsigned, int, bigendian } in
-    let bitfield = BITSTRING { 
+    |} ] in 
+    let%bitstring x801     = {| 0x8100 : 16 : unsigned, int, bigendian |} in
+    let%bitstring bitfield = {| 
         0x00b3 : 16 : unsigned, int, bigendian ;
         0x0800 : 16 : unsigned, int, bigendian 
-    } in
+    |} in
     Bitstring.concat [
         Scanf.sscanf dmac "%x:%x:%x:%x:%x:%x" pack;
         Scanf.sscanf smac "%x:%x:%x:%x:%x:%x" pack;
@@ -210,13 +210,13 @@ let eth_header smac dmac =
     ]
     
 let ip_header sip dip tot_length = 
-    let pack a b c d = BITSTRING {
+    let pack a b c d = [%bitstring {|
         a : 8 : unsigned, int, bigendian;
         b : 8 : unsigned, int, bigendian;
         c : 8 : unsigned, int, bigendian;
         d : 8 : unsigned, int, bigendian
-    } in
-    let bytes = BITSTRING {
+    |} ] in
+    let bytes = [%bitstring {|
         0x45 : 8 : unsigned, int, bigendian;
         0x00 : 8 : unsigned, int, bigendian;
         tot_length : 16 : unsigned, int, bigendian;
@@ -225,7 +225,7 @@ let ip_header sip dip tot_length =
         0x39   :  8 : unsigned, int, bigendian;
         0x11   :  8 : unsigned, int, bigendian;
         0x1234 : 16 : unsigned, int, bigendian (* Checksum -- validation disabled *)
-    } in
+    |} ] in
     Bitstring.concat [
         bytes;
         Scanf.sscanf dip "%d.%d.%d.%d" pack;
@@ -235,12 +235,12 @@ let ip_header sip dip tot_length =
 let udp_header sport dport length = 
     let sport = int_of_string sport in
     let dport = int_of_string dport in
-    BITSTRING {
+    [%bitstring {|
         dport  : 16 : unsigned, int, bigendian;
         sport  : 16 : unsigned, int, bigendian;
         length : 16 : unsigned, int, bigendian;
         0x1234 : 16 : unsigned, int, bigendian (* Checksum -- validation disabled *)
-    }
+    |} ]
 
 let time = ref 1461262423 
     
@@ -262,15 +262,15 @@ let make_pcap_header info t payload =
 (******************************************)
 
 let get_message ?(vrb=false) bits =
-    bitmatch bits with 
-    { receive_ts   : 64 : unsigned, int, littleendian;  
-      size         : 16 : unsigned, int, littleendian;
-      seqence_num  : 32 : unsigned, int, littleendian;
-      sent_ts      : 64 : unsigned, int, littleendian;
-      msg_size     : 16 : unsigned, int, littleendian;
-      block_length : 16 : unsigned, int, littleendian;
-      template_id  : 16 : unsigned, int, littleendian;
-      schema_id    : 16 : unsigned, int, littleendian } ->
+    match%bitstring bits with 
+    {| receive_ts   : 64 : unsigned, int, littleendian;  
+       size         : 16 : unsigned, int, littleendian;
+       seqence_num  : 32 : unsigned, int, littleendian;
+       sent_ts      : 64 : unsigned, int, littleendian;
+       msg_size     : 16 : unsigned, int, littleendian;
+       block_length : 16 : unsigned, int, littleendian;
+       template_id  : 16 : unsigned, int, littleendian;
+       schema_id    : 16 : unsigned, int, littleendian |} ->
     let md = { receive_ts; size; seqence_num; sent_ts;     
                msg_size; template_id; schema_id; block_length } in (
     if vrb then (
@@ -302,16 +302,16 @@ let write_message ostream (md, bits, gbits) =
         if md.msg_size = 0 
         then { md with msg_size = md.size - 12 }
         else md in
-    let header = BITSTRING 
-    { md.receive_ts   : 64 : unsigned, int, littleendian;  
-      md.size         : 16 : unsigned, int, littleendian;
-      md.seqence_num  : 32 : unsigned, int, littleendian;
-      md.sent_ts      : 64 : unsigned, int, littleendian;
-      md.msg_size     : 16 : unsigned, int, littleendian;
-      md.block_length : 16 : unsigned, int, littleendian;
-      md.template_id  : 16 : unsigned, int, littleendian;
-      md.schema_id    : 16 : unsigned, int, littleendian;
-      0               : 16 : unsigned, int, littleendian } in
+    let%bitstring header =  
+    {| md.receive_ts   : 64 : unsigned, int, littleendian;  
+       md.size         : 16 : unsigned, int, littleendian;
+       md.seqence_num  : 32 : unsigned, int, littleendian;
+       md.sent_ts      : 64 : unsigned, int, littleendian;
+       md.msg_size     : 16 : unsigned, int, littleendian;
+       md.block_length : 16 : unsigned, int, littleendian;
+       md.template_id  : 16 : unsigned, int, littleendian;
+       md.schema_id    : 16 : unsigned, int, littleendian;
+       0               : 16 : unsigned, int, littleendian |} in
     bits::header::[]
  
 
@@ -320,16 +320,16 @@ let write_message ostream (md, bits, gbits) =
 (******************************************)
 
 let get_group_info bits = 
-    bitmatch bits with
-    { b : 8 : unsigned, int, littleendian;
-      _ : 8 : unsigned, int, littleendian;
-      n : 8 : unsigned, int, littleendian } -> (n, b, Bitstring.dropbits 24 bits)
+    match%bitstring bits with
+    {| b : 8 : unsigned, int, littleendian;
+       _ : 8 : unsigned, int, littleendian;
+       n : 8 : unsigned, int, littleendian |} -> (n, b, Bitstring.dropbits 24 bits)
 
 let write_group_info  ostream ( n, b) = 
-    let hd = BITSTRING { 
+    let%bitstring hd = {| 
       b : 8 : unsigned, int, littleendian;
       0 : 8 : unsigned, int, littleendian;
-      n : 8 : unsigned, int, littleendian } in
+      n : 8 : unsigned, int, littleendian |} in
     hd::ostream 
 
 let cut_block bits bsize =
@@ -348,23 +348,23 @@ let append_padded bits nbits nbytes =
 (******************************************)
 
 
-let read_int8   bits = bitmatch bits with { v :  8 :           int, littleendian } -> v, Bitstring.dropbits  8 bits 
-let read_int16  bits = bitmatch bits with { v : 16 :           int, littleendian } -> v, Bitstring.dropbits 16 bits 
-let read_int32  bits = bitmatch bits with { v : 32 :           int, littleendian } -> v, Bitstring.dropbits 32 bits 
-let read_int64  bits = bitmatch bits with { v : 64 :           int, littleendian } -> v, Bitstring.dropbits 64 bits 
-let read_uint8  bits = bitmatch bits with { v :  8 : unsigned, int, littleendian } -> v, Bitstring.dropbits  8 bits 
-let read_uint16 bits = bitmatch bits with { v : 16 : unsigned, int, littleendian } -> v, Bitstring.dropbits 16 bits 
-let read_uint32 bits = bitmatch bits with { v : 32 : unsigned, int, littleendian } -> v, Bitstring.dropbits 32 bits 
-let read_uint64 bits = bitmatch bits with { v : 64 : unsigned, int, littleendian } -> v, Bitstring.dropbits 64 bits 
+let read_int8   bits = match%bitstring bits with {| v :  8 :           int, littleendian |} -> v, Bitstring.dropbits  8 bits 
+let read_int16  bits = match%bitstring bits with {| v : 16 :           int, littleendian |} -> v, Bitstring.dropbits 16 bits 
+let read_int32  bits = match%bitstring bits with {| v : 32 :           int, littleendian |} -> v, Bitstring.dropbits 32 bits 
+let read_int64  bits = match%bitstring bits with {| v : 64 :           int, littleendian |} -> v, Bitstring.dropbits 64 bits 
+let read_uint8  bits = match%bitstring bits with {| v :  8 : unsigned, int, littleendian |} -> v, Bitstring.dropbits  8 bits 
+let read_uint16 bits = match%bitstring bits with {| v : 16 : unsigned, int, littleendian |} -> v, Bitstring.dropbits 16 bits 
+let read_uint32 bits = match%bitstring bits with {| v : 32 : unsigned, int, littleendian |} -> v, Bitstring.dropbits 32 bits 
+let read_uint64 bits = match%bitstring bits with {| v : 64 : unsigned, int, littleendian |} -> v, Bitstring.dropbits 64 bits 
 
-let write_int8   ostream  ( v:int     ) = let bs = BITSTRING { v: 8 :           int, littleendian} in bs::ostream  
-let write_int16  ostream  ( v:int     ) = let bs = BITSTRING { v:16 :           int, littleendian} in bs::ostream
-let write_int32  ostream  ( v:Int32.t ) = let bs = BITSTRING { v:32 :           int, littleendian} in bs::ostream
-let write_int64  ostream  ( v:Int64.t ) = let bs = BITSTRING { v:64 :           int, littleendian} in bs::ostream
-let write_uint8  ostream  ( v:int     ) = let bs = BITSTRING { v: 8 : unsigned, int, littleendian} in bs::ostream
-let write_uint16 ostream  ( v:int     ) = let bs = BITSTRING { v:16 : unsigned, int, littleendian} in bs::ostream
-let write_uint32 ostream  ( v:Int32.t ) = let bs = BITSTRING { v:32 : unsigned, int, littleendian} in bs::ostream
-let write_uint64 ostream  ( v:Int64.t ) = let bs = BITSTRING { v:64 : unsigned, int, littleendian} in bs::ostream
+let write_int8   ostream  ( v:int     ) = let%bitstring bs = {| v: 8 :           int, littleendian |} in bs::ostream  
+let write_int16  ostream  ( v:int     ) = let%bitstring bs = {| v:16 :           int, littleendian |} in bs::ostream
+let write_int32  ostream  ( v:Int32.t ) = let%bitstring bs = {| v:32 :           int, littleendian |} in bs::ostream
+let write_int64  ostream  ( v:Int64.t ) = let%bitstring bs = {| v:64 :           int, littleendian |} in bs::ostream
+let write_uint8  ostream  ( v:int     ) = let%bitstring bs = {| v: 8 : unsigned, int, littleendian |} in bs::ostream
+let write_uint16 ostream  ( v:int     ) = let%bitstring bs = {| v:16 : unsigned, int, littleendian |} in bs::ostream
+let write_uint32 ostream  ( v:Int32.t ) = let%bitstring bs = {| v:32 : unsigned, int, littleendian |} in bs::ostream
+let write_uint64 ostream  ( v:Int64.t ) = let%bitstring bs = {| v:64 : unsigned, int, littleendian |} in bs::ostream
 
 let string_of_int8   = string_of_int 
 let string_of_int16  = string_of_int 
@@ -413,8 +413,8 @@ let bit_uint64 v n = ((Int64.logand (Int64.shift_right_logical v n) Int64.one) =
 (**     Char type reading / witing       **)
 (******************************************)
 
-let read_char   bits = bitmatch bits with { v : 8 : int, littleendian } -> char_of_int v , Bitstring.dropbits 8  bits 
-let write_char  ostream  (v:char) = let v = int_of_char v in let bs = BITSTRING { v: 8 } in bs::ostream  
+let read_char   bits = match%bitstring bits with {| v : 8 : int, littleendian |} -> char_of_int v , Bitstring.dropbits 8  bits 
+let write_char  ostream  (v:char) = let v = int_of_char v in let%bitstring bs = {| v: 8 |} in bs::ostream  
 let string_of_char = String.make 1  
 let string_to_char s = String.get s 0  
 let bit_char v n = bit_int8 (int_of_char v) n 
