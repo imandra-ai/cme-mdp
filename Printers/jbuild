@@ -3,7 +3,6 @@
 
 (library
   ( (name        cme_printers)
-    (public_name cme_printers)
     (wrapped  false)
     (modules (
       CME_json 

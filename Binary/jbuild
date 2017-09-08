@@ -2,6 +2,7 @@
 
 (executable
   ( (name json2bin)
+    (public_name json2bin)
     (modules ( json2bin CME_writer))
     (libraries (
       cme_printers 

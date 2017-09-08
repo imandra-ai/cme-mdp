@@ -2,7 +2,6 @@
 
 (library
   ( (name        sbf)
-    (public_name sbf)
     (wrapped  false)
     (libraries (binparser))
   )
