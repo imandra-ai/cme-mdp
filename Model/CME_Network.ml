@@ -7,16 +7,13 @@
 
 *)
 
-type net_from_cache = { 
-    net_from_cache : int 
-};;
 
-type net_effect = 
-    | NoEffect 
-    | PacketLoss 
-    | PacketMoveToCache 
-    | PacketMoveFromCache of net_from_cache
-;;
+
+(* @meta[imandra_ignore] on @end *)
+open CME_Types;;
+(* @meta[imandra_ignore] off @end *)
+
+type net_effect = NoEffect | PacketLoss | PacketMoveToCache | PacketMoveFromCache of int;;
 
 
 (** Module representing the *)
@@ -37,9 +34,7 @@ let is_neteffect_valid (n, e : network_state * net_effect) =
     | NoEffect              -> queue_not_empty
     | PacketLoss            -> queue_not_empty
     | PacketMoveToCache     -> queue_not_empty
-    | PacketMoveFromCache x -> 
-        let x = x.net_from_cache in
-        0 <= x && x < List.length n.cache
+    | PacketMoveFromCache x -> 0 <= x && x < List.length n.cache
 ;;
 
 (** Get n_th element from the list *)
@@ -72,7 +67,6 @@ let process_net_effect (n, e : network_state * net_effect) =
         | h::tl -> { n with incoming = tl; cache = h::n.cache }
         end
     | PacketMoveFromCache x -> begin
-        let x = x.net_from_cache in
         match n.cache with 
         | [] -> n
         | h::tl -> { n with cache = remove_nth (n.cache, x, 0 ) ; outgoing = (get_nth (n.cache, x, 0))::n.outgoing }

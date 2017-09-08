@@ -7,15 +7,15 @@ let process infile  =
     print_string ";;"
 
 let command =
-    Core.Std.Command.basic
+    Core.Command.basic
         ~summary:"Reads the CME Exchange state from a JSON file and wirtes the OCaml representaiton of it to stdout."
         ~readme:(fun () -> "")
-        Core.Std.Command.Spec.(
+        Core.Command.Spec.(
             empty
             +> flag "-i" (required string) ~doc:"Input JSON file "
         )
         ( fun infile () -> process infile )
 
 let () =
-    Core.Std.Command.run ~version:"1.0" ~build_info:"RWO" command
+    Core.Command.run ~version:"1.0" ~build_info:"RWO" command
 

@@ -1,0 +1,9 @@
+(jbuild_version 1)
+
+(library
+  ( (name        sbf)
+    (public_name sbf)
+    (wrapped  false)
+    (libraries (binparser))
+  )
+)
