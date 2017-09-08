@@ -72,10 +72,10 @@ let process filename outdir =
 ;;
 
 let command =
-    Core.Std.Command.basic
+    Core.Command.basic
         ~summary:"Processes template XML file, generating Ocaml code. "
         ~readme:(fun () -> "")
-        Core.Std.Command.Spec.(
+        Core.Command.Spec.(
             empty
             +> flag "-i" (required string) ~doc:"Input XML file"
             +> flag "-d" (required string) ~doc:"Output directory name (files are overwritten if exist)"
@@ -83,5 +83,5 @@ let command =
         (fun filename outdir () -> process filename outdir )
 
 let () =
-    Core.Std.Command.run ~version:"1.0" ~build_info:"RWO" command
+    Core.Command.run ~version:"1.0" ~build_info:"RWO" command
 

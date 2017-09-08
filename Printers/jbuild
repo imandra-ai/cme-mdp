@@ -1,0 +1,21 @@
+
+(jbuild_version 1)
+
+(library
+  ( (name        cme_printers)
+    (wrapped  false)
+    (modules (
+      CME_json 
+      CME_Exchange_json
+      CME_Internal_json
+    ))
+    (libraries (cme_model yojson))
+  )
+)
+
+(executable
+  ( (name cmejson2ocaml)
+    (modules (cmejson2ocaml) )
+    (libraries (cme_printers core)) 
+  )
+)

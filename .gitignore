@@ -1,0 +1,7 @@
+_build/*
+*.native
+.imandra_init.log
+.vscode*
+*.merlin
+*.install
+*jbuild-ignore

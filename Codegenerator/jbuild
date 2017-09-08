@@ -2,7 +2,6 @@
 
 (library
   ( (name        binparser)
-    (public_name binparser)
     (wrapped  false)
     (modules (binparser))
     (preprocess  (pps (ppx_bitstring)))

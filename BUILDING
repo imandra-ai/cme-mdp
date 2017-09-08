@@ -1,1 +1,0 @@
-corebuild -package bitstring,bitstring.syntax -syntax bitstring.syntax   json2bin.native
