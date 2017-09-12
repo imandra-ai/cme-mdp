@@ -93,14 +93,28 @@ let exchange_state_of_json (json : Yojson.Basic.json) : exchange_state =
     num_resets = 0
 };;
 
-let exchange_state_to_ocaml state  = "{" ^ String.concat ";" [
-    Printf.sprintf "sec_a=%s"     ( state.sec_a |> security_state_to_ocaml );
-    Printf.sprintf "sec_b=%s"     ( state.sec_b |> security_state_to_ocaml );
-    Printf.sprintf "pac_queue=%s" ( state.pac_queue |> packets_to_ocaml    );
-    Printf.sprintf "last_inc_seq_num=%d"   state.last_inc_seq_num ;
-    Printf.sprintf "last_snap_seq_num=%d"  state.last_snap_seq_num;
-     "inc_msg_queue=[]"; "snap_msg_queue=[]"; "num_resets=0"
-] ^ "}";;
+let exchange_state_to_ocaml state  =
+  Printf.sprintf "{ %s }"
+    (String.concat ";"
+       [ Printf.sprintf "sec_a=%s"     ( state.sec_a |> security_state_to_ocaml )
+       ; Printf.sprintf "sec_b=%s"     ( state.sec_b |> security_state_to_ocaml )
+       ; Printf.sprintf "pac_queue=%s" ( state.pac_queue |> packets_to_ocaml    )
+       ; Printf.sprintf "last_inc_seq_num=%d"   state.last_inc_seq_num
+       ; Printf.sprintf "last_snap_seq_num=%d"  state.last_snap_seq_num
+       ; "inc_msg_queue=[]"
+       ; "snap_msg_queue=[]"
+       ; "num_resets=0"
+       ])
+;;
+
+let network_state_ocaml_of_exchange_state state =
+  Printf.sprintf "{ %s }"
+    (String.concat "; "
+       [ Printf.sprintf "incoming=List.rev ( %s )" ( state.pac_queue |> packets_to_ocaml )
+       ; "outgoing=[]"
+       ; "cache=[]"
+       ])
+;;
 
 
 

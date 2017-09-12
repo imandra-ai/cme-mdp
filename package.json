@@ -1,0 +1,31 @@
+{
+    "name": "@Default/CME",
+    "model_type": "protocol",
+    "version": "0.0.1",
+    "company": "AestheticIntegration",
+    "description": "AestheticIntegration CME Implementation",
+    "main": "Model/CME_Testgen_Template.ml",
+    "short_name":"cme",
+    "scripts": {
+        "test": "start"
+    },
+    "keywords": [
+        "CME, AestheticIntegration"
+    ],
+    "author": "James Bond",
+    "license": "ISC",
+    "interface": {
+        "testgen_exchange": {
+            "type": "testgen",
+            "init_state": "init_ex_state",
+            "run": "run",
+            "valid": "valid"
+        },
+        "testgen_network": {
+            "type": "testgen",
+            "init_state": "empty_network_state",
+            "run": "run",
+            "valid": "valid"
+        }
+    }
+}
