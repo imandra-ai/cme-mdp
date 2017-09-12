@@ -17,7 +17,6 @@ programming language.
  
 ## SBE types codegeneration 
 
-###SBE simple types}
 At the root of it, SBE relies on a small number of common types:
 ASCII-characters, signed or unsigned integers of various sizes and IEE754
 floating-point numbers. 
@@ -25,43 +24,41 @@ floating-point numbers.
 In the XML schema any such 'primitive' type might be augmented by one of the
 following modifiers:
 
-    - It can have a `nullValue`, which denotes the null or none value for the
+- It can have a `nullValue`, which denotes the null or none value for the
       field of that type. 
-    - It can have an associated `length` value, meaning that the given field is
+- It can have an associated `length` value, meaning that the given field is
       a sequence of values of that type. 
-    - It can have a `constant`  "presence" -- in that case the corresponding
+- It can have a `constant`  "presence" -- in that case the corresponding
       field is never read or written to the binary stream.  Instead, the field
       is always equal to a constant value, provided in the XML file.
 
 The following conversions between the SBE simple types and their modifiers is
 used.
 
-| SBE Type      | OCaml type    |
-| ------------- | ------------- |
-| `int8`        | `int`         |
-| `int16`       | `int`         |
-| `int32`       | `Int32.t`     |
-| `int64`       | `Int63.t`     |
-| `char`        | `char`        |
+| SBE Type    | OCaml type  |
+| ----------- | ----------- |
+| int8        | int         |
+| int16       | int         |
+| int32       | Int32.t     |
+| int64       | Int63.t     |
+| char        | char        |
 
 
 | SBE type modifier | OCaml parametrized type |
 | ----------------- | ----------------------- |
-| length            | `'a list`               |
-| nullValue         | `'a option`             |
+| length            | 'a list                 |
+| nullValue         | 'a option               |
 
-###SBE complex types
 Three kinds of "complex" types can then be construced based on the primitive
 types described above:
 
-    - The `composite` type is a sequence (a record) of fields of various types.  
-    - The `enum` represents a number of mutually-exclusive cases. Each case
+- The `composite` type is a sequence (a record) of fields of various types.  
+- The `enum` represents a number of mutually-exclusive cases. Each case
       encoded with a constant `case-id`, provided in the XML schema.
-    - The `set` is a collection of boolean fields, packed into a single bit
+- The `set` is a collection of boolean fields, packed into a single bit
       field.  
 
 For `enum` and `set` types, an `encodingType` name must be provided.
-
 
 The composite types are represented as OCaml record-types with
 each record entry having the correstponding primitive type. 
@@ -128,14 +125,13 @@ type t_SettlPriceType = {
     r_SettlPriceType_Actual : bool;
 }
 ```
-###SBE messages
 In the XML schema, the declaration of all the necessary simple and complex
 types is folowed by the declaration of various messages. Each message contains
 a block of fields that are always present in the message, followed by a number
 of variable-sized groups. Each group is stored as a sequence of repeated
 blocks, with each block containing the same fixed number of fields.
 
-##The `cme_codegen` tool
+## The `cme_codegen` tool
 
 The OCaml codegenerator takes as an input the XML schema file (set with `-i`
 flag) and writes three files into a specified directory (set with `-d` flag)
