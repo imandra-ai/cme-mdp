@@ -1,0 +1,189 @@
+config:
+  log-level: debug
+  user-id: "github|81417"
+  download-path: "../tmp"
+  imandra-service:
+    command:
+      - "docker"
+      - "run"
+      - "--interactive"
+      - "--rm"
+      - "--volume"
+      - "/Users:/Users"
+      - "--volume"
+      - "imandra_images:/home/imandra/imandra/core/images"
+      - "quay.io/aestheticintegration/imandra-bin:latest"
+
+models:
+  my-CME-exchange:
+    package:
+      # Local packages are specified relative to this config file.
+      path: "."
+    # Override the `main` field in the model's package.json
+    main: "Model/CME_Testgen_Template.ml"
+    # Additional interfaces to those defined in package.json
+    interfaces:
+      testgen_1:
+        # The 'decompose-combinatoric' step requires the model to have a
+        # 'testgen' interface.
+        type: testgen
+        # init_state : t
+        init_state: init_ex_state
+        # run : t * action list -> t
+        run: run
+        # valid : t * action list -> bool
+        valid: valid
+
+  my-network:
+    package:
+      path: "."
+    main: "Model/CME_Network_Template.ml"
+    interfaces:
+      testgen_1:
+        type: testgen
+        init_state: empty_network_state
+        run: run
+        valid: valid
+
+  my-simulator:
+    package:
+      path: "."
+    main: "Model/CME_Simulate_Template.ml"
+
+pipelines:
+  generate_binary_test_data:
+    description: |
+      Starting with a model of the CME Exchange, we
+      - generate messages to populate the books with orders;
+      - generate a sequence of change/delete order messages;
+      - perturb the generated packet sequence by running the packets through a
+        Network Effects model; and
+      - run the perturbed packet sequences through the CME simulator model.
+
+    steps:
+
+      - decompose-combinatoric:
+          description: |
+            Populate the exchange with orders.
+          model: my-CME-exchange
+          # `printer` must be a function defined in the model.
+          printer: exchange_state_to_ocaml
+          # `sequence` defines a list of messages to generate and send to the
+          # model's `run` function.
+          sequence:
+            # `expand_sequence` will be expanded into a list of messages.
+            # One message will be generated for every combination of values
+            # defined in `expand_fields`.
+            # `free_fields` are left as symbolic variables for Imandra to
+            # explore using region decomposition.
+            - expand_sequence:
+                constructors: [BookAction, ST_Add]
+                payload:
+                  type: ord_add_data
+                  free_fields:
+                    oa_price: int
+                  expand_fields:
+                    oa_order_qty: [1]
+                    oa_sec_type: [SecA, SecB]
+                    oa_book_type: [Book_Type_Implied, Book_Type_Multi]
+                    oa_level_num: [1, 2, 3, 4, 5]
+                    oa_level_side: [OrdBuy, OrdSell]
+                    oa_num_orders: [Some 1]
+                # The message sequence in `after_each` will be generated after
+                # every message expanded from this `expand_sequence`.
+                # In this case we randomly choose whether or not to generate an
+                # incremental update message after each order add message.
+                # (The update message causes the exchange model to generate an
+                # outgoing network packet).
+                after_each:
+                  # An `alternative` sequence will randomly pick one sequence
+                  # from the list of alternatives for this test generation run.
+                  alternative:
+                    - constructors: ["ExchangeAction", "ST_DataSendInc"]
+                    - sequence: []
+
+      - decompose-combinatoric:
+          description: |
+            Generate some order change/delete messages.
+          model: my-CME-exchange
+          # At the end of this step, we use the outgoing packets of the exchange
+          # state to initialize the network model state for the next step.
+          printer: network_state_ocaml_of_exchange_state
+          sequence:
+            # A `reference` sequence refers to a sequence defined in the
+            # `let_sequences` block below.
+            - reference: send_snapshots
+            - reference: change_order
+            - reference: change_order
+            - reference: delete_order
+            - reference: change_order
+            - reference: change_order
+            - reference: send_snapshots
+          let_sequences:
+            send_snapshots:
+              sequence:
+                - constructors: ["ExchangeAction", "ST_Snapshot", "SecA"]
+                - constructors: ["ExchangeAction", "ST_DataSendSnap"]
+                - constructors: ["ExchangeAction", "ST_Snapshot", "SecB"]
+                - constructors: ["ExchangeAction", "ST_DataSendSnap"]
+            change_order:
+              # `expand_alternative` is similar to `expand_sequence`, but
+              # instead of generating a list of messages, a single message is
+              # picked at random from the possible choices of values defined in
+              # `expand_fields`.
+              expand_alternative:
+                constructors: [ "BookAction" , "ST_Change" ]
+                payload:
+                  type: ord_change_data
+                  free_fields:
+                    oc_new_qty: "int"
+                  expand_fields:
+                    oc_sec_type: [ "SecA", "SecB" ]
+                    oc_book_type: [ "Book_Type_Implied", "Book_Type_Multi" ]
+                    oc_level_num: [ 1, 2, 3, 4, 5 ]
+                    oc_level_side: [ "OrdBuy", "OrdSell" ]
+                after_each:
+                  alternative:
+                    - constructors: ["ExchangeAction", "ST_DataSendInc"]
+                    - sequence: []
+            delete_order:
+              expand_alternative:
+                constructors: [ "BookAction" , "ST_Delete" ]
+                payload:
+                  type: ord_del_data
+                  free_fields:
+                    od_level_num: "int"
+                  expand_fields:
+                    od_sec_type: [ "SecA", "SecB" ]
+                    od_book_type: [ "Book_Type_Implied", "Book_Type_Multi" ]
+                    od_level_side: [ "OrdBuy", "OrdSell" ]
+                after_each:
+                  alternative:
+                    - constructors: ["ExchangeAction", "ST_DataSendInc"]
+                    - sequence: []
+
+      - decompose-combinatoric:
+          description: |
+            Take the packets generated by the exchange and apply some
+            perturbations.
+          model: my-network
+          printer: outgoing_packets_ocaml_string_of_network_state
+          sequence:
+            - repeat:
+                count: 3
+                constructors: [ "NoEffect" ]
+            - repeat:
+                count: 2
+                # Here we let Imandra fully explore all variants of the message
+                # type symbolically.
+                payload:
+                  type: net_effect
+            - repeat:
+                count: 3
+                constructors: [ "NoEffect" ]
+
+      - convert:
+          description: |
+            Run the network packets through the CME simulator model.
+          model: my-simulator
+          fn-name: run
