@@ -101,7 +101,7 @@ If the enum type has a nullable encodingType, then one extra case is added to th
 </enum>
 ```
 
-```
+```ocaml
 type t_AggressorSide =
     | V_AggressorSide_NoAggressor
     | V_AggressorSide_Buy
