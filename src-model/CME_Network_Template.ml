@@ -1,12 +1,12 @@
 #use "topfind";;
 #require "yojson";;
 
-:load Model/CME_Types.ml
-:load Model/CME_Exchange.ml
-:load Model/CME_Network.ml
-:load_ocaml Printers/CME_json.ml
-:load_ocaml Printers/CME_Exchange_json.ml
-:load_ocaml Printers/CME_Network_Printer.ml
+:load src-model/CME_Types.ml
+:load src-model/CME_Exchange.ml
+:load src-model/CME_Network.ml
+:load_ocaml src-printers/CME_json.ml
+:load_ocaml src-printers/CME_Exchange_json.ml
+:load_ocaml src-printers/CME_Network_Printer.ml
 
 (* A recursive run function.
    Note how this implicitly includes transition validity.

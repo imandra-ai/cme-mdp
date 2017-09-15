@@ -12,17 +12,3 @@
     )
   )
 )
-
-
-
-(executable
-  ( (name    cme_codegen)
-    (modules (:standard \ binparser))
-    (libraries 
-      ( binparser
-        xml-light
-        core
-      )
-    )
-  )
-)
