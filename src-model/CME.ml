@@ -799,6 +799,13 @@ let move_to_next_packet ( s, current_packet, rest_packets : feed_state * packet 
 ;;
 
 
+let get_next_message (s : feed_state ) =
+    match s.channels.unprocessed_packets with [] -> None | current_packet::rest_packets ->
+    match current_packet.packet_messages with [] -> None | current_message::rest_messages ->
+    Some current_message
+;;
+
+
 (*****************************************************************  *)
 (** Top-level transition function                                   *)
 (** *************************************************************** *)
