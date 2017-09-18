@@ -1,0 +1,14 @@
+(jbuild_version 1)
+
+(library
+  ( (name        binparser)
+    (wrapped  false)
+    (modules (binparser))
+    (preprocess  (pps (ppx_bitstring)))
+    (libraries 
+      ( unix
+        bitstring
+      )
+    )
+  )
+)

@@ -16,7 +16,7 @@
 
 (* Load the CME model *)
 
-:load CME.ml
+:load ../src-model/CME.ml
 
 (* Load the VGs *)
 

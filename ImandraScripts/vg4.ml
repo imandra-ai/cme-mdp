@@ -5,13 +5,13 @@
 *)
 
 verify empty_packet_forces_recovery (s) =
-    let new_p = get_next_packet (s.channels) in
-    match new_p.p with
-      IncRefreshPacket sp ->
+    let message = get_next_message (s) in
+    match message with
+      Some(RefreshMessage ref_message) ->
       ( s.feed_status = Normal && 
-        correct_level (sp.rp_msg, s.books.book_depth) &&
-        sp.rp_msg.rm_rep_seq_num > (s.channels.last_seq_processed + 1) && 
-        sp.rp_msg.rm_security_id = s.sec_id)
+        correct_level (ref_message, s.books.book_depth) &&
+        ref_message.rm_rep_seq_num > (s.channels.last_seq_processed + 1) && 
+        ref_message.rm_security_id = s.feed_sec_id)
       ==>
         ((one_step s).feed_status = InRecovery)
     | _ -> true
@@ -42,12 +42,12 @@ let rec final_rep_seq_num_in_lst (ms) =
 verify good_recovery_proc_msg_recovery (s) =
   (s.feed_status = InRecovery
    && is_cache_valid_since_seq_num (s.channels.cache, s.channels.last_seq_processed, s.books.book_depth)
-   && match (get_next_packet (s.channels)).p with
-        (IncRefreshPacket ip) ->
-        ip.rp_msg.rm_rep_seq_num = s.channels.last_seq_processed + 1
+   && match (get_next_message (s.channels)) with
+        Some( RefreshMessage ref_message) ->
+        ref_message.rm_rep_seq_num = s.channels.last_seq_processed + 1
       | _ -> false)
   ==>
-    let s' = process_msg_recovery s in
+    let s' = one_step s in
     is_cache_valid_since_seq_num (s'.channels.cache, s'.channels.last_seq_processed, s.books.book_depth)
 ;;
 
@@ -56,10 +56,7 @@ verify good_recovery_proc_msg_recovery (s) =
 verify good_recovery_no_new_snap (s) =
   (s.feed_status = InRecovery
    && is_cache_valid_since_seq_num (s.channels.cache, s.channels.last_seq_processed, s.books.book_depth)
-   && s.channels.snap_a.s_unproc_packets = []
-   && s.channels.snap_b.s_unproc_packets = []
-   && s.channels.ref_a.r_unproc_packets = []
-   && s.channels.ref_b.r_unproc_packets = [])
+   && s.channels.unprocessed_packets = [])
     ==>
     ((one_step s).feed_status = Normal)
 ;;

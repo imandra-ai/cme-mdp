@@ -45,8 +45,8 @@ let rec is_side_sorted_raw (side, ls) =
 ;;
 
 let is_book_sorted (b : book) =
-  is_side_sorted_raw (BUY, b.buys)
-  && is_side_sorted_raw (SELL, b.sells)
+  is_side_sorted_raw (OrdBuy, b.buys)
+  && is_side_sorted_raw (OrdSell, b.sells)
 ;;
 
 theorem[rw] is_sorted_maintained_by_insert (l, side, ls) =
@@ -199,8 +199,8 @@ theorem[rw] trim_side_rw (ords, num_levels) =
 :enable is_book_sorted
 
 theorem[rw] is_book_sorted_implied_by (buys, sells) =
-  (is_side_sorted_raw (BUY, buys)
-   && is_side_sorted_raw (SELL, sells))
+  (is_side_sorted_raw (OrdBuy, buys)
+   && is_side_sorted_raw (OrdSell, sells))
   ==>
     (is_book_sorted { buys = buys;
                       sells = sells })
@@ -209,16 +209,16 @@ theorem[rw] is_book_sorted_implied_by (buys, sells) =
 theorem[rw] is_book_sorted_implies_sides_sorted (b : book) =
   (is_book_sorted b)
   ==>
-    (is_side_sorted_raw (BUY, b.buys)
-     && is_side_sorted_raw (SELL, b.sells))
+    (is_side_sorted_raw (OrdBuy, b.buys)
+     && is_side_sorted_raw (OrdSell, b.sells))
 ;;
 
 :disable is_book_sorted
 
 (* process_msg_recovery: books are not changed *)
 
-verify process_msg_recovery_does_not_change_books (s : feed_state) =
-  let s' = process_msg_recovery s in
+verify process_msg_recovery_does_not_change_books (s, next_message, channel_type : feed_state * message * channel_type) =
+  let s' = process_msg_recovery (s, next_message, channel_type)  in
   s'.books = s.books
 ;;
 
@@ -226,10 +226,10 @@ verify process_msg_recovery_does_not_change_books (s : feed_state) =
 
 :disable process_msg_recovery
 
-theorem[rw] book_always_sorted_process_msg_recovery (s) =
+theorem[rw] book_always_sorted_process_msg_recovery (s, m, c : feed_state * message * channel_type) =
   (books_sorted s.books)
   ==>
-    (books_sorted (process_msg_recovery s).books)
+    (books_sorted (process_msg_recovery (s,m,c) ).books)
 ;;
 
 :disable is_book_sorted
@@ -262,7 +262,7 @@ theorem[rw] clean_multi_depth_books_sorts (books) =
 
        (|order_level_LIST-P|
               (|bk_new| (|book->buys| (|books->multi| |books|))
-                        (BUY)
+                        (OrdBuy)
                         (|ref_message->rm_price_level| |msg|)
                         (|ref_message->rm_entry_size| |msg|)
                         (|ref_message->rm_entry_px| |msg|)
@@ -271,7 +271,7 @@ theorem[rw] clean_multi_depth_books_sorts (books) =
     need:
 
       (|order_level_LIST-P| (|book->buys| (|books->multi| |books|)))
-      (|side-P| (BUY))
+      (|side-P| (OrdBuy))
       (INTEGERP (|ref_message->rm_price_level| |msg|))
       (INTEGERP (|ref_message->rm_entry_size| |msg|))
       (INTEGERP (|ref_message->rm_entry_px| |msg|))
@@ -327,6 +327,7 @@ theorem[rw] book_always_sorted_apply_cache (books, channels) =
 
 (* process_refresh_action gives sorted snapshots *)
 
+(*
 :enable is_book_sorted
 :disable is_side_sorted_raw
 :disable trim_side'
@@ -359,6 +360,7 @@ theorem[rw] process_refresh_action_sorted_snapshot_i (books, packet) =
 ;;
 
 :disable is_book_sorted
+*)
 
 (* process_msg_recovery maintains sorted snapshots *)
 
@@ -485,8 +487,8 @@ theorem[fc] process_msg_recovery_snapshots_sorted_1_4 (s, snap1, snap2) =
 
 (* PROVED *)
 
-theorem[rw] process_msg_recovery_snapshots_sorted (s, snap1, snap2) =
-  let s' = process_msg_recovery s in
+theorem[rw] process_msg_recovery_snapshots_sorted (s,m,c, snap1, snap2) =
+  let s' = process_msg_recovery (s,m,c) in
   let snap_opt = s'.channels.last_snapshot in
   (s.channels.last_snapshot = Some snap1
    && snapshots_sorted snap1
@@ -498,10 +500,10 @@ theorem[rw] process_msg_recovery_snapshots_sorted (s, snap1, snap2) =
 
 (* An axiom we must prove *)
 
-axiom[rw] process_msg_recovery_snapshots_sorted_opt (s) =
+axiom[rw] process_msg_recovery_snapshots_sorted_opt (s, m, c  : feed_state * message * channel_type) =
   (snapshots_sorted_opt s.channels.last_snapshot)
   ==>
-    (snapshots_sorted_opt (process_msg_recovery s).channels.last_snapshot)
+    (snapshots_sorted_opt (process_msg_recovery (s,m,c)).channels.last_snapshot)
 ;;
 
 :disable process_msg_recovery
@@ -588,41 +590,41 @@ theorem[rw] attempt_recovery_maintains_sorted_books_3 (s) =
 
 (* PROVED *)
 
-theorem[rw] book_always_sorted_recovery_1 (s) =
+theorem[rw] book_always_sorted_recovery_1 (s, m, c : feed_state * message * channel_type) =
   (s.feed_status = InRecovery
    && books_sorted s.books
    && snapshots_sorted_opt s.channels.last_snapshot)
   ==>
-    (books_sorted (process_msg_recovery s).books)
+    (books_sorted (process_msg_recovery (s,m,c) ).books)
 ;;
 
 (* PROVED *)
 
-theorem[rw] book_always_sorted_recovery_2 (s) =
-  (books_sorted (process_msg_recovery s).books
-   && snapshots_sorted_opt (process_msg_recovery s).channels.last_snapshot)
+theorem[rw] book_always_sorted_recovery_2 (s, m, c : feed_state * message * channel_type) =
+  (books_sorted (process_msg_recovery (s,m,c)).books
+   && snapshots_sorted_opt (process_msg_recovery (s,m,c) ).channels.last_snapshot)
   ==>
-    (books_sorted (attempt_recovery (process_msg_recovery s)).books)
+    (books_sorted (attempt_recovery (process_msg_recovery (s,m,c))).books)
 ;;
 
 (* PROVED *)
 
-theorem[rw] book_always_sorted_recovery_3 (s) =
+theorem[rw] book_always_sorted_recovery_3 (s, m, c : feed_state * message * channel_type) =
   (s.feed_status = InRecovery
    && books_sorted s.books
    && snapshots_sorted_opt s.channels.last_snapshot)
   ==>
-    (books_sorted (process_msg_recovery s).books)
+    (books_sorted (process_msg_recovery (s,m,c) ).books)
 ;;
 
 (* PROVED *)
 
-theorem[rw] book_always_sorted_recovery_4 (s) =
+theorem[rw] book_always_sorted_recovery_4 (s, m, c : feed_state * message * channel_type) =
   (s.feed_status = InRecovery
    && books_sorted s.books
    && snapshots_sorted_opt s.channels.last_snapshot)
   ==>
-    (snapshots_sorted_opt (process_msg_recovery s).channels.last_snapshot)
+    (snapshots_sorted_opt (process_msg_recovery (s,m,c) ).channels.last_snapshot)
 ;;
 
 (* PROVED *)
@@ -675,12 +677,12 @@ theorem[rw] books_sorted_ignores_depth_and_status_4 (b, n) =
     (books_sorted { b with b_status = Publishable; book_depth = n })
 ;;
 
-theorem[rw] process_msg_normal_sorted (s) =
+theorem[rw] process_msg_normal_sorted ( s , m : feed_state * message ) =
   (s.feed_status = Normal
    && books_sorted s.books
    && snapshots_sorted_opt s.channels.last_snapshot)
   ==>
-    (books_sorted (process_msg_normal s).books)
+    (books_sorted (process_msg_normal (s,m) ).books)
 ;;
 
 :disable process_msg_normal
@@ -703,8 +705,8 @@ theorem[rw] recalc_combined_maintains_sorted (bs) =
 ;;
 
 theorem[rw] is_book_sorted_reduction (b) =
-  (is_side_sorted_raw (BUY, b.buys)
-   && is_side_sorted_raw (SELL, b.sells))
+  (is_side_sorted_raw (OrdBuy, b.buys)
+   && is_side_sorted_raw (OrdSell, b.sells))
   ==>
     (is_book_sorted b)
 ;;
