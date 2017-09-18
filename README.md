@@ -1,3 +1,5 @@
+![Aesthetic Integration](https://storage.googleapis.com/imandra-assets/images/docs/iml_cme_mdp_model.svg)
+---
 # CME Model
 ## Overview
 
