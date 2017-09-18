@@ -4,6 +4,14 @@
 Generating test cases JSON files using `imandra-analyser`
 ```bash
 imandra-analyser-cli strategy.yaml | python extract_packets.py generatedJsons
+
+```
+
+Starting the packets and transitions visualizer on http://localhost:8000
+
+```
+cd visualizer/
+python -m SimpleHTTPServer
 ```
 
 ## Simple Binary Encoding  
