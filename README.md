@@ -1,6 +1,11 @@
 # CME Model
 ## Overview
 
+Generating test cases JSON files using `imandra-analyser
+```
+imandra-analyser-cli strategy.yaml | python extract_packets.py generatedJsons
+```
+
 ## Simple Binary Encoding  
 The Simple Binary Encoding (SBE) is a binary encoding format for
 serialization/deserialization of a sequence of hierachically structured
