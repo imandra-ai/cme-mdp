@@ -37,7 +37,7 @@ def processStream(f, outdir):
             print outfile
             with open(outfile, "w") as jsonFile:
                 text = testcase['text'].decode('string_escape')
-                jsonFile.write(text.rstrip()[1:-1])
+                jsonFile.write(text.rstrip())
 
 
 def main():

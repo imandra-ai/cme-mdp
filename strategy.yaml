@@ -161,7 +161,7 @@ pipelines:
             perturbations.
           tcs-per-region: 3
           model: my-network
-          printer: outgoing_packets_ocaml_string_of_network_state
+          printer: testcase_json_string_of_network_state
           sequence:
             - repeat:
                 count: 3
@@ -175,9 +175,3 @@ pipelines:
             - repeat:
                 count: 3
                 constructors: [ "NoEffect" ]
-
-      - convert:
-          description: |
-            Run the network packets through the CME simulator model.
-          model: my-simulator
-          fn-name: run

@@ -4,8 +4,10 @@
 :load src-model/CME_Types.ml
 :load src-model/CME_Exchange.ml
 :load src-model/CME_Network.ml
+:load_ocaml src-model/CME.ml
 :load_ocaml src-printers/CME_json.ml
 :load_ocaml src-printers/CME_Exchange_json.ml
+:load_ocaml src-printers/CME_Internal_json.ml
 :load_ocaml src-printers/CME_Network_Printer.ml
 
 (* A recursive run function.
@@ -39,3 +41,30 @@ let rec valid (state, acts : network_state * net_effect list) =
         let es = process_net_effect (state, act) in
         valid ( es, acts) )
 ;;
+
+:program
+
+(* Take the outgoing packets (testcase input) from the network state and run
+   them through the CME model to produce an expected output of the testcase.
+*)
+let testcase_json_string_of_network_state (state : network_state) : string =
+  let packet_list = List.rev state.outgoing in
+  let init_state =
+    { empty_feed_state with
+      channels =
+        { empty_feed_state.channels with
+          unprocessed_packets = packet_list
+        }
+    } in
+  let end_state = simulate init_state in
+  let transitions_json = itransitions_to_json end_state.internal_changes in
+  let packets_json = packets_to_json packet_list in
+  let open Yojson.Basic in
+  `Assoc
+    [ ("input", packets_json)
+    ; ("output", transitions_json)
+    ]
+  |> to_string
+;;
+
+:logic
