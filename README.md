@@ -17,7 +17,7 @@ then reads this XML file, and produces a code (usually `Java` or `C++`) that
 contains the message type declaraions and read/write routines for them. The
 generated code can then be linked with the business logic software.  
 
-In this chapter I'll describe such a code-generation tool fori the OCaml
+In this chapter we'll describe such a code-generation tool for the OCaml
 programming language.
  
 ## SBE types codegeneration 
@@ -96,7 +96,7 @@ type t_LegSide =
      | V_LegSide_SellSide
  ```
 
-If the enum type has a nullable encodingType, then one extra case is added to the variant.  
+If the `enum` type has a nullable `encodingType`, then one extra case is added to the variant.  
 
 ```xml
 <enum name="AggressorSide" encodingType="uInt8NULL">
@@ -115,7 +115,7 @@ type t_AggressorSide =
 ```
 
 Finally, the set types are treated as records, but with all entries
-being of the boolean type.
+being of the `boolean` type.
 
 ```xml
 <set name="SettlPriceType" encodingType="uInt8">
