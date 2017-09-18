@@ -1,0 +1,70 @@
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Suite Visualiser</title>
+  <link rel="stylesheet" href="css/foundation.css">
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/visualiser.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Libre+Baskerville|Open+Sans">
+  <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+</head>
+
+<body>
+  <div class="i-top-bar ">
+    <div class="tb-item"><img src="images/logo-imandra.svg" width="144px"></div>
+    <div class="tb-item-parent"> 
+      <div class="tb-item top-bar-title">TEST SUITE VISUALISER</div>
+        <div class="border"></div>
+      <div class="tb-item"><img src="images/logo-db.svg" width="101px"></div>
+        <div class="border"></div>
+      <div class="tb-item"><img src="images/logo-cme.svg" width="101px"></div>
+    </div>
+    <div class="tb-item"><img src="images/logo-by-ai.svg" width="100px"></div>
+  </div>
+  <div class="fullwidth">
+    <div class="col-one large-2 medium-2 columns">
+      <h4 class="column-title"> TESTS </h4>
+      <select multiple class="testdisplay"> </select>
+    </div>
+    <div class="col-two large-5 medium-5 columns">
+          <div><h4 class="column-title"> PACKETS </h4></div>
+          <div id="packwiz"></div>
+    </div>
+    <div class="col-three large-5 medium-5 columns">
+          <div class="tb-item-parent"><h4 class=" tb-item column-title"> INTERNAL TRANSITIONS </h4> 
+          <a class=" tb-item tiny button masking-button" id="showNotRelevant" href="#">Show Not Relevant</a>
+          </div>
+          <div id="trwiz"></div>
+    </div>
+  </div>
+  <script src="js/vendor/jquery.js"></script>
+  <script src="js/vendor/foundation.js"></script>
+  <script src="js/vendor/d3.v4.min.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/htree.js"></script>
+  <script src="js/testLoader.js"></script>
+  <script src="js/packetConvert.js"></script>
+  <script src="js/transitionConvert.js"></script>
+  <script>
+
+    loadTestList( function(data){
+        var chroot = convertChannels(data.channels);
+        var trroot = convertTransitions(data.internal);
+        htree( d3.select("#packwiz").text(""), chroot);
+        var intree = htree( d3.select("#trwiz").text(""), trroot);
+        intree.switch_internal();
+        d3.select("#showNotRelevant").on("click", function(){
+            if(intree.switch_internal()){
+                d3.select(this).text("Hide Not Relevant")
+                  .classed("alert", true).classed("sucess", false);
+            } else {
+                d3.select(this).text("Show Not Relevant")
+                  .classed("alert", false).classed("sucess", true);
+            }
+        });
+    });
+
+  </script>
+</body>
