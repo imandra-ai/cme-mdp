@@ -1,8 +1,8 @@
 # CME Model
 ## Overview
 
-Generating test cases JSON files using `imandra-analyser
-```
+Generating test cases JSON files using `imandra-analyser`
+```bash
 imandra-analyser-cli strategy.yaml | python extract_packets.py generatedJsons
 ```
 
