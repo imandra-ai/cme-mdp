@@ -68,7 +68,7 @@ For `enum` and `set` types, an `encodingType` name must be provided.
 The composite types are represented as OCaml record-types with
 each record entry having the correstponding primitive type. 
 
-```
+```xml
 <composite name="FLOAT">
     <type name="mantissa" primitiveType="int64"/>
     <type name="exponent" primitiveType="int"/>
@@ -84,7 +84,7 @@ type t_FLOAT = {
 The enum types are represented as OCaml variant-types (2a) with each variant
 case beaing a constant.
 
-```
+```xml
 <enum name="LegSide" encodingType="uInt8">
     <validValue name="BuySide" >1</validValue>
     <validValue name="SellSide">2</validValue>
@@ -98,7 +98,7 @@ type t_LegSide =
 
 If the enum type has a nullable encodingType, then one extra case is added to the variant.  
 
-```
+```xml
 <enum name="AggressorSide" encodingType="uInt8NULL">
     <validValue name="NoAggressor">0</validValue>
     <validValue name="Buy">1</validValue>
@@ -117,7 +117,7 @@ type t_AggressorSide =
 Finally, the set types are treated as records, but with all entries
 being of the boolean type.
 
-```
+```xml
 <set name="SettlPriceType" encodingType="uInt8">
     <choice name="Final">0</choice>
     <choice name="Actual">1</choice>
@@ -141,7 +141,7 @@ blocks, with each block containing the same fixed number of fields.
 The OCaml codegenerator takes as an input the XML schema file (set with `-i`
 flag) and writes three files into a specified directory (set with `-d` flag)
 
-```
+```bash
 $ _build/default/src-codegenerator/cme_codegen.bc -i templates.xml -d outputdir
 $ ls outputdir
 message_types.ml  readers.ml  writers.ml
