@@ -407,87 +407,35 @@ let snapshots_sorted_opt (snap_opt) =
 
 :disable process_refresh_action
 
-(* PROVED *)
 
-theorem[fc] process_msg_recovery_snapshots_sorted_1_1 (s, snap1, snap2) =
-  let channels = s.channels in
-  let books = s.books in
-  let next_packet = get_next_packet (s.channels) in
-  let src = next_packet.source in
-  (snapshots_sorted_opt s.channels.last_snapshot)
-    ==>
-      match next_packet.p with
-        NoPacket -> snapshots_sorted_opt ((process_msg_recovery s).channels.last_snapshot)
-      | _ -> true
+let get_next_channel s =
+    match s.channels.unprocessed_packets with [] -> None 
+    | current_packet::rest_packets -> Some ( current_packet.packet_channel )
 ;;
 
 (* PROVED *)
 
-theorem[fc] process_msg_recovery_snapshots_sorted_1_2 (s, snap1, snap2) =
-  let channels = s.channels in
-  let books = s.books in
-  let next_packet = get_next_packet (s.channels) in
-  let src = next_packet.source in
+theorem[fc] process_msg_recovery_snapshots_sorted (s) =
+  match get_next_channel (s) with None -> true | Some c ->
+  match get_next_message (s) with None -> true | Some m ->
   (snapshots_sorted_opt s.channels.last_snapshot)
     ==>
-      match next_packet.p with
-         | IncRefreshPacket ip ->
-            snapshots_sorted_opt ((process_msg_recovery s).channels.last_snapshot)
-         | _ -> true
+   snapshots_sorted_opt ((process_msg_recovery (s,m,c) ).channels.last_snapshot)
 ;;
 
-(* So, the only case we need to worry about is when, in process_msg_recovery,
-    we've got np = SnapshotPacket sp.
- *)
-
-:enable snapshots_sorted
-
-(* PROVED *)
-
-theorem[fc] process_msg_recovery_snapshots_sorted_1_3 (s, snap1, snap2) =
-  let channels = s.channels in
-  let books = s.books in
-  let next_packet = get_next_packet (s.channels) in
-  let src = next_packet.source in
+theorem[fc] process_msg_recovery_snapshots_sorted (s) =
+  match get_next_channel (s) with None -> true | Some c ->
+  match get_next_message (s) with None -> true | Some m ->
   (snapshots_sorted_opt s.channels.last_snapshot)
     ==>
-      match next_packet.p with
-        | SnapshotPacket sp ->
-          let this_ch = process_snap_ch (get_snap_channel (channels, src)) in
-          let channels' = set_snap_channel (channels, this_ch, src) in
-          let last_snap = process_refresh_action (books, sp) in
-          
-          snapshots_sorted (last_snap)
-        | _ -> true
+   snapshots_sorted_opt ((process_msg_recovery (s,m,c) ).channels.last_snapshot)
 ;;
 
 (* PROVED *)
 
-theorem[fc] process_msg_recovery_snapshots_sorted_1_4 (s, snap1, snap2) =
-  let channels = s.channels in
-  let books = s.books in
-  let next_packet = get_next_packet (s.channels) in
-  let src = next_packet.source in
-  (snapshots_sorted_opt s.channels.last_snapshot)
-    ==>
-      match next_packet.p with
-         | SnapshotPacket sp ->
-            let this_ch = process_snap_ch (get_snap_channel (channels, src)) in
-            let channels' = set_snap_channel (channels, this_ch, src) in
-            let last_snap = process_refresh_action (books, sp) in
-            let new_snap = (
-              if new_snapshot_better (last_snap, channels'.last_snapshot) then
-                Some last_snap
-              else
-                channels'.last_snapshot) in
-
-            snapshots_sorted_opt (new_snap)
-        | _ -> true
-;;
-
-(* PROVED *)
-
-theorem[rw] process_msg_recovery_snapshots_sorted (s,m,c, snap1, snap2) =
+theorem[rw] process_msg_recovery_snapshots_sorted (s, snap1, snap2) =
+  match get_next_channel (s) with None -> true | Some c ->
+  match get_next_message (s) with None -> true | Some m ->
   let s' = process_msg_recovery (s,m,c) in
   let snap_opt = s'.channels.last_snapshot in
   (s.channels.last_snapshot = Some snap1
@@ -500,7 +448,9 @@ theorem[rw] process_msg_recovery_snapshots_sorted (s,m,c, snap1, snap2) =
 
 (* An axiom we must prove *)
 
-axiom[rw] process_msg_recovery_snapshots_sorted_opt (s, m, c  : feed_state * message * channel_type) =
+axiom[rw] process_msg_recovery_snapshots_sorted_opt (s : feed_state ) =
+  match get_next_channel (s) with None -> true | Some c ->
+  match get_next_message (s) with None -> true | Some m ->
   (snapshots_sorted_opt s.channels.last_snapshot)
   ==>
     (snapshots_sorted_opt (process_msg_recovery (s,m,c)).channels.last_snapshot)
