@@ -1,5 +1,5 @@
 function convertTransition(tr) {
-    if(tr.ChangeType == "NotRelevant") return {name: "Not_Relevant"};
+    if(tr.ChangeType == "Not Relevant") return {name: "Not Relevant"};
     var ret = { name: tr.ChangeType + " LastSeqN = " + tr.MessageTime };
     function processSide(side){
         return side
@@ -10,7 +10,10 @@ function convertTransition(tr) {
                     "Price=" + ord.Price,
                     "Qty=" + ord.Quantity,
                 ];
-                if(ord.NumOrders) txt.push("Num=" + ord.NumOrders);
+                if(ord.NumOrders) {
+                     if(Object.keys(ord.NumOrders).length != 0) 
+                          txt.push("Num=" + ord.NumOrders);
+                }
                 return { name: txt.join(" ")};
             });
     };

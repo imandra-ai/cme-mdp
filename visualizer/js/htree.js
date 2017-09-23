@@ -118,7 +118,7 @@ function htree(cont, data){
         if( root.data.name != "Transitions" ) return;
         if( !("withInternal" in root) ) root.withInternal = root.children.slice();
         if( !("withoutInternal" in root) ) 
-            root.withoutInternal = root.children.filter(function(d){return d.data.name != "Not_Relevant";});
+            root.withoutInternal = root.children.filter(function(d){return d.data.name != "Not Relevant";});
         show_internal = !show_internal;
         if(show_internal) {
             root.children = root.withInternal;        
