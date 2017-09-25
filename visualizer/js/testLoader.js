@@ -1,5 +1,5 @@
 function loadTestList(callback) {
-    d3.json("tests.json",function(data) {
+    d3.json("cases/tests.json",function(data) {
         d3.select("select").text("");
         var opts = d3.select("select")  
             .selectAll("option")
