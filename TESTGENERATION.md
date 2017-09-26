@@ -20,6 +20,7 @@ The security state structure contains:
 - **`last_rep_seq`_num`** -  this security RptSeqNumber incremented with each message
 - **`sec_id`** – numerical ID of the security 
 - **`multi_book`** and **`implied_book`**  – the state of the two books 
+
 For the books we are storing five levels for buy and sell sides:
 ```ocaml
 type book_side = {
@@ -33,4 +34,21 @@ type order_book = {
     buy_orders : book_side;
     sell_orders : book_side;
 };;
+```
+
+There are two general types of exchange actions (or, as they called in the code, internal transitions): 
+the book transitions are events that modify orders in the book, and exchange transitions:
+
+```ocaml
+type book_transition =
+	| ST_Add of ord_add_data (* Add order book level *)
+	| ST_Change of ord_change_data (* Cancel an order in the book *)
+	| ST_Delete of ord_del_data (* Delete book level *)
+;;
+type exchange_transition =
+	| ST_BookReset (* We reset the whole book *)
+	| ST_DataSendInc (* Indicates that we need to send out the collected incremental refresh messages *)
+	| ST_DataSendSnap (* Indicates that we need to send out the collected snapshot refresh messages *)
+	| ST_Snapshot of sec_type (* Indicates the need to send a snapshot message *)
+;;
 ```
