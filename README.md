@@ -2,6 +2,8 @@
 ---
 ## Overview
 
+
+
 Generating test cases JSON files using `imandra-analyser`
 ```bash
 imandra-analyser-cli strategy.yaml | python extract_packets.py generatedJsons
@@ -15,15 +17,80 @@ cd visualizer/
 python -m SimpleHTTPServer
 ```
 
+## Imandra model of the CME feed  
+We model the CME exchange with as an infinite state machine. The `feed_state`
+datatype contains all of the information about CME exchange state:
+
+- `feed_sec_type` : the ID of the security that the exchange is working on.
+- `books` : current state of books in the exchange
+- `channels` : state of the communication channels. Contains a sequence of
+  incoming unprocessed packets in the chronological order, a sequence of
+  already processed packets, latest received snapshot, an ordered set of cached
+  packets for recovery and a pair of `cycle_history` structures for channels A
+  and B.
+- `feed_status` : the current status of the feed can be either `Normal` or
+  `InRecovery`.
+- `internal_changes` : stores all the internal changes in the algorithm - how
+  books are updated with every message, current state of the cache and cycle
+  histories, whether the status is `Normal` or `InRecovery`, e.t.c.
+- `cur_time`: the timestamp of last processed packet
+
+The model takes the next packet from the list of unprocessed packets and
+iterates over the messages in it. 
+
+In the `Normal` state, the message sequence number is checked and the message
+is either processed normally or, if the message is off-sequence, added to cache
+with the feed transitioning to the `InRecovery` state. 
+
+While `InRecovery`, incremental update messages are added to cache, and
+snapshot messages are saved as a `last_snapshot`. After each message a recovery
+is attempted:  if all cached messages are in chronological order since last
+snapshot -- the feed transitions back into the `Normal` state:
+
+![CME Flowchart](doc/images/CME_model_flowchart.svg)
+
+The flowchart diagram above gives an overview of the 
+
+- **`simulate`** : a toplevel function that recursively
+  applies the `one_step` function until `feed_state` is not changed by it.
+- **`one_step`** : performs one step of the simulation
+  of the `feed_state`. The function extracts the next message from the stream
+  of incoming packets and forwards it either to `process_msg_normal` and
+  `process_msg_recovery`, depending on the current `feed_status`. If we are
+  currently `InRecovery`, then recovery is attempted (via `attempt_recovery`)
+  after the message is processed.
+- **`process_msg_normal`** :  processes the next
+  message, when our feed is in the `Normal` state. All snapshot messages are
+  ignored. If a refresh message `is_msg_relevant` and has the sequence number
+  that is exactly (`last_processed + 1`), then it is applied to the books in the
+  exchange. If there is a gap in the sequence number, then the `feed_status` is
+  changed to `InRecovery`.
+- **`is_msg_relevant`** : used by the previous
+  function, it checks whether the next incremental refresh message is
+  "relevant": its security ID equals to this feed's security, if its sequirity
+  sequence number is greater that the last processed one and if the order level
+  number is smaller than the book size of the feed. 
+- **`process_md_update_action`** : applies the
+  current incremental refresh action (could be creation, deletion or update of
+  some order) to the books in the exchange.
+- **`process_msg_recovery`** : processes the
+  next message, when our feed is `InRecovery`. The incremental refresh messages
+  are placed in the cache (cache is kept sorted). The snapshots for "our"
+  security are stored, and the snapshot for the "reference" security are used
+  to detect whether our security is `Liquid` or `Illiquid`.
+- **`attemp_recovery`** : there are three possibilities
+  for the status to change back from `InRecovery`
+
+
 ## Simple Binary Encoding  
 The Simple Binary Encoding (SBE) is a binary encoding format for
 serialization/deserialization of a sequence of hierachically structured
 messages in a stream of raw binary data.  
 
 In the SBE framework, one first defines an *XML schema* -- an XML description
-the binary layout of the messages.  Typicaly, a special codegenerating tool
+the binary layout of the messages.  Typically, a special codegenerating tool
 then reads this XML file, and produces a code (usually `Java` or `C++`) that
-contains the message type declaraions and read/write routines for them. The
+contains the message type declarations and read/write routines for them. The
 generated code can then be linked with the business logic software.  
 
 In this chapter we'll describe such a code-generation tool for the OCaml
@@ -63,7 +130,7 @@ used.
 | length            | 'a list                 |
 | nullValue         | 'a option               |
 
-Three kinds of "complex" types can then be construced based on the primitive
+Three kinds of "complex" types can then be constructed based on the primitive
 types described above:
 
 - The `composite` type is a sequence (a record) of fields of various types.  
@@ -75,7 +142,7 @@ types described above:
 For `enum` and `set` types, an `encodingType` name must be provided.
 
 The composite types are represented as OCaml record-types with
-each record entry having the correstponding primitive type. 
+each record entry having the corresponding primitive type. 
 
 ```xml
 <composite name="FLOAT">
@@ -91,7 +158,7 @@ type t_FLOAT = {
 ```
 
 The enum types are represented as OCaml variant-types (2a) with each variant
-case beaing a constant.
+case being a constant.
 
 ```xml
 <enum name="LegSide" encodingType="uInt8">
@@ -140,7 +207,7 @@ type t_SettlPriceType = {
 }
 ```
 In the XML schema, the declaration of all the necessary simple and complex
-types is folowed by the declaration of various messages. Each message contains
+types is followed by the declaration of various messages. Each message contains
 a block of fields that are always present in the message, followed by a number
 of variable-sized groups. Each group is stored as a sequence of repeated
 blocks, with each block containing the same fixed number of fields.
