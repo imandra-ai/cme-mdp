@@ -2,6 +2,9 @@
 ---
 ## Overview
 
+The CME Group Market Data Platform (MDP) disseminates market data for CME Group
+markets. MDP ensures the data consistency via recovery mechanism that employs
+book snapshot messages, sent over dedicated Market Recovery channels. 
 
 
 Generating test cases JSON files using `imandra-analyser`
