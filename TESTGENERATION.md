@@ -15,7 +15,7 @@ suite generation: the generation is broken into several configurable steps,
 with each step generating a small amount of events.  A representation of an
 internal state of the algorithm is passed between the steps:
 
-![Event generation](doc/images/CME_model_flowchart.svg)
+![Event generation](doc/images/Event_generation.svg)
 
 ## CME Exchange model 
 The `CME_Exchange` is a model used to generate sequences of packets for the CME

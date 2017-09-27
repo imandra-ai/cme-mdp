@@ -3,15 +3,16 @@
 ## Overview
 
 The CME Group Market Data Platform (MDP) disseminates market data for CME Group
-markets.  An ordered stream of Incremental Refresh messages is used to update
-the client state in real time.  The Incremental Refresh messages, gathered in
-packets, are sent over two redundant UDP connections: Incremental A and
-Incremental B.  This redundancy reduces the chance of packet loss in the UDP.
+markets.  The client state is updated in real time with an ordered stream of
+Incremental Refresh messages.  This messages are encoded using Simple Binary
+Encoding (SBE), gathered in packets, and are sent over two redundant UDP
+connections: Incremental Refresh A and Incremental Refresh B.  This redundancy
+is needed to reduc the chance of packet loss in the UDP.
 
-Another pair of UDP feeds: Market Recovery A and Market Recovery B are used to
-disseminate market data snapshots of all the active books.  The snapshot
-messages can be used to recover from a possible of an Incremental Refresh
-packet.
+There is another pair of UDP feeds: Market Recovery A and Market Recovery B.
+The recovery feeds are used to disseminate market data snapshots of the active
+books. These snapshot messages can be used to recover from a possible loss of
+an Incremental Refresh packet.
 
 
 Generating test cases JSON files using `imandra-analyser`
