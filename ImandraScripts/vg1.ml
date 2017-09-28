@@ -6,66 +6,77 @@
 
 (** Check that after every update to the book, the book is sorted *)
 
-(* Sanity check: order_higher_ranked is transitive                *)
+
+(** 1. Proofs about order_higher_ranked *)
+
 (* PROVED *)
-
-verify ohr_trans (s, o1, o2, o3) =
-  (order_higher_ranked (s, o1, o2)
-   && order_higher_ranked (s, o2, o3))
-  ==>
-  (order_higher_ranked (s, o1, o3))
+theorem[rw] ohr_trans (s, o1, o2, o3) =
+    ( order_higher_ranked (s, o1, o2) &&  
+      order_higher_ranked (s, o2, o3) )
+    ==>
+    ( order_higher_ranked (s, o1, o3) )
 ;;
 
-(* Sanity check: order_higher_ranked is reflexive *)
 (* PROVED *)
-
-verify ohr_refl (s, o1) =
-  order_higher_ranked (s, o1, o1);;
-
-(* Sanity check: order_higher_ranked is antisymmetric *)
-(* REFUTED - this doesn't hold!
-
-verify ohr_anti_symm (s, o1, o2) =
-  (order_higher_ranked (s, o1, o2)
-   && order_higher_ranked (s, o2, o1))
-  ==>
-    (o1 = o2)
+theorem[rw] ohr_refl (s, o1) =
+      order_higher_ranked (s, o1, o1)
 ;;
 
- *)
-
-(* What it means to be sorted *)
-
-let rec is_side_sorted_raw (side, ls) =
-  match ls with
-    [] -> true
-  | [a] -> true
-  | a :: b :: rst -> order_higher_ranked (side, a, b)
-                     && is_side_sorted_raw (side, b :: rst)
-;;
-
-let is_book_sorted (b : book) =
-  is_side_sorted_raw (OrdBuy, b.buys)
-  && is_side_sorted_raw (OrdSell, b.sells)
-;;
-
-theorem[rw] is_sorted_maintained_by_insert (l, side, ls) =
-  (is_side_sorted_raw (side, ls))
-  ==>
-    (is_side_sorted_raw (side, insert_order (l, side, ls)))
+(* PROVED *)
+theorem[rw] ohr_antisym (s, o1, o2) =
+    not ( order_higher_ranked (s, o1, o2) )
+    ==> ( order_higher_ranked (s, o2, o1) )
 ;;
 
 :disable order_higher_ranked
 
+(** 2. Proofs about sortedness of a single side *)
+
+let rec is_side_sorted_raw (side, ls) =
+    match ls with
+    |  [] -> true
+    | [a] -> true
+    | a :: b :: _ -> 
+	order_higher_ranked (side, a, b)
+        && is_side_sorted_raw (side, List.tl ls)
+;;
+
+theorem[rw] is_sorted_maintained_by_insert (l, side, ls) =
+    (is_side_sorted_raw (side, ls))
+    ==>
+    (is_side_sorted_raw (side, insert_order (l, side, ls)))
+;;
+
 theorem[rw] is_sorted_idempotent_raw (side, ls) =
-  (is_side_sorted_raw (side, ls))
-  ==>
+    (is_side_sorted_raw (side, ls))
+    ==>
     (sort_side (ls, side) = ls);;
 
 theorem[rw] sort_side_is_sorted_raw (side, ls) =
-  (is_side_sorted_raw (side, sort_side (ls, side)));;
+    (is_side_sorted_raw (side, sort_side (ls, side)));;
 
-:enable order_higher_ranked
+(** *)
+theorem[rw] trim_preserves_head(side, lst, n, x) =  
+    n > 0 && order_higher_ranked(side, x , List.hd lst) 
+    ==> 
+    order_higher_ranked(side, x , List.hd (trim_side(lst, n)) )
+;;
+
+theorem[rw] sorted_maintained_by_trim (side, lst, n) =  
+    ( is_side_sorted_raw(side, lst) && n > 1 ) 
+    ==> 
+    is_side_sorted_raw(side, trim_side(lst, n) )
+;;
+
+:break
+
+(** 3. Book sortedness *)
+
+let is_book_sorted (b : book) =
+       is_side_sorted_raw ( OrdBuy  , b.buys  )
+    && is_side_sorted_raw ( OrdSell , b.sells )
+;;
+
 
 (* Sorted book is sorted! *)
 
@@ -75,7 +86,7 @@ theorem[rw] sorted_book_is_sorted (b : book) =
 
 (* Reset_books sorts the books, trivially *)
 
-:p (in-theory (enable |NoLevel|))
+:p (in-theory (enable |NoLevel|)) 
 
 theorem[rw] empty_order_levels_empty (n) =
   (n > 0) ==> (List.hd (empty_order_levels n) = NoLevel)
@@ -146,34 +157,8 @@ theorem[rw] reset_books_sorted_all (bs : books) =
 
 :disable reset_books
 
-(* trim_side respects sorting *)
 
-(* A simpler version of trim_side, that we prove equivalent to the original
-    w.r.t. a bit of numerical fiddling (num_levels - curr_level + 1). *)
-
-let rec trim_side' (ords, num_levels : order_level list * int) =
-  if num_levels <= 0
-  then []
-  else match ords with
-         [] -> []
-       | o :: os -> o :: (trim_side' (os, num_levels - 1))
-;;
-
-theorem[rw] trim_side_eq_trim_side' (ords, num_levels, curr_level) =
-  (trim_side (ords, num_levels, curr_level) = trim_side' (ords, num_levels - curr_level + 1))
-;;
-
-:disable order_higher_ranked
-:disable trim_side trim_side'
-:enable trim_side'
-
-(* List.tl of a sorted list is sorted *)
-
-theorem[rw] tl_of_sorted_lst_is_sorted (side, ls) =
-  (is_side_sorted_raw (side, ls))
-  ==>
-    (is_side_sorted_raw (side, List.tl ls))
-;;
+:disable reset_books
 
 (* Axiom: trim_side' of a sorted side is still sorted *)
 
@@ -678,14 +663,6 @@ theorem[rw] books_sorted_ignores_depth_and_status_4 (b, n) =
 ;;
 
 theorem[rw] process_msg_normal_sorted ( s , m : feed_state * message ) =
-  (s.feed_status = Normal
-   && books_sorted s.books
-   && snapshots_sorted_opt s.channels.last_snapshot)
-  ==>
-    (books_sorted (process_msg_normal (s,m) ).books)
-;;
-
-:disable process_msg_normal
 :enable is_side_sorted_raw order_higher_ranked
 
 theorem[rw] add_levels_maintains_sorted (side, os) =

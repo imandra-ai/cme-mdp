@@ -192,14 +192,11 @@ let sort_book (b : book) = {
 };;
 
 (** Remove all orders over num-levels *)
-let rec trim_side ( ords, num_levels, curr_level : order_level list * int * int) =
-    if curr_level <= num_levels then (
-        match ords with
-        [] -> []
-       | x::xs -> x :: trim_side (xs, num_levels, curr_level + 1)
-    )
-    else
-        []
+let rec trim_side ( ords, num_levels : order_level list * int ) =
+    if num_levels <= 0 then [] else
+    match ords with
+    | [] -> []
+    | x::xs -> x::trim_side(xs, num_levels - 1)
 ;;
 
 (** Remove duplicates from the list of orders (used in conslidating the book) *)
@@ -339,8 +336,8 @@ let recalc_combined (books : books) =
     let buys' = add_levels (sort_side (books.multi.buys @ books.implied.buys, OrdBuy)) in
     let sells' = add_levels (sort_side (books.multi.sells @ books.implied.sells, OrdSell)) in
     let combined = {
-        buys = trim_side (buys', books.book_depth, 1);
-        sells = trim_side (sells', books.book_depth, 1);
+        buys = trim_side (buys', books.book_depth);
+        sells = trim_side (sells', books.book_depth);
     } in
     { books with combined = combined }
 ;;
@@ -439,8 +436,8 @@ let reset_books ( b : books ) =
 (** Clean multi-depth book *)
 let clean_multi_depth_book (books : books) =
     (* let book' = sort_book (books.multi) in *)
-    let buys' = trim_side (books.multi.buys, books.book_depth, 1) in
-    let sells' = trim_side (books.multi.sells, books.book_depth, 1) in
+    let buys' = trim_side (books.multi.buys, books.book_depth) in
+    let sells' = trim_side (books.multi.sells, books.book_depth) in
     {
         books with multi = { buys = buys'; sells = sells' }
     } 
@@ -799,12 +796,16 @@ let move_to_next_packet ( s, current_packet, rest_packets : feed_state * packet 
 ;;
 
 
+let get_next_packet (s : feed_state ) =
+    match s.channels.unprocessed_packets with [] -> None | current_packet::rest_packets ->
+    Some current_packet
+;;
+
 let get_next_message (s : feed_state ) =
     match s.channels.unprocessed_packets with [] -> None | current_packet::rest_packets ->
     match current_packet.packet_messages with [] -> None | current_message::rest_messages ->
     Some current_message
 ;;
-
 
 (*****************************************************************  *)
 (** Top-level transition function                                   *)
