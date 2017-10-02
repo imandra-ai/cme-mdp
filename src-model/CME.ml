@@ -192,12 +192,15 @@ let sort_book (b : book) = {
 };;
 
 (** Remove all orders over num-levels *)
-let rec trim_side ( ords, num_levels : order_level list * int ) =
+let rec trim_side ( ords, num_levels : order_level list * int ) = ords ;;
+
+(*  NOTE: looks like we dont need this function at all
     if num_levels <= 0 then [] else
     match ords with
     | [] -> []
     | x::xs -> x::trim_side(xs, num_levels - 1)
 ;;
+*)
 
 (** Remove duplicates from the list of orders (used in conslidating the book) *)
 let rec add_levels (orders : order_level list) =
@@ -224,61 +227,36 @@ let rec add_levels (orders : order_level list) =
 (** *************************************************************** *)
 (** Functions used for book modifications                           *)
 (** *************************************************************** *)
-let rec adjust_orders_size (num_levels, ords : int * order_level list) =
-    if num_levels <= 0 then
-        ords
-    else
-        adjust_orders_size (num_levels - 1, ords @ [NoLevel])
+
+(** Helper function -- replaces the book entry at the given level.
+  * If the insertion violates sortedness of the book -- the change
+  * is ignored (formally proven in imandra)
+  * TODO: consider transitioning into recovery in case the inserion
+  * is invalid.  *)
+let rec replace_level_at (s, x, lst, n) = 
+    match (n, lst) with
+    | 2 , a::b::c::tl -> if order_higher_ranked(s,a,x) && order_higher_ranked(s,x,c) then a::x::c::tl else lst
+    | 2 , a::b::[]    -> if order_higher_ranked(s,a,x) then a::x::[] else lst
+    | 2 , a::[]       -> lst
+    | 1 , a::b::tl    -> if order_higher_ranked(s,x,b) then x::b::tl else lst
+    | 1 , a::[]       -> x::[]
+    | n , a::tl       -> if n < 1 then lst else a::replace_level_at(s,x,List.tl lst,n-1)    
+    | _ , []          -> []
 ;;
 
-(** Adjusts the number of levels within a single side of an order book *)
-let adjust_size (orders, book_depth : order_level list * int) =
-    adjust_orders_size ((List.length orders - book_depth), orders)
-;;
-
-(** Used to remove orders from a list given starting index *)
-let rec bk_delete_from (orders, curr_idx, target_idx : order_level list * int * int ) =
+(** Used to remove orders from a list given its index. Appends NoLevel to the end of the list. *)
+let rec delete_at (orders, n) =
     match orders with
-        | [] -> []
-        | x::xs ->
-            if curr_idx = target_idx then
-                []
-            else
-                x :: bk_delete_from (xs, curr_idx + 1, target_idx)
-;;
-
-(**
-    Overlay a new order info
-    TODO: Figure out what this is. *)
-let bk_overlay (orders, id : order_info list * int) =
-    []
-;;
-
-(** Delete a level from the list of orders information *)
-let rec delete_level (orders, curr_idx, target_idx : order_level list * int * int) =
-    match orders with
-        | [] -> []
-        | x::xs ->
-            if curr_idx = target_idx then
-                xs
-            else
-                x :: delete_level (xs, curr_idx + 1, target_idx)
+    | [] -> []
+    | h::tl -> 
+        if n > 1 then h::delete_at(tl, n-1) 
+        else if n = 1 then tl @ [NoLevel]
+        else orders
 ;;
 
 (** Delete from the book *)
 let bk_delete (orders, price_level : order_level list * int) =
-    delete_level (orders, 1, price_level)
-;;
-
-(** Change existing order level *)
-let rec ch_inplace (orders, curr_idx, target_idx, new_order_info : order_level list * int * int * order_level) =
-    match orders with
-        | [] -> if curr_idx = target_idx then [new_order_info] else []
-        | x::xs ->
-            if curr_idx = target_idx then
-                new_order_info :: xs
-            else
-                x :: ch_inplace (xs, curr_idx + 1, target_idx, new_order_info)
+    delete_at (orders, price_level)
 ;;
 
 (** Change an existing order level *)
@@ -288,21 +266,11 @@ let bk_change (orders, side, price_level, entry_size, entry_price, num_orders : 
         qty = entry_size;
         price = entry_price;
         num_orders = num_orders;
-    } in ch_inplace (orders, 1, price_level, new_order_info)
+    } in 
+    replace_level_at (side, new_order_info, orders, price_level)
 ;;
 
-(** Helper function for 'bk_new' *)
-let rec insert_level ( orders, new_order, curr_idx, target_idx : order_level list * order_level * int * int) =
-    match orders with
-        | [] -> [ new_order ]
-        | x::xs ->
-            if curr_idx = target_idx then
-                new_order :: xs
-            else
-                x :: insert_level (xs, new_order, curr_idx + 1, target_idx)
-;;
-
-(** Add a new level to the book *)
+(** Add a new level to the book. Works only if the level is emty in the list *)
 let bk_new (orders, side, price_level, entry_size, entry_price, num_orders : order_level list * order_side * int * int * int * int option) =
     let new_order_info = Level {
         side = side;
@@ -310,7 +278,7 @@ let bk_new (orders, side, price_level, entry_size, entry_price, num_orders : ord
         price = entry_price;
         num_orders = num_orders;
     } in
-    insert_level (orders, new_order_info, 1, price_level)
+    replace_level_at (side, new_order_info, orders, price_level)
 ;;
 
 let mk_int_msg (s, ct : feed_state * book_change_type) =
@@ -504,16 +472,16 @@ let process_md_update_action (books, msg : books * ref_message) =
         match msg.rm_entry_type with
         | V_MDEntryType_Bid ->
             let buys' = bk_delete (m.buys, msg.rm_price_level)
-            in { books with multi = { m with buys = adjust_size (buys', books.book_depth) }}
+            in { books with multi = { m with buys = buys' } }
         | V_MDEntryType_Offer ->
             let sells' = bk_delete (m.sells, msg.rm_price_level)
-            in { books with multi = { m with sells = adjust_size( sells', books.book_depth) }}
+            in { books with multi = { m with sells = sells' } }
         | V_MDEntryType_ImpliedBid ->
             let buys' = bk_delete (i.buys, msg.rm_price_level)
-            in { books with implied = { i with buys = adjust_size (buys', books.book_depth) }}
+            in { books with implied = { i with buys = buys' } }
         | V_MDEntryType_ImpliedOffer ->
             let sells' = bk_delete (i.sells, msg.rm_price_level)
-            in { books with implied = { i with sells = adjust_size( sells', books.book_depth) }}
+            in { books with implied = { i with sells = sells' } }
         | _ -> books
     )
 
@@ -531,17 +499,17 @@ let process_md_update_action (books, msg : books * ref_message) =
         (** Delete all orders from a side from a given level *)
         match msg.rm_entry_type with
         | V_MDEntryType_Bid ->
-            let buys' = bk_delete_from (m.buys, 1, msg.rm_price_level) in
-            { books with multi = { m with buys = adjust_size (buys', books.book_depth); }}
+            let buys' = bk_delete (m.buys, msg.rm_price_level) in
+            { books with multi = { m with buys = buys' } }
         | V_MDEntryType_Offer ->
-            let sells' = bk_delete_from (m.sells, 1, msg.rm_price_level) in
-            { books with multi = { m with sells = adjust_size (sells', books.book_depth); }}
+            let sells' = bk_delete (m.sells, msg.rm_price_level) in
+            { books with multi = { m with sells = sells' } }
         | V_MDEntryType_ImpliedBid ->
-            let buys' = bk_delete_from (i.buys, 1, msg.rm_price_level) in
-            { books with implied = { i with buys = adjust_size (buys', books.book_depth); }}
+            let buys' = bk_delete (i.buys, msg.rm_price_level) in
+            { books with implied = { i with buys = buys' } }
         | V_MDEntryType_ImpliedOffer ->
-            let sells' = bk_delete_from (i.sells, 1, msg.rm_price_level) in
-            { books with implied = { i with sells = adjust_size (sells', books.book_depth); }}
+            let sells' = bk_delete (i.sells, msg.rm_price_level) in
+            { books with implied = { i with sells = sells' } }
         | _ -> books
     )
 
