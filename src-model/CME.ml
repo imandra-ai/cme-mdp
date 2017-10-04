@@ -191,17 +191,6 @@ let sort_book (b : book) = {
     sells = sort_side (b.sells, OrdSell);
 };;
 
-(** Remove all orders over num-levels *)
-let rec trim_side ( ords, num_levels : order_level list * int ) = ords ;;
-
-(*  NOTE: looks like we dont need this function at all
-    if num_levels <= 0 then [] else
-    match ords with
-    | [] -> []
-    | x::xs -> x::trim_side(xs, num_levels - 1)
-;;
-*)
-
 (** Remove duplicates from the list of orders (used in conslidating the book) *)
 let rec add_levels (orders : order_level list) =
     match orders with
@@ -300,12 +289,39 @@ let is_security_liquid (ch : channels)=
     ch.cycle_hist_a.liq = Liquid || ch.cycle_hist_b.liq = Liquid
 ;;
 
+
+(* @meta[measure : merge_sides]
+   let measure_merge_sides (side,a,b) = List.length a + List.length b
+  @end
+*)
+
+let rec merge_sides (side,a,b) =
+    match (a , b) with
+    | [], [] -> []
+    | ha::ta, [] -> a              
+    | [], hb::tb -> b              
+    | ha::ta, NoLevel::tb -> a
+    | NoLevel::ta,      hb::tb -> b
+    | (Level la)::ta, (Level lb)::tb ->
+        if la.price = lb.price then
+             (Level {la with qty = la.qty + lb.qty })::merge_sides(side, List.tl a, List.tl b)
+        else if order_higher_ranked(side, Level la, Level lb) then
+             (Level la)::merge_sides(side, List.tl a, b)
+        else (Level lb)::merge_sides(side, a, List.tl b)
+;;
+
+let rec trim_side ( n, lst : int * order_level list ) =
+    if n <= 0 then [] else 
+    match lst with | [] -> []
+    | x::xs -> x::trim_side(n - 1, xs) 
+;;
+
 let recalc_combined (books : books) =
-    let buys' = add_levels (sort_side (books.multi.buys @ books.implied.buys, OrdBuy)) in
-    let sells' = add_levels (sort_side (books.multi.sells @ books.implied.sells, OrdSell)) in
+    let buys' =  merge_sides (OrdBuy,  books.multi.buys  , books.implied.buys  ) in
+    let sells' = merge_sides (OrdSell, books.multi.sells , books.implied.sells ) in
     let combined = {
-        buys = trim_side (buys', books.book_depth);
-        sells = trim_side (sells', books.book_depth);
+        buys = trim_side ( books.book_depth, buys');
+        sells = trim_side ( books.book_depth, sells');
     } in
     { books with combined = combined }
 ;;
@@ -401,16 +417,6 @@ let reset_books ( b : books ) =
     b_status = Empty;
 };;
 
-(** Clean multi-depth book *)
-let clean_multi_depth_book (books : books) =
-    (* let book' = sort_book (books.multi) in *)
-    let buys' = trim_side (books.multi.buys, books.book_depth) in
-    let sells' = trim_side (books.multi.sells, books.book_depth) in
-    {
-        books with multi = { buys = buys'; sells = sells' }
-    } 
-;;
-
 (* *************************************************************** *)
 (*  Note that here we're assuming that the message is in sequence, *)
 (*  hence we will not check sequence numbers here                  *)
@@ -425,23 +431,19 @@ let process_md_update_action (books, msg : books * ref_message) =
         | V_MDEntryType_Bid -> 
             let buys' = bk_new (m.buys, OrdBuy, msg.rm_price_level, msg.rm_entry_size,
                                     msg.rm_entry_px, msg.rm_num_orders) in
-            let books' = { books with multi = { m with buys = buys'; }} in
-            clean_multi_depth_book (books')
+            { books with multi = { m with buys = buys'; }} 
         | V_MDEntryType_Offer ->
             let sells' = bk_new (m.sells, OrdSell, msg.rm_price_level, msg.rm_entry_size,
                                       msg.rm_entry_px, msg.rm_num_orders) in
-            let books' = { books with multi = { m with sells = sells'; }} in
-            clean_multi_depth_book (books')
+            { books with multi = { m with sells = sells'; }} 
         | V_MDEntryType_ImpliedBid ->
             let buys' = bk_new (i.buys, OrdBuy, msg.rm_price_level, msg.rm_entry_size,
                                 msg.rm_entry_px, None) in
-            let books' = { books with implied = {i with buys = buys'; }} in
-            clean_multi_depth_book (books')
+            { books with implied = {i with buys = buys'; }} 
         | V_MDEntryType_ImpliedOffer ->
             let sells' = bk_new (i.sells, OrdSell, msg.rm_price_level, msg.rm_entry_size,
                                  msg.rm_entry_px, None) in
-            let books' = { books with implied = {i with sells = sells'; }} in
-            clean_multi_depth_book (books')
+            { books with implied = {i with sells = sells'; }} 
         | _ -> books
     )
 
