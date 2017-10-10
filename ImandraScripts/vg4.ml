@@ -4,7 +4,8 @@
      (via snapshot or natural refresh)
 *)
 
-verify empty_packet_forces_recovery (s) =
+(* Part1: a gap in refresh messages changes status to recovery *)
+verify packet_gap_forces_recovery (s) =
     let message = get_next_message (s) in
     match message with
       Some(RefreshMessage ref_message) ->
@@ -17,58 +18,53 @@ verify empty_packet_forces_recovery (s) =
     | _ -> true
 ;;
 
-(* Second part of VG4 *)
-:disable process_msg_recovery is_cache_valid_since_seq_num
 
-let get_next_channel s =
-    match s.channels.unprocessed_packets with [] -> None 
-    | current_packet::rest_packets -> Some ( current_packet.packet_channel )
+(* Part2: if recovery/snapshot message makes cache valid -- transition to normal state *)
+
+(* - hypothese for cache validity *)
+let is_cache_valid_last_msg  ( s : feed_state ) =
+    let cache = s.channels.cache in
+    let last_seq = s.channels.last_seq_processed in
+    is_cache_valid_since_seq_num (cache, last_seq, s.books.book_depth)
 ;;
 
-(* PROVED *)
-verify good_recovery_light (s) =
-  match get_next_channel (s) with None -> true | Some c ->
-  match get_next_message (s) with None -> true | Some m ->
-  (
-    s.feed_status = InRecovery && 
-    s.channels.last_seq_processed > 0 &&
-    let s' = process_msg_recovery (s,m,c) in
-      is_cache_valid_since_seq_num (s'.channels.cache, s'.channels.last_seq_processed, s.books.book_depth))
-  ==>
-    ((one_step s).feed_status = Normal)
+let is_cache_valid_last_snap ( s : feed_state ) =
+    let cache = s.channels.cache in
+    match s.channels.last_snapshot with None -> false | Some snap -> 
+    let last_seq = snap.snap_last_msg_seq_num_processed in
+    is_cache_valid_since_seq_num (cache, last_seq, s.books.book_depth) 
 ;;
 
+(* Proving that attempt_recovery gets to Normal *)
 
-let rec final_rep_seq_num_in_lst (ms) =
-  match ms with
-    [] -> 0
-  | [m] -> m.rm_rep_seq_num
-  | m :: ms -> final_rep_seq_num_in_lst ms
+theorem[rw] attempt_recovery_msg (s) =
+    ( is_cache_valid_last_snap s )
+     ==>
+    (attempt_recovery s).feed_status = Normal
 ;;
 
-(* ! Counterexample *)
-verify good_recovery_proc_msg_recovery (s) =
-  (s.feed_status = InRecovery
-   && is_cache_valid_since_seq_num (s.channels.cache, s.channels.last_seq_processed, s.books.book_depth)
-   && match (get_next_message (s)) with
-        Some( RefreshMessage ref_message) ->
-        ref_message.rm_rep_seq_num = s.channels.last_seq_processed + 1
-      | _ -> false)
-  ==>
-    let s' = one_step s in
-    is_cache_valid_since_seq_num (s'.channels.cache, s'.channels.last_seq_processed, s.books.book_depth)
+theorem[rw] attempt_recovery_snap (s) =
+    ( is_cache_valid_last_msg s )
+     ==>
+    (attempt_recovery s).feed_status = Normal
+;;
+
+:disable attempt_recovery
+:disable is_cache_valid_since_seq_num
+
+let is_cache_valid_after_processing s =
+    match s.channels.unprocessed_packets with [] -> false | packet::rest_packets ->
+    match packet.packet_messages with [] -> false | message::rest_messages ->
+    let s' = process_msg_recovery ( s, message, packet.packet_channel ) in
+    (is_cache_valid_last_msg s' || is_cache_valid_last_snap s')
 ;;
 
 :disable process_msg_recovery
 
-(* ! Counterexample *)
-verify good_recovery_no_new_snap (s) =
-  (s.feed_status = InRecovery
-   && is_cache_valid_since_seq_num (s.channels.cache, s.channels.last_seq_processed, s.books.book_depth)
-   && s.channels.unprocessed_packets = [])
-    ==>
-    ((one_step s).feed_status = Normal)
+(* PROVEN *)
+theorem recovery_both (s) =
+    (  is_cache_valid_after_processing s 
+      &&  s.feed_status = InRecovery 
+    ) ==>
+    (one_step s).feed_status = Normal
 ;;
-
-
-

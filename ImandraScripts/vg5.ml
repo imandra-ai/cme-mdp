@@ -10,6 +10,37 @@
 	processed... 
 *)
 
+let set_next_message(s, msg, channel) =
+    let packet = {
+        packet_seq_num = s.channels.last_seq_processed + 1; 
+        packet_messages = [msg];
+        packet_channel  = channel
+    } in { s with channels = {s.channels with unprocessed_packets = [packet] } }
+;; 
+
+theorem[rw] process_msg_recovery_channel_invariant (s, m) =
+     let sA = set_next_message( s, m, Ch_Ref_A ) in
+     let sB = set_next_message( s, m, Ch_Ref_B ) in
+     process_msg_recovery (sA, m, Ch_Ref_A) = process_msg_recovery (sA, m, Ch_Ref_B)
+;;
+
+:disable process_msg_recovery
+
+:break
+
+theorem ref(s, ref_msg) =
+    let packetA = {
+        packet_seq_num = 1; 
+        packet_messages = [RefreshMessage ref_msg];
+        packet_channel  = Ch_Ref_A
+    } in 
+    let packetB = { packetA with packet_channel = Ch_Ref_B } in
+    let sA = { s with channels = {s.channels with unprocessed_packets = [packetA] } } in 
+    let sB = { s with channels = {s.channels with unprocessed_packets = [packetB] } } in 
+    ((one_step(sA)).channels.last_seq_processed) = ( (one_step(sB)).channels.last_seq_processed )
+;;
+
+
 verify correct_process_a (s, next_a : feed_state * ref_packet) = (
 	next_a.rp_msg.rm_security_id = s.sec_id &&
 	correct_level (next_a.rp_msg, s.books.book_depth) && 
