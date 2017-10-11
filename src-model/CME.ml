@@ -824,7 +824,7 @@ let rec simulate(s : feed_state) =
 
 let empty_feed_state : feed_state =
   { feed_sec_type = SecA
-  ; feed_sec_id   = 1 (* TODO Fix the secid shizm*)
+  ; feed_sec_id   = 1 
   ; books =
       { book_depth = 5
       ; multi      = empty_book 5
