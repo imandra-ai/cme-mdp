@@ -219,9 +219,7 @@ let rec add_levels (orders : order_level list) =
 
 (** Helper function -- replaces the book entry at the given level.
   * If the insertion violates sortedness of the book -- the change
-  * is ignored (formally proven in imandra)
-  * TODO: consider transitioning into recovery in case the inserion
-  * is invalid.  *)
+  * is ignored (formally proven in imandra) *)
 let rec replace_level_at (s, x, lst, n) = 
     match (n, lst) with
     | 2 , a::b::c::tl -> if order_higher_ranked(s,a,x) && order_higher_ranked(s,x,c) then a::x::c::tl else lst
