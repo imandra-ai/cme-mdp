@@ -19,7 +19,9 @@
 *)
 let rec run (state, acts : network_state * net_effect list) =
     match acts with
-    | [] -> state
+    | [] -> { state with 
+		outgoing = List.rev state.incoming @ state.outgoing;
+		incoming = [] }
     | act::acts ->
         let es = process_net_effect  (state, act) in
         run ( es, acts )

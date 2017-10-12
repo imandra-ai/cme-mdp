@@ -2,6 +2,32 @@ import json
 import os.path
 import sys
 
+def create_jsons(testcase, outdir, name):
+    channels = [ 
+        ("channel_ref_a_", "RefreshA"), 
+        ("channel_ref_b_", "RefreshB"),
+        ("channel_snap_a_", "SnapshotA"),
+        ("channel_snap_b_", "SnapshotB"),
+    ]
+    outfile = "internal_" + name + ".json"
+    outfile = os.path.join(outdir, outfile)
+    with open(outfile, "w") as jsonFile:
+        json.dump(testcase['output'], jsonFile)
+    
+    packets = testcase['input']['packets']
+    for fchannel, channel in channels:
+        data = [p for p in packets if p['Channel'] == channel]
+        data = { "packets": data }
+        outfile = fchannel + name + ".json"
+        outfile = os.path.join(outdir, outfile)
+        with open(outfile, "w") as jsonFile:
+            json.dump(data, jsonFile)
+        create_jsons.tests.append({
+            "name" : "test " + str(len(create_jsons.tests)), "file":name
+        })
+    
+create_jsons.tests = []
+
 def processStream(f, outdir):
     tcs = []
     names = {}
@@ -33,11 +59,12 @@ def processStream(f, outdir):
 
         for testcase in testcases:
             point = str(testcase['point'])
-            outfile = outdir + "region_" + name.replace("'","x") + "_" + point + ".json"
-            print outfile
-            with open(outfile, "w") as jsonFile:
-                text = testcase['text'].decode('string_escape')
-                jsonFile.write(text.rstrip())
+            tcname = name.replace("'","x") + "_" + point
+            testcase = json.loads(testcase['text'].decode('string_escape'))
+            create_jsons(testcase, outdir, tcname)
+            
+        with open(os.path.join(outdir, "tests.json"), "w") as jsonTests: 
+            json.dump({"tests": create_jsons.tests}, jsonTests)
 
 
 def main():
