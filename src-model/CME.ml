@@ -191,17 +191,6 @@ let sort_book (b : book) = {
     sells = sort_side (b.sells, OrdSell);
 };;
 
-(** Remove all orders over num-levels *)
-let rec trim_side ( ords, num_levels, curr_level : order_level list * int * int) =
-    if curr_level <= num_levels then (
-        match ords with
-        [] -> []
-       | x::xs -> x :: trim_side (xs, num_levels, curr_level + 1)
-    )
-    else
-        []
-;;
-
 (** Remove duplicates from the list of orders (used in conslidating the book) *)
 let rec add_levels (orders : order_level list) =
     match orders with
@@ -227,61 +216,34 @@ let rec add_levels (orders : order_level list) =
 (** *************************************************************** *)
 (** Functions used for book modifications                           *)
 (** *************************************************************** *)
-let rec adjust_orders_size (num_levels, ords : int * order_level list) =
-    if num_levels <= 0 then
-        ords
-    else
-        adjust_orders_size (num_levels - 1, ords @ [NoLevel])
+
+(** Helper function -- replaces the book entry at the given level.
+  * If the insertion violates sortedness of the book -- the change
+  * is ignored (formally proven in imandra) *)
+let rec replace_level_at (s, x, lst, n) = 
+    match (n, lst) with
+    | 2 , a::b::c::tl -> if order_higher_ranked(s,a,x) && order_higher_ranked(s,x,c) then a::x::c::tl else lst
+    | 2 , a::b::[]    -> if order_higher_ranked(s,a,x) then a::x::[] else lst
+    | 2 , a::[]       -> lst
+    | 1 , a::b::tl    -> if order_higher_ranked(s,x,b) then x::b::tl else lst
+    | 1 , a::[]       -> x::[]
+    | n , a::tl       -> if n < 1 then lst else a::replace_level_at(s,x,List.tl lst,n-1)    
+    | _ , []          -> []
 ;;
 
-(** Adjusts the number of levels within a single side of an order book *)
-let adjust_size (orders, book_depth : order_level list * int) =
-    adjust_orders_size ((List.length orders - book_depth), orders)
-;;
-
-(** Used to remove orders from a list given starting index *)
-let rec bk_delete_from (orders, curr_idx, target_idx : order_level list * int * int ) =
+(** Used to remove orders from a list given its index. Appends NoLevel to the end of the list. *)
+let rec delete_at (orders, n) =
     match orders with
-        | [] -> []
-        | x::xs ->
-            if curr_idx = target_idx then
-                []
-            else
-                x :: bk_delete_from (xs, curr_idx + 1, target_idx)
-;;
-
-(**
-    Overlay a new order info
-    TODO: Figure out what this is. *)
-let bk_overlay (orders, id : order_info list * int) =
-    []
-;;
-
-(** Delete a level from the list of orders information *)
-let rec delete_level (orders, curr_idx, target_idx : order_level list * int * int) =
-    match orders with
-        | [] -> []
-        | x::xs ->
-            if curr_idx = target_idx then
-                xs
-            else
-                x :: delete_level (xs, curr_idx + 1, target_idx)
+    | [] -> []
+    | h::tl -> 
+        if n > 1 then h::delete_at(tl, n-1) 
+        else if n = 1 then tl @ [NoLevel]
+        else orders
 ;;
 
 (** Delete from the book *)
 let bk_delete (orders, price_level : order_level list * int) =
-    delete_level (orders, 1, price_level)
-;;
-
-(** Change existing order level *)
-let rec ch_inplace (orders, curr_idx, target_idx, new_order_info : order_level list * int * int * order_level) =
-    match orders with
-        | [] -> if curr_idx = target_idx then [new_order_info] else []
-        | x::xs ->
-            if curr_idx = target_idx then
-                new_order_info :: xs
-            else
-                x :: ch_inplace (xs, curr_idx + 1, target_idx, new_order_info)
+    delete_at (orders, price_level)
 ;;
 
 (** Change an existing order level *)
@@ -291,21 +253,11 @@ let bk_change (orders, side, price_level, entry_size, entry_price, num_orders : 
         qty = entry_size;
         price = entry_price;
         num_orders = num_orders;
-    } in ch_inplace (orders, 1, price_level, new_order_info)
+    } in 
+    replace_level_at (side, new_order_info, orders, price_level)
 ;;
 
-(** Helper function for 'bk_new' *)
-let rec insert_level ( orders, new_order, curr_idx, target_idx : order_level list * order_level * int * int) =
-    match orders with
-        | [] -> [ new_order ]
-        | x::xs ->
-            if curr_idx = target_idx then
-                new_order :: xs
-            else
-                x :: insert_level (xs, new_order, curr_idx + 1, target_idx)
-;;
-
-(** Add a new level to the book *)
+(** Add a new level to the book. Works only if the level is emty in the list *)
 let bk_new (orders, side, price_level, entry_size, entry_price, num_orders : order_level list * order_side * int * int * int * int option) =
     let new_order_info = Level {
         side = side;
@@ -313,7 +265,7 @@ let bk_new (orders, side, price_level, entry_size, entry_price, num_orders : ord
         price = entry_price;
         num_orders = num_orders;
     } in
-    insert_level (orders, new_order_info, 1, price_level)
+    replace_level_at (side, new_order_info, orders, price_level)
 ;;
 
 let mk_int_msg (s, ct : feed_state * book_change_type) =
@@ -335,12 +287,39 @@ let is_security_liquid (ch : channels)=
     ch.cycle_hist_a.liq = Liquid || ch.cycle_hist_b.liq = Liquid
 ;;
 
+
+(* @meta[measure : merge_sides]
+   let measure_merge_sides (side,a,b) = List.length a + List.length b
+  @end
+*)
+
+let rec merge_sides (side,a,b) =
+    match (a , b) with
+    | [], [] -> []
+    | ha::ta, [] -> a              
+    | [], hb::tb -> b              
+    | ha::ta, NoLevel::tb -> a
+    | NoLevel::ta,      hb::tb -> b
+    | (Level la)::ta, (Level lb)::tb ->
+        if la.price = lb.price then
+             (Level {la with qty = la.qty + lb.qty })::merge_sides(side, List.tl a, List.tl b)
+        else if order_higher_ranked(side, Level la, Level lb) then
+             (Level la)::merge_sides(side, List.tl a, b)
+        else (Level lb)::merge_sides(side, a, List.tl b)
+;;
+
+let rec trim_side ( n, lst : int * order_level list ) =
+    if n <= 0 then [] else 
+    match lst with | [] -> []
+    | x::xs -> x::trim_side(n - 1, xs) 
+;;
+
 let recalc_combined (books : books) =
-    let buys' = add_levels (sort_side (books.multi.buys @ books.implied.buys, OrdBuy)) in
-    let sells' = add_levels (sort_side (books.multi.sells @ books.implied.sells, OrdSell)) in
+    let buys' =  merge_sides (OrdBuy,  books.multi.buys  , books.implied.buys  ) in
+    let sells' = merge_sides (OrdSell, books.multi.sells , books.implied.sells ) in
     let combined = {
-        buys = trim_side (buys', books.book_depth, 1);
-        sells = trim_side (sells', books.book_depth, 1);
+        buys = trim_side ( books.book_depth, buys');
+        sells = trim_side ( books.book_depth, sells');
     } in
     { books with combined = combined }
 ;;
@@ -436,16 +415,6 @@ let reset_books ( b : books ) =
     b_status = Empty;
 };;
 
-(** Clean multi-depth book *)
-let clean_multi_depth_book (books : books) =
-    (* let book' = sort_book (books.multi) in *)
-    let buys' = trim_side (books.multi.buys, books.book_depth, 1) in
-    let sells' = trim_side (books.multi.sells, books.book_depth, 1) in
-    {
-        books with multi = { buys = buys'; sells = sells' }
-    } 
-;;
-
 (* *************************************************************** *)
 (*  Note that here we're assuming that the message is in sequence, *)
 (*  hence we will not check sequence numbers here                  *)
@@ -460,23 +429,19 @@ let process_md_update_action (books, msg : books * ref_message) =
         | V_MDEntryType_Bid -> 
             let buys' = bk_new (m.buys, OrdBuy, msg.rm_price_level, msg.rm_entry_size,
                                     msg.rm_entry_px, msg.rm_num_orders) in
-            let books' = { books with multi = { m with buys = buys'; }} in
-            clean_multi_depth_book (books')
+            { books with multi = { m with buys = buys'; }} 
         | V_MDEntryType_Offer ->
             let sells' = bk_new (m.sells, OrdSell, msg.rm_price_level, msg.rm_entry_size,
                                       msg.rm_entry_px, msg.rm_num_orders) in
-            let books' = { books with multi = { m with sells = sells'; }} in
-            clean_multi_depth_book (books')
+            { books with multi = { m with sells = sells'; }} 
         | V_MDEntryType_ImpliedBid ->
             let buys' = bk_new (i.buys, OrdBuy, msg.rm_price_level, msg.rm_entry_size,
                                 msg.rm_entry_px, None) in
-            let books' = { books with implied = {i with buys = buys'; }} in
-            clean_multi_depth_book (books')
+            { books with implied = {i with buys = buys'; }} 
         | V_MDEntryType_ImpliedOffer ->
             let sells' = bk_new (i.sells, OrdSell, msg.rm_price_level, msg.rm_entry_size,
                                  msg.rm_entry_px, None) in
-            let books' = { books with implied = {i with sells = sells'; }} in
-            clean_multi_depth_book (books')
+            { books with implied = {i with sells = sells'; }} 
         | _ -> books
     )
 
@@ -507,16 +472,16 @@ let process_md_update_action (books, msg : books * ref_message) =
         match msg.rm_entry_type with
         | V_MDEntryType_Bid ->
             let buys' = bk_delete (m.buys, msg.rm_price_level)
-            in { books with multi = { m with buys = adjust_size (buys', books.book_depth) }}
+            in { books with multi = { m with buys = buys' } }
         | V_MDEntryType_Offer ->
             let sells' = bk_delete (m.sells, msg.rm_price_level)
-            in { books with multi = { m with sells = adjust_size( sells', books.book_depth) }}
+            in { books with multi = { m with sells = sells' } }
         | V_MDEntryType_ImpliedBid ->
             let buys' = bk_delete (i.buys, msg.rm_price_level)
-            in { books with implied = { i with buys = adjust_size (buys', books.book_depth) }}
+            in { books with implied = { i with buys = buys' } }
         | V_MDEntryType_ImpliedOffer ->
             let sells' = bk_delete (i.sells, msg.rm_price_level)
-            in { books with implied = { i with sells = adjust_size( sells', books.book_depth) }}
+            in { books with implied = { i with sells = sells' } }
         | _ -> books
     )
 
@@ -534,17 +499,17 @@ let process_md_update_action (books, msg : books * ref_message) =
         (** Delete all orders from a side from a given level *)
         match msg.rm_entry_type with
         | V_MDEntryType_Bid ->
-            let buys' = bk_delete_from (m.buys, 1, msg.rm_price_level) in
-            { books with multi = { m with buys = adjust_size (buys', books.book_depth); }}
+            let buys' = bk_delete (m.buys, msg.rm_price_level) in
+            { books with multi = { m with buys = buys' } }
         | V_MDEntryType_Offer ->
-            let sells' = bk_delete_from (m.sells, 1, msg.rm_price_level) in
-            { books with multi = { m with sells = adjust_size (sells', books.book_depth); }}
+            let sells' = bk_delete (m.sells, msg.rm_price_level) in
+            { books with multi = { m with sells = sells' } }
         | V_MDEntryType_ImpliedBid ->
-            let buys' = bk_delete_from (i.buys, 1, msg.rm_price_level) in
-            { books with implied = { i with buys = adjust_size (buys', books.book_depth); }}
+            let buys' = bk_delete (i.buys, msg.rm_price_level) in
+            { books with implied = { i with buys = buys' } }
         | V_MDEntryType_ImpliedOffer ->
-            let sells' = bk_delete_from (i.sells, 1, msg.rm_price_level) in
-            { books with implied = { i with sells = adjust_size (sells', books.book_depth); }}
+            let sells' = bk_delete (i.sells, msg.rm_price_level) in
+            { books with implied = { i with sells = sells' } }
         | _ -> books
     )
 
@@ -799,12 +764,16 @@ let move_to_next_packet ( s, current_packet, rest_packets : feed_state * packet 
 ;;
 
 
+let get_next_packet (s : feed_state ) =
+    match s.channels.unprocessed_packets with [] -> None | current_packet::rest_packets ->
+    Some current_packet
+;;
+
 let get_next_message (s : feed_state ) =
     match s.channels.unprocessed_packets with [] -> None | current_packet::rest_packets ->
     match current_packet.packet_messages with [] -> None | current_message::rest_messages ->
     Some current_message
 ;;
-
 
 (*****************************************************************  *)
 (** Top-level transition function                                   *)
@@ -853,7 +822,7 @@ let rec simulate(s : feed_state) =
 
 let empty_feed_state : feed_state =
   { feed_sec_type = SecA
-  ; feed_sec_id   = 1 (* TODO Fix the secid shizm*)
+  ; feed_sec_id   = 1 
   ; books =
       { book_depth = 5
       ; multi      = empty_book 5
