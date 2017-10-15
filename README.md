@@ -4,15 +4,15 @@
 
 The CME Group Market Data Platform (MDP) disseminates market data for CME Group
 markets.  The client state is updated in real time with an ordered stream of
-Incremental Refresh messages.  This messages are encoded using Simple Binary
+Incremental Refresh messages.  These messages are encoded using Simple Binary
 Encoding (SBE), gathered in packets, and are sent over two redundant UDP
-connections: Incremental Refresh A and Incremental Refresh B.  This redundancy
-is needed to reduc the chance of packet loss in the UDP.
+connections: Incremental Refresh A and Incremental Refresh B. This redundancy
+is needed to reduce the chance of packet loss in the UDP.
 
-There is another pair of UDP feeds: Market Recovery A and Market Recovery B.
+Furthermore, there is another pair of UDP feeds: Market Recovery A and Market Recovery B.
 The recovery feeds are used to disseminate market data snapshots of the active
 books. These snapshot messages can be used to recover from a possible loss of
-an Incremental Refresh packet.
+Incremental Refresh packets from both of the incremental channels.
 
 
 Generating test cases JSON files using `imandra-analyser`
@@ -28,9 +28,9 @@ cd visualizer/
 python -m SimpleHTTPServer
 ```
 
-## Imandra model of the CME feed  
-We model the CME exchange with as an infinite state machine. The `feed_state`
-datatype contains all of the information about CME exchange state:
+## Imandra model of the CME book-builder  
+We model the CME book-builder as an infinite state machine. The `feed_state`
+datatype contains all of the information about CME book-builder state:
 
 - `feed_sec_type` : the ID of the security that the exchange is working on.
 - `books` : current state of books in the exchange
