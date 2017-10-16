@@ -45,6 +45,7 @@ Where the equivalence operation "~=" checks that the relevant parts of the
 state are being equal: in our case these are the feed status, the last message
 number processed and everything in the books state. We encode this equivalence
 operator as a `states_eq` function. 
+
     let states_eq(s1, s2) =
         ( s1.feed_status = s2.feed_status ) &&
         ( s1.channels.last_seq_processed = s2.channels.last_seq_processed ) &&
