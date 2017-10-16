@@ -6,7 +6,8 @@ Starting from the "English prose" formulation of the property we need to:
 
 ##Verification Goal 6
 The VG6 is formulated as *"If the instrument is not in snapshot channel
-(illiquid instr case), the book should be populated from incremental channel."*
+(illiquid instrument case), the book should be populated from incremental
+channel."*
 We want to express it as a statement about the `one_step` function: for any
 initial state that (a)  has  an illiquid sequirty (b) starts from a recovery
 state (c) has an incoming message. In that case, recovery is always always
