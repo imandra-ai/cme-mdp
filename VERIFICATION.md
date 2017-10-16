@@ -4,7 +4,7 @@ Starting from the "English prose" formulation of the property we need to:
 2. Encode the formula as an Imandra `theorem` or `verify` statement 
 3. Make sure that Imandra proves/verifies the statement 
 
-##Verification Goal 6
+## Verification Goal 6
 The VG6 is formulated as *"If the instrument is not in snapshot channel
 (illiquid instrument case), the book should be populated from incremental
 channel."*
@@ -27,7 +27,7 @@ We can formally write this requirement as a first-order logic formula:
 
 
 
-##Verification Goal 5
+## Verification Goal 5
 
 The MDP messages are gathered into packets and sent over a UDP connection. In
 order to reduce the chance of a packet loss, two redundant channels (called A
@@ -64,7 +64,7 @@ simplify the task for Imandra, by proving (as rewrite rules) the equivalence
 for `process_msg_normal` and `process_msg_recovery` branches of the model and
 then `:disable`ing both functions.    
 
-##Verification Goal 4
+## Verification Goal 4
 
 Due to unreliability of UDP, the MDP receiver must have a strategy for dealing
 with lost and out-of-sequence messages. The feed transitions to a recovery
