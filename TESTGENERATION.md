@@ -85,7 +85,7 @@ orders are left as free parameters, explored by Imandra.  The sequence of the
 `SendSnapshot` events -- these are used to create packets in the incremental
 refresh and snapshot refresh channels correspondingly.  
 
-![Event generation](doc/images/BookCreation.svg)
+![Event generation](doc/images/BookCreation_1.svg)
 
 ### Step 2. Book modification.
 
@@ -96,7 +96,7 @@ the previous step, the generated `ModifyOrder` and `DeleteOrder` events are
 also randomly interspersed with `SendIncrementalRefresh` and `SendSnapshot`
 events.
 
-![Event generation](doc/images/BookModification.svg)
+![Event generation](doc/images/BookModification_1.svg)
 
 ### Step 3. Network effects.
 
@@ -105,7 +105,7 @@ might affect the sequence of packets, received by the exchange. Packets may get
 lost or come in a wrong order. We produce all possible combinations of such
 network effects for the five first packets in the network.
 
-![Event generation](doc/images/TestgenDiagram.svg)
+![Event generation](doc/images/TestgenDiagram_1.svg)
 
 
 ## Imandra Analyser and test generation strategy YAML configuration file
