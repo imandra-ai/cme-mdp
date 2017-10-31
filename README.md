@@ -58,7 +58,7 @@ snapshot messages are saved as a `last_snapshot`. After each message a recovery
 is attempted:  if all cached messages are in chronological order since last
 snapshot -- the feed transitions back into the `Normal` state:
 
-![CME Flowchart](doc/images/CME_model_flowchart.svg)
+![CME Flowchart](doc/images/CME_model_flowchart_1.svg)
 
 The flowchart diagram above gives an overview of the 
 
