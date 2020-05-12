@@ -102,7 +102,7 @@ let to_ocaml t =
         writer = "let write_msg_" ^ t.name ^ " x = Binparser.create_out (), Binparser.create_out () \n" 
     } else
     let rec predefine_groups = function
-        | (Field x)::tl -> predefine_groups tl
+        | (Field _)::tl -> predefine_groups tl
         | (Group x)::tl -> codecat (Group.to_ocaml t.name x) (predefine_groups tl)
         | [] -> { typedecl = ""; writer = ""; reader = "" } 
     in
@@ -153,7 +153,7 @@ let get_types filename =
         match nlist with
         | Xml.Element ( "ns2:message" , _ , _ )::tl -> 
             (from_xml_node (List.hd nlist))::(scan tl)
-        | hd::tl -> scan tl
+        | _::tl -> scan tl
         | [] -> []
     in
     filename |> Xml.parse_file |> Xml.children |> scan

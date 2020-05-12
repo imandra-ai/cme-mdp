@@ -47,12 +47,12 @@ let ocaml_type t et =
     let idt = "    " in
     let c l = String.concat " " l in
     let null_variant = match Simple.null_value et with
-        | Some v -> Some ("V_" ^ t.name ^ "_Null")
+        | Some _ -> Some ("V_" ^ t.name ^ "_Null")
         | None   -> None in
     let null_decl = match null_variant with 
         | Some v -> "\n" ^ c [ idt; "|"; v] 
         | None -> "" in
-    let variant_name  (n, e) = c [ idt; "|"; n] in
+    let variant_name  (n, _) = c [ idt; "|"; n] in
         ( cases t |> List.map variant_name |> String.concat "\n" ) ^
         null_decl 
  
@@ -95,10 +95,9 @@ let ocaml_writer t et bitsname varname =
 
 
 let to_ocaml context t =
-    let idt = "    " in
     let c l = String.concat " " l in
     let et = Hashtbl.find context (encoding_type t) in
-    let null_variant, null_value = match Simple.null_value et with
+    let _null_variant, _null_value = match Simple.null_value et with
         | Some v -> Some ("V_" ^ t.name ^ "_Null"), v | None -> None, "" in
     let type_decl   = c [ "type"; type_name t; "=" ] ^ "\n" ^ ocaml_type t et in
     let reader_decl = c ["let"; reader t; "bits"; "="; "\n"] ^ ocaml_reader t et in

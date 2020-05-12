@@ -1,0 +1,4 @@
+(library
+ (name cme_model)
+ (wrapped false)
+ (modules CME CME_Types CME_Exchange CME_Network))

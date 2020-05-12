@@ -78,18 +78,18 @@ let ocaml_reader t varname =
 let ocaml_writer t bitsname varname= 
     let c l = String.concat " " l in
     let pt_name = primitive_type t in
-    let string_of_func = "Binparser.string_of_" ^ pt_name in
+    let _string_of_func = "Binparser.string_of_" ^ pt_name in
     let string_to_func = "Binparser.string_to_" ^ pt_name in
     let write_func     = "Binparser.write_" ^ pt_name in
     match get_modifier t with
         | NoModifier -> c [ write_func; bitsname; varname ]
-        | Constant v -> c [ bitsname ] 
+        | Constant _ -> c [ bitsname ] 
         | Nullable v -> c [ "match"; varname; "with"; 
                                 "|";  "Some"; "x"; "->"; write_func; bitsname; "x";
                                 "|";  "None"; "->"; "\"" ^ v ^ "\""; 
                                         "|>"; string_to_func; 
                                         "|>"; write_func; bitsname; ] 
-        | Listed n   -> c [ "List.fold_left"; write_func; bitsname; varname ] 
+        | Listed _   -> c [ "List.fold_left"; write_func; bitsname; varname ] 
 
 let ocaml_string_of t varname =
     let c l = String.concat " " l in
@@ -103,7 +103,7 @@ let ocaml_string_of t varname =
                                 "|";  "Some"; "x"; "->"; string_of_func; "x";
                                 "|";  "None"; "->"; "\"" ^ v ^ "\""; "|>"; string_to_func; 
                                                                      "|>"; string_of_func ]
-        | Listed n   -> c [ varname; "|>"; "List.map"; string_of_func; 
+        | Listed _   -> c [ varname; "|>"; "List.map"; string_of_func; 
                                      "|>"; "String.concat"; "\"\"" ] 
 
 let ocaml_string_to t varname =
@@ -116,16 +116,16 @@ let ocaml_string_to t varname =
         | Nullable v -> c [ "match"; varname; "with";
                                 "|"; "\"" ^ v ^ "\""; "->"; "None";
                                 "|"; "x"; "->"; "Some ("; string_to_func; "x"; ")" ]
-        | Listed n   -> c [ "[]" ] 
+        | Listed _   -> c [ "[]" ] 
 
 
 let to_ocaml context t = 
     Hashtbl.add context (name t) t;
     let c l = String.concat " " l in
     let pt_name = primitive_type t in
-    let wbit_func = "Binparser.write_bits_" ^ pt_name in
-    let  bit_func = "Binparser.bit_"  ^ pt_name in
-    let read_func = "Binparser.read_" ^ pt_name in
+    let  wbit_func = "Binparser.write_bits_" ^ pt_name in
+    let   bit_func = "Binparser.bit_"  ^ pt_name in
+    let _read_func = "Binparser.read_" ^ pt_name in
     let      type_decl = c [ "type"; type_name t; "="; ocaml_type t ] in
     let     write_decl = c [ "let";           writer t; "bits v ="; ocaml_writer    t "bits" "v"; ";;"] in
     let string_of_decl = c [ "let";        string_of t;      "v ="; ocaml_string_of t    "v"; ";;"] in
@@ -138,9 +138,9 @@ let to_ocaml context t =
          |          _ -> [ reader_decl; string_of_decl ] in
     let    writer_full = match get_modifier t with
          | NoModifier -> [ write_decl; string_to_decl; wbit_decl ]
-         | Constant v -> [ write_decl ]
-         | Nullable v -> [ write_decl; string_to_decl; wbit_decl ]
-         | Listed n   -> [ write_decl ] in
+         | Constant _ -> [ write_decl ]
+         | Nullable _ -> [ write_decl; string_to_decl; wbit_decl ]
+         | Listed _   -> [ write_decl ] in
  
     {
         typedecl = type_decl;

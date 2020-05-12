@@ -1,5 +1,3 @@
-open Utils 
-
 type t =
     | Simple    of Simple.t
     | Composite of Composite.t
@@ -23,8 +21,8 @@ let to_ocaml context_hash = function
 
 let get_types filename = 
     let rec search = function
-        | Xml.Element ( "types" , _ , children )::tl -> children
-        | hd::tl -> search tl
+        | Xml.Element ( "types" , _ , children )::_ -> children
+        | _::tl -> search tl
         | [] -> raise (Failure "Types tag not found")
     in
     filename |> Xml.parse_file |> Xml.children 

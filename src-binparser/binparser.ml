@@ -105,7 +105,7 @@ let metadata_to_string md = [
 
 let read_pcap_file_info ?(vrb=false) bits =
     match%bitstring bits with 
-    {| magic        : 32 : unsigned, int, littleendian;  
+    {| _magic       : 32 : unsigned, int, littleendian;  
        major_verion : 16 : unsigned, int, littleendian;
        minor_verion : 16 : unsigned, int, littleendian;
        timezone     : 32 : unsigned, int, littleendian;
@@ -143,15 +143,15 @@ let write_pcap_file_info () =
 let get_pcap_message ?(vrb=false) bits =
     match%bitstring bits with 
     {| receive_ts   : 32 : unsigned, int, littleendian;  
-       receive_ns   : 32 : unsigned, int, littleendian;  
+      _receive_ns   : 32 : unsigned, int, littleendian;  
        size         : 32 : unsigned, int, littleendian;
-       othersize    : 32 : unsigned, int, littleendian;
-       stuffA       : 64 : unsigned, int, littleendian;
-       stuffB       : 64 : unsigned, int, littleendian;
-       stuffC       : 64 : unsigned, int, littleendian;
-       stuffD       : 64 : unsigned, int, littleendian;
-       stuffE       : 64 : unsigned, int, littleendian;
-       stuffF       : 48 : unsigned, int, littleendian;
+      _othersize    : 32 : unsigned, int, littleendian;
+      _stuffA       : 64 : unsigned, int, littleendian;
+      _stuffB       : 64 : unsigned, int, littleendian;
+      _stuffC       : 64 : unsigned, int, littleendian;
+      _stuffD       : 64 : unsigned, int, littleendian;
+      _stuffE       : 64 : unsigned, int, littleendian;
+      _stuffF       : 48 : unsigned, int, littleendian;
        seqence_num  : 32 : unsigned, int, littleendian;
        sent_ts      : 64 : unsigned, int, littleendian;
        msg_size     : 16 : unsigned, int, littleendian;
@@ -244,7 +244,7 @@ let udp_header sport dport length =
 
 let time = ref 1461262423 
     
-let make_pcap_header info t payload =
+let make_pcap_header info _t payload =
     time := !time + 1;
     let size = payload |> List.map Bitstring.bitstring_length 
                        |> List.fold_left ( + ) 0
@@ -282,7 +282,7 @@ let get_message ?(vrb=false) bits =
       Bitstring.dropbits ((10 + size) * 8) bits 
     )
 
-let write_message ostream (md, bits, gbits) =
+let write_message _ (md, bits, gbits) =
     let bits = bits |> List.rev |> Bitstring.concat in
     let md = (* Calculating block_length *)
         if md.block_length = 0 

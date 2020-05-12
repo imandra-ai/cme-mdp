@@ -1,0 +1,7 @@
+(library
+ (name binparser)
+ (wrapped false)
+ (modules binparser)
+ (preprocess
+  (pps bitstring.ppx))
+ (libraries unix bitstring))

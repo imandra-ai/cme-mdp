@@ -25,7 +25,7 @@ let string_converter t = "string_of_" ^ t.name
 let reader           t = "read_" ^ t.name
 let writer           t = "write_" ^ t.name
 
-let to_ocaml context t =
+let to_ocaml _context t =
     let idt = "    " in
     let c l = String.concat " " l in
     let def_entry (n, t) = c [ idt; n; ":"; Simple.ocaml_type t] in 

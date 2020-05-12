@@ -56,15 +56,15 @@ let ocaml_writer t bitsname varname =
 
 
 
-let to_ocaml context t =
+let to_ocaml _context t =
     let idt = "    " in
     let c l = String.concat " " l in
     let et_name = encoding_type t in
     let read_func  = "read_" ^ et_name in
     let bit_func   = "bit_" ^ et_name in
-    let bit_name  (n, b) = idt ^ c [ n; ":"; "bool"] in
+    let bit_name  (n, _b) = idt ^ c [ n; ":"; "bool"] in
     let bit_entry (n, b) = idt ^ idt ^ c [ n; "="; bit_func; "v"; string_of_int b.bit_number ] in
-    let lst_entry (n, b) = idt ^ idt ^ c [ n; "="; bit_func; "v"; string_of_int b.bit_number ] in
+    let _lst_entry (n, b) = idt ^ idt ^ c [ n; "="; bit_func; "v"; string_of_int b.bit_number ] in
     let type_decl = 
         c [ "type"; type_name t; "="; "{"; "\n" ] ^ 
         ( bits t |> List.map bit_name |> String.concat ";\n" ) ^ "\n}" in

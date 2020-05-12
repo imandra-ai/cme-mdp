@@ -1,0 +1,18 @@
+(executable
+ (modes byte exe)
+ (name json2bin)
+ (public_name json2bin)
+ (modules json2bin CME_writer)
+ (libraries cme_printers cme_model sbf binparser core))
+
+(executable
+ (modes byte exe)
+ (name bin2json)
+ (modules bin2json CME_reader)
+ (libraries cme_printers cme_model sbf binparser core))
+
+(executable
+ (modes byte exe)
+ (name scan_file)
+ (modules scan_file)
+ (libraries cme_printers cme_model sbf binparser core))

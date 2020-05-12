@@ -1,0 +1,12 @@
+(library
+  (name sbf)
+  (wrapped false)
+  (libraries binparser)
+  (flags :standard -w -27-8)
+)
+
+(rule
+ (targets message_types.ml readers.ml writers.ml)
+ (deps ../src-codegenerator/cme_codegen.bc templates_FixBinary.xml)
+ (action
+  (run ../src-codegenerator/cme_codegen.bc -i templates_FixBinary.xml -d .)))

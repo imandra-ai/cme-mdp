@@ -71,7 +71,19 @@ let process filename outdir =
     write_code outdir code
 ;;
 
-let command =
+let () =
+  let open Cmdliner in
+  let filename = let doc = "Input XML file" in
+      Arg.(value & opt string "dict.xml" & info ["i"] ~docv:"INFILE" ~doc)
+      in
+  let outdir = let doc = "Output directory name (files are overwritten if exist)" in
+      Arg.(value & opt string "." & info ["d"] ~docv:"OUTDIR" ~doc)
+      in
+  let info = let doc = "SBU types Ocaml code generator" in
+      Term.info "SBU codegenerator" ~version:"%%VERSION%%" ~doc ~exits:Term.default_exits
+      in
+  Term.exit @@ Term.eval (Term.(const process $ filename $ outdir), info)
+(*      
     Core.Command.basic
         ~summary:"Processes template XML file, generating Ocaml code. "
         ~readme:(fun () -> "")
@@ -85,3 +97,4 @@ let command =
 let () =
     Core.Command.run ~version:"1.0" ~build_info:"RWO" command
 
+*)
